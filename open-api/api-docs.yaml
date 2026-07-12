@@ -1,0 +1,1536 @@
+openapi: 3.1.0
+info:
+  title: UBUMonitor-Analytics
+  description: API documentation for UBUMonitor Analytics
+  version: 1.0.0
+servers:
+  - url: http://localhost:9090/api
+    description: Local development server
+security:
+  - bearerAuth: []
+tags:
+  - name: CourseLogs
+    description: the CourseLogs API
+  - name: CourseEnrollments
+    description: the CourseEnrollments API
+  - name: Sites
+    description: the Sites API
+  - name: CourseContent
+    description: the CourseContent API
+  - name: Auth
+    description: the Auth API
+  - name: UserEnrollments
+    description: the UserEnrollments API
+  - name: Users
+    description: the Users API
+paths:
+  /api/sites/sync:
+    post:
+      tags:
+        - Sites
+      summary: Synchronize site information
+      description: "Synchronize site information from the Moodle instance. This endpoint\
+        \ retrieves basic information about the Moodle site, such as the site name,\
+        \ version, and other relevant details. This information can be used to ensure\
+        \ that the integration is properly connected to the correct Moodle instance\
+        \ and to gather necessary metadata for further interactions with the Moodle\
+        \ API."
+      operationId: syncSiteInfo
+      responses:
+        "200":
+          description: Site information
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SiteInfoResponseDto"
+        "401":
+          description: Unauthorized - token missing or invalid
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+      security:
+        - bearerAuth: []
+  /api/public/auth/token:
+    post:
+      tags:
+        - Auth
+      summary: Get Moodle token
+      description: "Receives host, username, and password. A JWT token is returned\
+        \ to be used in subsequent Moodle API calls. This endpoint is essential for\
+        \ authenticating users and establishing a secure session with the Moodle instance.\
+        \ The token can be used in the Authorization header of future requests to\
+        \ access protected resources and perform actions on behalf of the authenticated\
+        \ user. "
+      operationId: authToken
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AuthTokenRequestDto"
+        required: true
+      responses:
+        "200":
+          description: JWT token retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AuthResponseDto"
+        "401":
+          description: Unauthorized - token missing or invalid
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+  /api/public/auth/offline:
+    post:
+      tags:
+        - Auth
+      summary: Get Moodle token
+      description: "Receives host, username, and password. A JWT token is returned\
+        \ to be used in subsequent Moodle API calls. This endpoint is essential for\
+        \ authenticating users and establishing a secure session with the Moodle instance.\
+        \ The token can be used in the Authorization header of future requests to\
+        \ access protected resources and perform actions on behalf of the authenticated\
+        \ user. "
+      operationId: authOffline
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AuthOfflineRequestDto"
+        required: true
+      responses:
+        "200":
+          description: JWT token retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AuthResponseDto"
+        "401":
+          description: Unauthorized - token missing or invalid
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+  /api/public/auth/credentials:
+    post:
+      tags:
+        - Auth
+      summary: Get Moodle token
+      description: "Receives host, username, and password. A JWT token is returned\
+        \ to be used in subsequent Moodle API calls. This endpoint is essential for\
+        \ authenticating users and establishing a secure session with the Moodle instance.\
+        \ The token can be used in the Authorization header of future requests to\
+        \ access protected resources and perform actions on behalf of the authenticated\
+        \ user. "
+      operationId: authLogin
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AuthLoginRequestDto"
+        required: true
+      responses:
+        "200":
+          description: JWT token retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AuthResponseDto"
+        "401":
+          description: Unauthorized - token missing or invalid
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+  /api/enrollments/sync:
+    post:
+      tags:
+        - UserEnrollments
+      summary: Synchronize enrollments of the logged user courses information
+      description: Synchronizes the enrollments of the logged user courses information.
+        This endpoint retrieves the latest enrollment data for the courses the user
+        is enrolled in and updates the local database accordingly. It ensures that
+        the user's course enrollments are up-to-date with the Moodle site.
+      operationId: syncUserEnrollments
+      responses:
+        "200":
+          description: Successful synchronization of enrollments. The response includes
+            the updated enrollment information for the user's courses.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/EnrollmentsResponseDto"
+        "401":
+          description: Unauthorized - token missing or invalid
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+      security:
+        - bearerAuth: []
+  /api/courses/{courseId}/logs/sync:
+    post:
+      tags:
+        - CourseLogs
+      summary: Sync Moodle logs CSV
+      operationId: syncCourseLogs
+      parameters:
+        - name: courseId
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int32
+      responses:
+        "200":
+          description: Sync completed
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CourseLogsResponseDto"
+        "401":
+          description: Unauthorized - token missing or invalid
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+      security:
+        - bearerAuth: []
+  /api/courses/{courseId}/logs/metrics:
+    post:
+      tags:
+        - CourseLogs
+      summary: Get course logs metrics
+      description: Get course logs metrics
+      operationId: getCourseLogsMetrics
+      parameters:
+        - name: courseId
+          in: path
+          description: Course identifier
+          required: true
+          schema:
+            type: integer
+            format: int32
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CourseLogsMetricsRequestDto"
+        required: true
+      responses:
+        "200":
+          description: Logs retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CourseLogsMetricsResponseDto"
+        "401":
+          description: Unauthorized - token missing or invalid
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+      security:
+        - bearerAuth: []
+  /api/courses/{courseId}/logs/info:
+    post:
+      tags:
+        - CourseLogs
+      summary: Get course logs with filters
+      description: "Retrieves logs for a specific course with optional filtering by
+        date range and selectable log columns. "
+      operationId: getCourseLogs
+      parameters:
+        - name: courseId
+          in: path
+          description: Course identifier
+          required: true
+          schema:
+            type: integer
+            format: int32
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CourseLogsInfoRequestDto"
+        required: true
+      responses:
+        "200":
+          description: Logs retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CourseLogsInfoResponseDto"
+        "401":
+          description: Unauthorized - token missing or invalid
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+      security:
+        - bearerAuth: []
+  /api/courses/{courseId}/logs/import:
+    post:
+      tags:
+        - CourseLogs
+      summary: Import Moodle logs CSV
+      operationId: importCourseLogs
+      parameters:
+        - name: courseId
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int32
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                logFile:
+                  type: string
+                  format: binary
+              required:
+                - logFile
+      responses:
+        "200":
+          description: Import completed
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CourseLogsResponseDto"
+        "401":
+          description: Unauthorized - token missing or invalid
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+      security:
+        - bearerAuth: []
+  /api/courses/{courseId}/enrollments/sync:
+    post:
+      tags:
+        - CourseEnrollments
+      summary: Synchronize course users has been enrolled information
+      description: Synchronizes the enrollments of the logged user courses information.
+        This endpoint retrieves the latest enrollment data for the courses the user
+        is enrolled in and updates the local database accordingly. It ensures that
+        the user's course enrollments are up-to-date with the Moodle site.
+      operationId: syncCourseUsersEnrollments
+      parameters:
+        - name: courseId
+          in: path
+          description: The unique identifier of the course for which to synchronize
+            enrollments.
+          required: true
+          schema:
+            type: integer
+            format: int32
+      responses:
+        "200":
+          description: Successful synchronization of enrollments. The response includes
+            the updated enrollment information for the user's courses.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CourseEnrollmentsResponseDto"
+        "401":
+          description: Unauthorized - token missing or invalid
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+      security:
+        - bearerAuth: []
+  /api/courses/{courseId}/content/sync:
+    post:
+      tags:
+        - CourseContent
+      summary: Synchronize course users has been enrolled information
+      description: Synchronizes the enrollments of the logged user courses information.
+        This endpoint retrieves the latest enrollment data for the courses the user
+        is enrolled in and updates the local database accordingly. It ensures that
+        the user's course enrollments are up-to-date with the Moodle site.
+      operationId: syncCourseContent
+      parameters:
+        - name: courseId
+          in: path
+          description: The unique identifier of the course for which to synchronize
+            enrollments.
+          required: true
+          schema:
+            type: integer
+            format: int32
+      responses:
+        "200":
+          description: Successful synchronization of enrollments. The response includes
+            the updated enrollment information for the user's courses.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CourseContentResponseDto"
+        "401":
+          description: Unauthorized - token missing or invalid
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+      security:
+        - bearerAuth: []
+  /api/auth/logout:
+    post:
+      tags:
+        - Auth
+      summary: Logout session
+      description: Logout session. The token must be included in the Authorization
+        header as a Bearer token.
+      operationId: authLogout
+      responses:
+        "204":
+          description: Logout successful. No content is returned.
+        "401":
+          description: Unauthorized - token missing or invalid
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+      security:
+        - bearerAuth: []
+  /api/sites/info:
+    get:
+      tags:
+        - Sites
+      summary: Get site info and actual user logged
+      description: Get site info and actual user logged
+      operationId: getSiteInfo
+      responses:
+        "200":
+          description: Site information
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SiteInfoResponseDto"
+        "401":
+          description: Unauthorized - token missing or invalid
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+      security:
+        - bearerAuth: []
+  /api/public/users/{userId}/images/profile:
+    get:
+      tags:
+        - Users
+      summary: Get user profile image
+      description: Get user profile image
+      operationId: getUserImagesProfile
+      parameters:
+        - name: userId
+          in: path
+          description: The user id
+          required: true
+          schema:
+            type: integer
+            format: int32
+        - name: host
+          in: query
+          description: The Moodle host
+          required: true
+          schema:
+            type: string
+            format: uri
+        - name: username
+          in: query
+          description: The user name
+          required: true
+          schema:
+            type: string
+        - name: If-None-Match
+          in: header
+          description: hash to check if has changes
+          required: false
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Image of the user
+          content:
+            image/jpeg:
+              schema:
+                type: string
+                format: binary
+            image/png:
+              schema:
+                type: string
+                format: binary
+            image/gif:
+              schema:
+                type: string
+                format: binary
+            image/webp:
+              schema:
+                type: string
+                format: binary
+            image/bmp:
+              schema:
+                type: string
+                format: binary
+            image/tiff:
+              schema:
+                type: string
+                format: binary
+        "304":
+          description: Not Modified
+          content:
+            image/jpeg:
+              schema:
+                type: string
+                format: binary
+            image/png:
+              schema:
+                type: string
+                format: binary
+            image/gif:
+              schema:
+                type: string
+                format: binary
+            image/webp:
+              schema:
+                type: string
+                format: binary
+            image/bmp:
+              schema:
+                type: string
+                format: binary
+            image/tiff:
+              schema:
+                type: string
+                format: binary
+  /api/enrollments/info:
+    get:
+      tags:
+        - UserEnrollments
+      summary: Get user courses enrollments information
+      description: Synchronizes or retrieves the enrollments of the logged user's
+        courses information. This endpoint returns the latest enrollment data for
+        the courses the user is enrolled in and updates the local database accordingly
+        when applicable.
+      operationId: getActualUserEnrollments
+      responses:
+        "200":
+          description: Successful retrieval of enrollments. The response includes
+            the updated enrollment information for the user's courses.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/EnrollmentsResponseDto"
+        "401":
+          description: Unauthorized - token missing or invalid
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+      security:
+        - bearerAuth: []
+  /api/courses/{courseId}/enrollments/info:
+    get:
+      tags:
+        - CourseEnrollments
+      summary: Get course users has been enrolled information
+      description: "Retrieves the enrollment information for users enrolled in a specific\
+        \ course. This endpoint provides details about the users enrolled in the course,\
+        \ including their roles and enrollment status. It allows clients to access\
+        \ up-to-date enrollment information for a particular course on the Moodle\
+        \ site."
+      operationId: getCourseUsersEnrollmentsInfo
+      parameters:
+        - name: courseId
+          in: path
+          description: The unique identifier of the course for which to retrieve enrollments.
+          required: true
+          schema:
+            type: integer
+            format: int32
+      responses:
+        "200":
+          description: Successful retrieval of enrollments. The response includes
+            the enrollment information for users enrolled in the specified course.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CourseEnrollmentsResponseDto"
+        "401":
+          description: Unauthorized - token missing or invalid
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+      security:
+        - bearerAuth: []
+  /api/courses/{courseId}/content/info:
+    get:
+      tags:
+        - CourseContent
+      summary: Get course users has been enrolled information
+      description: Get course Users Content sections and modules
+      operationId: getCourseUsersContentInfo
+      parameters:
+        - name: courseId
+          in: path
+          description: The unique identifier of the course for which to retrieve contents.
+          required: true
+          schema:
+            type: integer
+            format: int32
+      responses:
+        "200":
+          description: Get course sections and modules
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CourseContentResponseDto"
+        "401":
+          description: Unauthorized - token missing or invalid
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+      security:
+        - bearerAuth: []
+components:
+  schemas:
+    SiteInfoResponseDto:
+      type: object
+      properties:
+        site:
+          $ref: "#/components/schemas/Site_Information"
+        user:
+          $ref: "#/components/schemas/User_Information"
+      required:
+        - site
+        - user
+    Site_Information:
+      type: object
+      description: Basic information about the Moodle site.
+      properties:
+        siteName:
+          type: string
+          description: The name of the Moodle site.
+        siteVersion:
+          type: string
+          description: The version of the Moodle site.
+        siteUrl:
+          type: string
+          format: uri
+          description: The URL of the Moodle site.
+        typeOfLogin:
+          type: string
+          description: "The type of login method used by the Moodle site (e.g., APP,\
+            \ EMBEDDED, BROWSER)."
+          enum:
+            - APP
+            - EMBEDDED
+            - BROWSER
+        launchUrl:
+          type: string
+          format: uri
+          description: "The SSO login launch URL for the Moodle site, if applicable."
+      required:
+        - siteName
+        - siteUrl
+        - siteVersion
+        - typeOfLogin
+    User_Information:
+      type: object
+      description: Information about the authenticated user.
+      properties:
+        id:
+          type: integer
+          format: int32
+          description: The unique identifier of the user.
+        username:
+          type: string
+          description: The username of the user.
+        fullName:
+          type: string
+          description: The full name of the user.
+        firstName:
+          type: string
+          description: The first name of the user.
+        lastName:
+          type: string
+          description: The last name of the user.
+      required:
+        - firstName
+        - fullName
+        - id
+        - lastName
+        - username
+    ErrorDetail:
+      type: object
+      description: Details about a specific field validation failure.
+      properties:
+        field:
+          type: string
+          description: The name of the field that failed validation.
+          example: email
+        message:
+          type: string
+          description: The specific validation error message for this field.
+          example: must be a well-formed email address
+      required:
+        - field
+        - message
+    ErrorResponse:
+      type: object
+      description: Standard error response object for API failures.
+      properties:
+        code:
+          type: string
+          description: "A short, uppercase code identifying the error type (e.g.,\
+            \ 'BAD_REQUEST')."
+          example: NOT_FOUND
+        message:
+          type: string
+          description: A human-readable explanation specific to this occurrence of
+            the problem.
+          example: The requested resource was not found on the server.
+        timestamp:
+          type: string
+          format: date-time
+          description: The date and time when the error occurred.
+          example: 2026-03-05T20:57:38Z
+        traceId:
+          type: string
+          description: "A unique identifier for the request trace, useful for debugging."
+          example: 550e8400-e29b-41d4-a716-446655440000
+        errors:
+          type: array
+          description: "List of specific validation errors, if applicable."
+          items:
+            $ref: "#/components/schemas/ErrorDetail"
+      required:
+        - code
+        - message
+        - timestamp
+    AuthResponseDto:
+      type: object
+      properties:
+        accessToken:
+          type: string
+          description: Access token for authentication
+        tokenType:
+          type: string
+          description: 'Type of the token, usually "Bearer"'
+          example: Bearer
+      required:
+        - accessToken
+        - tokenType
+    AuthTokenRequestDto:
+      type: object
+      properties:
+        host:
+          type: string
+          format: uri
+          description: Moodle site URL
+          example: https://school.moodledemo.net
+        username:
+          type: string
+          description: Moodle username
+          example: teacher
+        token:
+          type: string
+          description: Moodle token
+          example: abc123def456ghi789jkl012mno345pqr678stu901vwx234yz567
+        dbPassword:
+          type: string
+          description: "Database password encrypted with AES-256. This is used to\
+            \ securely store the database password in the system, ensuring that sensitive\
+            \ information is protected while allowing the application to access the\
+            \ database when needed."
+          example: U2FsdGVkX1+5sQ9v3y
+      required:
+        - dbPassword
+        - host
+        - token
+        - username
+    AuthOfflineRequestDto:
+      type: object
+      properties:
+        host:
+          type: string
+          format: uri
+          description: Moodle site URL
+          example: https://school.moodledemo.net
+        username:
+          type: string
+          description: Moodle username
+          example: teacher
+        dbPassword:
+          type: string
+          description: "Database password encrypted with AES-256. This is used to\
+            \ securely store the database password in the system, ensuring that sensitive\
+            \ information is protected while allowing the application to access the\
+            \ database when needed."
+          example: U2FsdGVkX1+5sQ9v3y
+      required:
+        - dbPassword
+        - host
+        - username
+    AuthLoginRequestDto:
+      type: object
+      properties:
+        host:
+          type: string
+          format: uri
+          description: Moodle site URL
+          example: https://school.moodledemo.net
+        username:
+          type: string
+          description: Moodle username
+          example: teacher
+        password:
+          type: string
+          description: Moodle password
+          example: moodle25
+        dbPassword:
+          type: string
+          description: "Database password encrypted with AES-256. This is used to\
+            \ securely store the database password in the system, ensuring that sensitive\
+            \ information is protected while allowing the application to access the\
+            \ database when needed."
+          example: U2FsdGVkX1+5sQ9v3y
+      required:
+        - dbPassword
+        - host
+        - password
+        - username
+    CourseInformationDto:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int32
+          description: The unique identifier of the course.
+        fullName:
+          type: string
+          description: The name of the course.
+        showGrades:
+          type: boolean
+          description: Indicates whether the user can view grades for the course.
+        enableCompletion:
+          type: boolean
+          description: Indicates whether course completion tracking is enabled for
+            the user.
+        startDate:
+          type: string
+          format: date-time
+          description: The date and time when the user's enrollment in the course
+            starts.
+        endDate:
+          type: string
+          format: date-time
+          description: The date and time when the user's enrollment in the course
+            ends.
+        timeModified:
+          type: string
+          format: date-time
+          description: The date and time when the enrollment information was last
+            modified.
+      required:
+        - enableCompletion
+        - endDate
+        - fullName
+        - id
+        - showGrades
+        - startDate
+        - timeModified
+    EnrollmentsResponseDto:
+      type: object
+      properties:
+        courses:
+          type: array
+          description: "List of courses the user is enrolled in, with updated enrollment\
+            \ information."
+          items:
+            $ref: "#/components/schemas/CourseInformationDto"
+      required:
+        - courses
+    CourseLogsResponseDto:
+      type: object
+      properties:
+        saved:
+          type: integer
+          format: int32
+          description: Number of logs imported
+        ignored:
+          type: integer
+          format: int32
+          description: "Number of logs ignored (e.g. duplicates or don't have a mapper\
+            \ for component, event or origin)"
+        failed:
+          type: integer
+          format: int32
+          description: Number of logs that failed to import due to errors
+      required:
+        - failed
+        - ignored
+        - saved
+    CourseLogsMetricsResponseDto:
+      type: object
+      properties:
+        rows:
+          type: array
+          items:
+            $ref: "#/components/schemas/CourseLogsMetricsResponseRowDto"
+      required:
+        - rows
+    CourseLogsMetricsResponseRowComponentDto:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int32
+          example: 2
+        name:
+          type: string
+          example: forum
+    CourseLogsMetricsResponseRowDto:
+      type: object
+      properties:
+        timeBucket:
+          type: string
+          example: 2026-05-01
+        user:
+          $ref: "#/components/schemas/CourseLogsMetricsResponseRowUserDto"
+        module:
+          $ref: "#/components/schemas/CourseLogsMetricsResponseRowModuleDto"
+        component:
+          $ref: "#/components/schemas/CourseLogsMetricsResponseRowComponentDto"
+        event:
+          $ref: "#/components/schemas/CourseLogsMetricsResponseRowEventDto"
+        origin:
+          $ref: "#/components/schemas/CourseLogsMetricsResponseRowOriginDto"
+        ipAddress:
+          type: string
+          example: 192.168.1.150
+        courseId:
+          type: integer
+          format: int32
+          example: 105
+        sectionId:
+          type: integer
+          format: int32
+          example: 3
+        sectionName:
+          type: string
+          example: "Unidad 1: Introducción"
+        value:
+          type: integer
+          format: int32
+          example: 42
+    CourseLogsMetricsResponseRowEventDto:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int32
+          example: 15
+        name:
+          type: string
+          example: discussion_created
+    CourseLogsMetricsResponseRowModuleDto:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int32
+          example: 874
+        name:
+          type: string
+          example: Foro de dudas generales
+    CourseLogsMetricsResponseRowOriginDto:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int32
+          example: 1
+        name:
+          type: string
+          example: web
+    CourseLogsMetricsResponseRowUserDto:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int32
+          example: 4521
+        fullName:
+          type: string
+          example: María González
+    CourseLogsMetricsRequestDto:
+      type: object
+      properties:
+        fields:
+          type: array
+          description: Columns to include in response
+          items:
+            type: string
+            enum:
+              - COURSE_ID
+              - USER_ID
+              - MODULE_ID
+              - COMPONENT_ID
+              - EVENT_ID
+              - ORIGIN_ID
+              - IP_ADDRESS
+              - USER_FULL_NAME
+              - MODULE_NAME
+              - COMPONENT_NAME
+              - EVENT_NAME
+              - ORIGIN_NAME
+              - SECTION_ID
+              - SECTION_NAME
+        timeRange:
+          $ref: "#/components/schemas/CourseLogsMetricsRequestTimeRangeDto"
+        groupBy:
+          type: array
+          items:
+            type: string
+            enum:
+              - USER_ID
+              - MODULE_ID
+              - COMPONENT_ID
+              - EVENT_ID
+              - ORIGIN_ID
+              - IP_ADDRESS
+              - SECTION_ID
+        interval:
+          type: string
+          description: "Optional time aggregation interval for grouping logs by time\
+            \ buckets. If not provided, no time-based grouping is applied. "
+          enum:
+            - HOURLY
+            - DAILY
+            - WEEKLY
+            - MONTHLY
+            - DAY_OF_WEEK
+          example: DAILY
+        fillGapsStrategy:
+          type: string
+          enum:
+            - NONE
+            - ZERO
+        sortBy:
+          type: array
+          items:
+            $ref: "#/components/schemas/CourseLogsMetricsRequestSortByItemDto"
+        filters:
+          $ref: "#/components/schemas/CourseLogsMetricsRequestFiltersDto"
+    CourseLogsMetricsRequestFiltersDto:
+      type: object
+      properties:
+        userIds:
+          type: array
+          items:
+            type: integer
+            format: int32
+        moduleIds:
+          type: array
+          items:
+            type: integer
+            format: int32
+        componentIds:
+          type: array
+          items:
+            type: integer
+            format: int32
+        eventIds:
+          type: array
+          items:
+            type: integer
+            format: int32
+        originIds:
+          type: array
+          items:
+            type: integer
+            format: int32
+        ipAddresses:
+          type: array
+          items:
+            type: string
+        sectionIds:
+          type: array
+          items:
+            type: integer
+            format: int32
+    CourseLogsMetricsRequestSortByItemDto:
+      type: object
+      properties:
+        field:
+          type: string
+          enum:
+            - VALUE
+            - USER_ID
+            - MODULE_ID
+            - TIME
+            - TIME_BUCKET
+        direction:
+          type: string
+          enum:
+            - ASC
+            - DESC
+          example: ASC
+      required:
+        - field
+    CourseLogsMetricsRequestTimeRangeDto:
+      type: object
+      properties:
+        from:
+          type: string
+          example: 2026-05-01T00:00:00
+          pattern: "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}(:\\d{2})?$"
+        to:
+          type: string
+          example: 2026-05-31T23:59:59
+          pattern: "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}(:\\d{2})?$"
+    CourseLogsInfoResponseDto:
+      type: object
+      properties:
+        page:
+          $ref: "#/components/schemas/PaginationInfoDto"
+        content:
+          type: array
+          description: List of log rows (dynamic fields based on columns)
+          items:
+            $ref: "#/components/schemas/LogEntryDto"
+      required:
+        - content
+    LogEntryDto:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int32
+          description: Log entry ID
+        timeCreated:
+          type: string
+          description: Log creation time
+          example: 2026-05-22T10:15:30
+          pattern: "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}(:\\d{2})?$"
+        courseId:
+          type: integer
+          format: int32
+          description: ID of the course associated with the log
+        userId:
+          type: integer
+          format: int32
+          description: ID of the user associated with the log
+        userFullName:
+          type: string
+          description: Full name of the user associated with the log
+        moduleId:
+          type: integer
+          format: int32
+          description: ID of the module associated with the log
+        moduleName:
+          type: string
+          description: Name of the module associated with the log
+        component:
+          type: string
+          description: Component associated with the log
+        componentId:
+          type: integer
+          format: int32
+          description: ID of the component associated with the log
+        eventName:
+          type: string
+          description: Name of the event associated with the log
+        eventId:
+          type: integer
+          format: int32
+          description: ID of the event associated with the log
+        originName:
+          type: string
+          description: Name of the origin associated with the log
+        originId:
+          type: integer
+          format: int32
+          description: ID of the origin associated with the log
+        ip:
+          type: string
+          description: IP address associated with the log
+      required:
+        - component
+        - componentId
+        - courseId
+        - eventId
+        - eventName
+        - id
+        - ip
+        - moduleId
+        - moduleName
+        - originId
+        - originName
+        - timeCreated
+        - userFullName
+        - userId
+    PaginationInfoDto:
+      type: object
+      properties:
+        page:
+          type: integer
+          format: int32
+          description: Zero-based index of the current page
+          example: 0
+        size:
+          type: integer
+          format: int32
+          description: Number of items per page
+          example: 20
+        totalElements:
+          type: integer
+          format: int32
+          description: Total number of elements matching the filters
+          example: 1200
+        totalPages:
+          type: integer
+          format: int32
+          description: Total number of pages
+          example: 60
+        first:
+          type: boolean
+          description: Whether this is the first page
+          example: true
+        last:
+          type: boolean
+          description: Whether this is the last page
+          example: false
+        empty:
+          type: boolean
+          description: Whether the page has no content
+          example: false
+      required:
+        - page
+        - size
+        - totalElements
+    CourseLogsInfoRequestDto:
+      type: object
+      properties:
+        timeRange:
+          $ref: "#/components/schemas/CourseLogsInfoRequestTimeRangeDto"
+        filters:
+          $ref: "#/components/schemas/CourseLogsInfoRequestFiltersDto"
+        fields:
+          type: array
+          description: Columns to include in response
+          example:
+            - TIMESTAMP
+            - USER_FULL_NAME
+            - EVENT_NAME
+            - IP_ADDRESS
+          items:
+            type: string
+            enum:
+              - ID
+              - TIMESTAMP
+              - COURSE_ID
+              - USER_ID
+              - MODULE_ID
+              - COMPONENT_ID
+              - EVENT_ID
+              - ORIGIN_ID
+              - IP_ADDRESS
+              - USER_FULL_NAME
+              - MODULE_NAME
+              - COMPONENT_NAME
+              - EVENT_NAME
+              - ORIGIN_NAME
+              - SECTION_ID
+              - SECTION_NAME
+        pagination:
+          $ref: "#/components/schemas/CourseLogsInfoRequestPaginationDto"
+        sort:
+          type: array
+          items:
+            $ref: "#/components/schemas/CourseLogsInfoRequestSortItemDto"
+        includeTotal:
+          type: boolean
+          example: false
+    CourseLogsInfoRequestFiltersDto:
+      type: object
+      properties:
+        userIds:
+          type: array
+          example:
+            - 123
+            - 456
+            - 789
+          items:
+            type: integer
+            format: int32
+        moduleIds:
+          type: array
+          example:
+            - 10
+            - 20
+          items:
+            type: integer
+            format: int32
+        componentIds:
+          type: array
+          example:
+            - 5
+            - 6
+          items:
+            type: integer
+            format: int32
+        sectionIds:
+          type: array
+          example:
+            - 2
+            - 4
+          items:
+            type: integer
+            format: int32
+        eventIds:
+          type: array
+          example:
+            - 1
+            - 2
+          items:
+            type: integer
+            format: int32
+        originIds:
+          type: array
+          example:
+            - 3
+          items:
+            type: integer
+            format: int32
+        ipAddresses:
+          type: array
+          example:
+            - 192.168.1.1
+            - 10.0.0.1
+          items:
+            type: string
+    CourseLogsInfoRequestPaginationDto:
+      type: object
+      properties:
+        page:
+          type: integer
+          format: int32
+          example: 0
+        size:
+          type: integer
+          format: int32
+          example: 20
+    CourseLogsInfoRequestSortItemDto:
+      type: object
+      properties:
+        field:
+          type: string
+          example: TIMESTAMP
+        direction:
+          type: string
+          enum:
+            - ASC
+            - DESC
+          example: DESC
+    CourseLogsInfoRequestTimeRangeDto:
+      type: object
+      properties:
+        from:
+          type: string
+          example: 2026-05-01T00:00:00
+          pattern: "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}(:\\d{2})?$"
+        to:
+          type: string
+          example: 2026-05-31T23:59:59
+          pattern: "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}(:\\d{2})?$"
+    CourseEnrollmentsResponseDto:
+      type: object
+      properties:
+        users:
+          type: array
+          description: List of users and their course enrollment information
+          items:
+            $ref: "#/components/schemas/UserEnrollmentInfoDto"
+      required:
+        - users
+    UserEnrollmentInfoCoursesInnerDto:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int32
+          description: The unique identifier of the course.
+        fullName:
+          type: string
+          description: The full name of the course.
+      required:
+        - fullName
+        - id
+    UserEnrollmentInfoDto:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int32
+          description: The unique identifier of the user.
+        fullName:
+          type: string
+          description: The full name of the user.
+        email:
+          type: string
+          description: The email address of the user.
+        firstAccess:
+          type: string
+          format: date-time
+          description: The timestamp of the user's first access to the site.
+        lastAccess:
+          type: string
+          format: date-time
+          description: The timestamp of the user's last access to the site.
+        lastCourseAccess:
+          type: string
+          format: date-time
+          description: The timestamp of the user's last access to the course.
+        imageUrl:
+          type: string
+          format: uri
+          description: The URL of the user's profile image.
+        roles:
+          type: array
+          description: List of roles the user has in the course.
+          items:
+            $ref: "#/components/schemas/UserEnrollmentInfoRolesInnerDto"
+        groups:
+          type: array
+          description: List of groups the user is enrolled in for the course.
+          items:
+            $ref: "#/components/schemas/UserEnrollmentInfoGroupsInnerDto"
+        courses:
+          type: array
+          description: List of courses the user is enrolled in.
+          items:
+            $ref: "#/components/schemas/UserEnrollmentInfoCoursesInnerDto"
+      required:
+        - courses
+        - email
+        - firstAccess
+        - fullName
+        - groups
+        - id
+        - imageUrl
+        - lastAccess
+        - lastCourseAccess
+        - roles
+    UserEnrollmentInfoGroupsInnerDto:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int32
+          description: The unique identifier of the group.
+        name:
+          type: string
+          description: Group name
+      required:
+        - id
+        - name
+    UserEnrollmentInfoRolesInnerDto:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int32
+          description: The unique identifier of the role.
+        name:
+          type: string
+          description: Role name
+      required:
+        - id
+        - name
+    CourseContentModuleDto:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int32
+          description: Module ID
+        name:
+          type: string
+          description: Module name
+        modName:
+          type: string
+          description: Module technical name
+        url:
+          type: string
+          format: uri
+          description: Module URL
+        description:
+          type: string
+          description: Module description
+        visible:
+          type: boolean
+          description: Is module visible
+      required:
+        - description
+        - id
+        - modName
+        - name
+        - url
+        - visible
+    CourseContentResponseDto:
+      type: object
+      properties:
+        sections:
+          type: array
+          items:
+            $ref: "#/components/schemas/CourseContentSectionDto"
+      required:
+        - sections
+    CourseContentSectionDto:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int32
+          description: Section ID
+        name:
+          type: string
+          description: Section name
+        visible:
+          type: boolean
+          description: Is the section visible
+        summary:
+          type: string
+          description: Section description
+        position:
+          type: integer
+          format: int32
+          description: Section number inside the course
+        modules:
+          type: array
+          description: List of modules in the section
+          items:
+            $ref: "#/components/schemas/CourseContentModuleDto"
+      required:
+        - id
+        - modules
+        - name
+        - position
+        - summary
+        - visible
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
