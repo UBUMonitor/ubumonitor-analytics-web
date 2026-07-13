@@ -95,6 +95,7 @@ export class RelativeCumulativeChart extends Chart {
         trigger: "axis",
       },
       legend: {
+        type: "scroll",
         top: "top",
         left: "center",
       },
