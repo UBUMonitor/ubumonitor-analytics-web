@@ -108,6 +108,11 @@ jobs:
           mkdir -p src-tauri/resources
           curl -L -o src-tauri/resources/app.jar "${{ env.JAR_URL }}"
 
+      - name: Set LD_LIBRARY_PATH for JRE (linuxdeploy dependency resolution)
+        if: matrix.platform == 'ubuntu-22.04'
+        run: |
+          echo "LD_LIBRARY_PATH=$GITHUB_WORKSPACE/src-tauri/resources/jre/lib/server:$GITHUB_WORKSPACE/src-tauri/resources/jre/lib:${LD_LIBRARY_PATH:-}" >> "$GITHUB_ENV"
+
       - uses: tauri-apps/tauri-action@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
