@@ -37,7 +37,7 @@
       }
     },
     "resources": {
-      "resources/jre/**/*": "jre/",
+      "resources/jre": "jre",
       "resources/app.jar": "app.jar"
     },
     "icon": [
