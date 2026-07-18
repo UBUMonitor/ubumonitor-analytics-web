@@ -25,7 +25,7 @@ jobs:
             args: "--target x86_64-apple-darwin"
             temurin_asset: "OpenJDK25U-jre_x64_mac_hotspot"
           - platform: "ubuntu-22.04"
-            args: ""
+            args: "--verbose"
             temurin_asset: "OpenJDK25U-jre_x64_linux_hotspot"
           - platform: "windows-latest"
             args: ""
