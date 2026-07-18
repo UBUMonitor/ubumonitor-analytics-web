@@ -33,11 +33,12 @@
     "createUpdaterArtifacts": true,
     "windows": {
       "nsis": {
-        "installMode": "both"
+        "installMode": "currentUser"
       }
     },
     "resources": {
-      "resources/logback.xml": "java/logback.xml"
+      "resources/jre/**/*": "jre/",
+      "resources/app.jar": "app.jar"
     },
     "icon": [
       "icons/32x32.png",

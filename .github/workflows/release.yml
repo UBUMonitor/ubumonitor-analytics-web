@@ -6,6 +6,10 @@ on:
       - "v*"
   workflow_dispatch:
 
+env:
+  TEMURIN_VERSION: "25.0.3+9"
+  JAR_URL: "https://github.com/UBUMonitor/ubumonitor-analytics-api/releases/download/v0.0.1/ubumonitoranalytics-0.0.1.jar"
+
 jobs:
   publish-tauri:
     permissions:
@@ -16,12 +20,16 @@ jobs:
         include:
           - platform: "macos-latest" # Arm (M1+)
             args: "--target aarch64-apple-darwin"
+            temurin_asset: "OpenJDK25U-jre_aarch64_mac_hotspot"
           - platform: "macos-latest" # Intel
             args: "--target x86_64-apple-darwin"
+            temurin_asset: "OpenJDK25U-jre_x64_mac_hotspot"
           - platform: "ubuntu-22.04"
             args: ""
+            temurin_asset: "OpenJDK25U-jre_x64_linux_hotspot"
           - platform: "windows-latest"
             args: ""
+            temurin_asset: "OpenJDK25U-jre_x64_windows_hotspot"
 
     runs-on: ${{ matrix.platform }}
     steps:
@@ -51,6 +59,54 @@ jobs:
 
       - name: install frontend dependencies
         run: pnpm install --frozen-lockfile
+
+      - name: Download JRE (Temurin 25, Windows/macOS)
+        if: matrix.platform != 'ubuntu-22.04'
+        shell: bash
+        run: |
+          set -e
+          VERSION_TAG="jdk-$(echo "${{ env.TEMURIN_VERSION }}" | sed 's/+/%2B/')"
+          VERSION_FILE=$(echo "${{ env.TEMURIN_VERSION }}" | sed 's/+/_/')
+          EXT="tar.gz"
+          if [ "${{ matrix.platform }}" = "windows-latest" ]; then
+            EXT="zip"
+          fi
+          URL="https://github.com/adoptium/temurin25-binaries/releases/download/${VERSION_TAG}/${{ matrix.temurin_asset }}_${VERSION_FILE}.${EXT}"
+          echo "Downloading: $URL"
+          mkdir -p src-tauri/resources/jre
+          curl -L -o jre_archive.${EXT} "$URL"
+          if [ "$EXT" = "zip" ]; then
+            unzip -q jre_archive.zip -d jre_extracted
+          else
+            mkdir jre_extracted
+            tar -xzf jre_archive.tar.gz -C jre_extracted
+          fi
+          # el contenido queda dentro de una carpeta tipo jdk-25.0.3+9-jre; lo movemos a jre/
+          mv jre_extracted/*/* src-tauri/resources/jre/
+          rm -rf jre_extracted jre_archive.${EXT}
+
+      - name: Download JRE (Temurin 25, Linux)
+        if: matrix.platform == 'ubuntu-22.04'
+        shell: bash
+        run: |
+          set -e
+          VERSION_TAG="jdk-$(echo "${{ env.TEMURIN_VERSION }}" | sed 's/+/%2B/')"
+          VERSION_FILE=$(echo "${{ env.TEMURIN_VERSION }}" | sed 's/+/_/')
+          URL="https://github.com/adoptium/temurin25-binaries/releases/download/${VERSION_TAG}/${{ matrix.temurin_asset }}_${VERSION_FILE}.tar.gz"
+          echo "Downloading: $URL"
+          mkdir -p src-tauri/resources/jre
+          curl -L -o jre_archive.tar.gz "$URL"
+          mkdir jre_extracted
+          tar -xzf jre_archive.tar.gz -C jre_extracted
+          mv jre_extracted/*/* src-tauri/resources/jre/
+          rm -rf jre_extracted jre_archive.tar.gz
+
+      - name: Download JAR
+        shell: bash
+        run: |
+          set -e
+          mkdir -p src-tauri/resources
+          curl -L -o src-tauri/resources/app.jar "${{ env.JAR_URL }}"
 
       - uses: tauri-apps/tauri-action@v1
         env:
