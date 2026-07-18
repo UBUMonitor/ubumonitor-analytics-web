@@ -1,6 +1,7 @@
 use futures_util::StreamExt;
+use log::{debug, error, info, warn};
 use serde::Serialize;
-use std::io::Write;
+use std::io::{BufRead, BufReader, Write};
 use std::path::{Path, PathBuf};
 use std::process::{Child, Command, Stdio};
 use std::sync::atomic::{AtomicBool, Ordering};
@@ -15,7 +16,7 @@ const SUBFOLDER: &str = "java";
 const JRE_SUBFOLDER: &str = "jre";
 const JRE_MAJOR_VERSION: &str = "25";
 
-// Pasos del proceso: descargar jar, descargar jre, extraer jre -> cada uno pesa lo mismo
+// Steps in the process: download jar, download jre, extract jre -> each one has equal weight
 const TOTAL_STEPS: u32 = 3;
 const STEP_WEIGHT: u32 = 100 / TOTAL_STEPS; // 33
 
@@ -37,10 +38,11 @@ fn release_url() -> String {
 struct ProgressPayload {
     percent: u32,
     finished: bool,
-    error: Option<String>, // ej. "[jar] Error HTTP: 404"
+    error: Option<String>, // e.g. "[jar] HTTP Error: 404"
 }
 
 fn emit_progress(app: &AppHandle, percent: u32, finished: bool) {
+    debug!("progress: {}% (finished={})", percent, finished);
     app.emit(
         "download-progress",
         ProgressPayload {
@@ -53,6 +55,7 @@ fn emit_progress(app: &AppHandle, percent: u32, finished: bool) {
 }
 
 fn emit_error(app: &AppHandle, step: &str, message: &str) {
+    error!("[{}] {}", step, message);
     app.emit(
         "download-progress",
         ProgressPayload {
@@ -68,11 +71,12 @@ fn get_target_dir() -> Result<PathBuf, String> {
     let exe_dir = std::env::current_exe()
         .map_err(|e| e.to_string())?
         .parent()
-        .ok_or("No se pudo obtener el directorio del ejecutable")?
+        .ok_or("Could not get the executable directory")?
         .to_path_buf();
 
     let target_dir = exe_dir.join(SUBFOLDER);
     if !target_dir.exists() {
+        debug!("creating target directory: {:?}", target_dir);
         std::fs::create_dir_all(&target_dir).map_err(|e| e.to_string())?;
     }
     Ok(target_dir)
@@ -86,7 +90,7 @@ fn adoptium_platform() -> Result<(&'static str, &'static str, &'static str), Str
     } else if cfg!(target_os = "linux") {
         "linux"
     } else {
-        return Err("SO no soportado".into());
+        return Err("Unsupported OS".into());
     };
 
     let arch = if cfg!(target_arch = "x86_64") {
@@ -94,7 +98,7 @@ fn adoptium_platform() -> Result<(&'static str, &'static str, &'static str), Str
     } else if cfg!(target_arch = "aarch64") {
         "aarch64"
     } else {
-        return Err("Arquitectura no soportada".into());
+        return Err("Unsupported architecture".into());
     };
 
     let ext = if os == "windows" { "zip" } else { "tar.gz" };
@@ -118,18 +122,18 @@ fn java_executable_path(jre_dir: &Path) -> PathBuf {
     }
 }
 
-/// Cliente HTTP reutilizable con timeouts razonables.
+/// Reusable HTTP client with sensible timeouts.
 fn http_client() -> Result<reqwest::Client, String> {
     reqwest::Client::builder()
         .connect_timeout(Duration::from_secs(10))
-        .timeout(Duration::from_secs(300)) // 5 min máx por descarga completa
+        .timeout(Duration::from_secs(300)) // 5 min max per full download
         .build()
         .map_err(|e| e.to_string())
 }
 
-/// Descarga con streaming. `step_index` (0-based) indica qué paso ocupa dentro del total,
-/// repartiendo el progreso global en tramos iguales de STEP_WEIGHT.
-/// Si la descarga falla a mitad, se limpia el archivo parcial antes de propagar el error.
+/// Streams a download to disk. `step_index` (0-based) indicates which step this occupies
+/// within the total, mapping progress into equal-sized STEP_WEIGHT chunks.
+/// If the download fails midway, the partial file is cleaned up before propagating the error.
 async fn download_with_progress(
     app: &AppHandle,
     client: &reqwest::Client,
@@ -137,12 +141,23 @@ async fn download_with_progress(
     dest: &Path,
     step_index: u32,
 ) -> Result<(), String> {
-    let response = client.get(url).send().await.map_err(|e| e.to_string())?;
+    info!("starting download: {} -> {:?}", url, dest);
+    let start_time = Instant::now();
+
+    let response = client.get(url).send().await.map_err(|e| {
+        error!("failed to connect to {}: {}", url, e);
+        e.to_string()
+    })?;
+
     if !response.status().is_success() {
-        return Err(format!("Error HTTP: {}", response.status()));
+        let msg = format!("HTTP Error: {}", response.status());
+        error!("{} ({})", msg, url);
+        return Err(msg);
     }
 
     let total = response.content_length().unwrap_or(0);
+    info!("total size to download: {} bytes", total);
+
     let mut file = std::fs::File::create(dest).map_err(|e| e.to_string())?;
 
     let mut downloaded: u64 = 0;
@@ -173,15 +188,28 @@ async fn download_with_progress(
     }
     .await;
 
-    if result.is_err() {
-        drop(file);
-        std::fs::remove_file(dest).ok(); // limpieza del archivo parcial/corrupto
+    match &result {
+        Ok(_) => info!(
+            "download completed: {:?} ({} bytes in {:.1}s)",
+            dest,
+            downloaded,
+            start_time.elapsed().as_secs_f64()
+        ),
+        Err(e) => {
+            warn!(
+                "download interrupted, cleaning up partial file: {:?} ({})",
+                dest, e
+            );
+            drop(file);
+            std::fs::remove_file(dest).ok();
+        }
     }
 
     result
 }
 
 fn extract_zip(archive_path: &Path, dest_dir: &Path) -> Result<(), String> {
+    info!("extracting zip: {:?} -> {:?}", archive_path, dest_dir);
     let file = std::fs::File::open(archive_path).map_err(|e| e.to_string())?;
     let mut archive = zip::ZipArchive::new(file).map_err(|e| e.to_string())?;
 
@@ -213,18 +241,21 @@ fn extract_zip(archive_path: &Path, dest_dir: &Path) -> Result<(), String> {
         }
     }
 
+    info!("zip extraction completed ({} entries)", archive.len());
     Ok(())
 }
 
 fn extract_tar_gz(archive_path: &Path, dest_dir: &Path) -> Result<(), String> {
+    info!("extracting tar.gz: {:?} -> {:?}", archive_path, dest_dir);
     let file = std::fs::File::open(archive_path).map_err(|e| e.to_string())?;
     let decoder = flate2::read::GzDecoder::new(file);
     let mut archive = tar::Archive::new(decoder);
     archive.unpack(dest_dir).map_err(|e| e.to_string())?;
+    info!("tar.gz extraction completed");
     Ok(())
 }
 
-/// El binario de Adoptium viene dentro de una carpeta (ej. jdk-25+9-jre/), la subimos un nivel.
+/// The Adoptium binary comes wrapped in a folder (e.g. jdk-25+9-jre/), so we flatten it up one level.
 fn flatten_single_subdir(dest_dir: &Path) -> Result<(), String> {
     let entries: Vec<_> = std::fs::read_dir(dest_dir)
         .map_err(|e| e.to_string())?
@@ -233,6 +264,7 @@ fn flatten_single_subdir(dest_dir: &Path) -> Result<(), String> {
 
     if entries.len() == 1 && entries[0].path().is_dir() {
         let inner = entries[0].path();
+        debug!("flattening single subdirectory: {:?}", inner);
         for child in std::fs::read_dir(&inner).map_err(|e| e.to_string())? {
             let child = child.map_err(|e| e.to_string())?;
             let target = dest_dir.join(child.file_name());
@@ -252,12 +284,14 @@ async fn ensure_jar(
     let jar_path = target_dir.join(file_name());
 
     if jar_path.exists() {
+        info!("jar already exists, skipping download: {:?}", jar_path);
         return Ok(jar_path);
     }
 
     let tmp_path = target_dir.join(format!("{}.part", file_name()));
     download_with_progress(app, client, &release_url(), &tmp_path, 0).await?;
     std::fs::rename(&tmp_path, &jar_path).map_err(|e| e.to_string())?;
+    info!("jar saved to: {:?}", jar_path);
 
     Ok(jar_path)
 }
@@ -271,13 +305,15 @@ async fn ensure_jre(
     let java_bin = java_executable_path(&jre_dir);
 
     if java_bin.exists() {
+        info!("JRE already exists, skipping download: {:?}", java_bin);
         return Ok(java_bin);
     }
 
     std::fs::create_dir_all(&jre_dir).map_err(|e| e.to_string())?;
 
-    let (_os, _arch, ext) = adoptium_platform()?;
+    let (os, arch, ext) = adoptium_platform()?;
     let url = jre_download_url()?;
+    info!("downloading JRE {} for {}/{}", JRE_MAJOR_VERSION, os, arch);
     let archive_path = target_dir.join(format!("jre_download.{}", ext));
 
     download_with_progress(app, client, &url, &archive_path, 1).await?;
@@ -290,37 +326,55 @@ async fn ensure_jre(
         extract_tar_gz(&archive_path, &jre_dir)
     };
 
-    // Limpiamos el archivo descargado tanto si la extracción tiene éxito como si falla
+    // Clean up the downloaded archive whether extraction succeeds or fails
     std::fs::remove_file(&archive_path).ok();
-    extract_result.map_err(|e| format!("Error extrayendo Java: {}", e))?;
+    extract_result.map_err(|e| format!("Error extracting Java: {}", e))?;
 
     flatten_single_subdir(&jre_dir)?;
 
     if !java_bin.exists() {
-        return Err("No se encontró el ejecutable java tras la extracción".into());
+        error!(
+            "java executable not found after extraction in {:?}",
+            jre_dir
+        );
+        return Err("Could not find the java executable after extraction".into());
     }
 
+    info!("JRE ready at: {:?}", java_bin);
     Ok(java_bin)
 }
 
-/// Estado compartido para guardar el proceso Java lanzado.
+/// Shared state holding the launched Java process.
 struct JarProcess(Mutex<Option<Child>>);
 
-/// Helper que ignora el "poisoning" del mutex (si un hilo entró en pánico con el lock
-/// tomado) en vez de propagar el pánico en cascada al llamador.
+/// Helper that ignores mutex poisoning (if a thread panicked while holding the lock)
+/// instead of propagating a cascading panic to the caller.
 fn lock_jar_state(state: &JarProcess) -> std::sync::MutexGuard<'_, Option<Child>> {
-    state
-        .0
-        .lock()
-        .unwrap_or_else(|poisoned| poisoned.into_inner())
+    state.0.lock().unwrap_or_else(|poisoned| {
+        warn!("JarProcess mutex was poisoned, recovering inner state");
+        poisoned.into_inner()
+    })
 }
 
-fn launch_jar(java_path: &Path, jar_path: &Path) -> Result<Child, String> {
-    let mut cmd = Command::new(java_path);
-    cmd.arg("-jar").arg(jar_path);
+fn launch_jar(java_path: &Path, jar_path: &Path, app: &AppHandle) -> Result<Child, String> {
+    info!("launching: {:?} -jar {:?}", java_path, jar_path);
 
-    cmd.stdout(Stdio::null());
-    cmd.stderr(Stdio::null());
+    let app_local_data_dir = app
+        .path()
+        .app_local_data_dir()
+        .map_err(|e| format!("Could not get the local data directory: {}", e))?;
+
+    if !app_local_data_dir.exists() {
+        std::fs::create_dir_all(&app_local_data_dir).map_err(|e| e.to_string())?;
+    }
+
+    let mut cmd = Command::new(java_path);
+    cmd.current_dir(&app_local_data_dir)
+        .arg("-jar")
+        .arg(jar_path);
+
+    cmd.stdout(Stdio::piped());
+    cmd.stderr(Stdio::piped());
 
     #[cfg(target_os = "windows")]
     {
@@ -331,22 +385,55 @@ fn launch_jar(java_path: &Path, jar_path: &Path) -> Result<Child, String> {
 
     let mut child = cmd
         .spawn()
-        .map_err(|e| format!("No se pudo iniciar la aplicación: {}", e))?;
+        .map_err(|e| format!("Could not start the application: {}", e))?;
 
-    // Comprobación rápida: si el proceso muere en los primeros instantes (puerto ocupado,
-    // excepción en el main, etc.), lo detectamos aquí en vez de reportar éxito falso.
+    info!("Java process launched with PID {}", child.id());
+
+    if let Some(stdout) = child.stdout.take() {
+        let app_handle = app.clone();
+        std::thread::spawn(move || {
+            let reader = BufReader::new(stdout);
+            for line in reader.lines().map_while(Result::ok) {
+                info!("[java stdout] {}", line);
+                app_handle.emit("java-log", &line).ok();
+            }
+        });
+    }
+
+    if let Some(stderr) = child.stderr.take() {
+        let app_handle = app.clone();
+        std::thread::spawn(move || {
+            let reader = BufReader::new(stderr);
+            for line in reader.lines().map_while(Result::ok) {
+                warn!("[java stderr] {}", line);
+                app_handle.emit("java-log", &line).ok();
+            }
+        });
+    }
+
     std::thread::sleep(Duration::from_millis(500));
     match child.try_wait() {
-        Ok(Some(status)) => Err(format!(
-            "El proceso Java terminó inmediatamente (código: {:?})",
-            status.code()
-        )),
-        Ok(None) => Ok(child), // sigue vivo, todo bien
-        Err(e) => Err(format!("Error comprobando el proceso: {}", e)),
+        Ok(Some(status)) => {
+            let msg = format!(
+                "The Java process exited immediately (code: {:?})",
+                status.code()
+            );
+            error!("{}", msg);
+            Err(msg)
+        }
+        Ok(None) => {
+            info!("Java process is still running after the initial check");
+            Ok(child)
+        }
+        Err(e) => {
+            let msg = format!("Error checking the process: {}", e);
+            error!("{}", msg);
+            Err(msg)
+        }
     }
 }
 
-// Guard contra invocaciones concurrentes/duplicadas de prepare_and_launch
+// Guard against concurrent/duplicate invocations of prepare_and_launch
 static LAUNCH_IN_PROGRESS: AtomicBool = AtomicBool::new(false);
 
 #[tauri::command]
@@ -355,15 +442,19 @@ async fn prepare_and_launch(
     jar_state: State<'_, JarProcess>,
 ) -> Result<(), String> {
     if LAUNCH_IN_PROGRESS.swap(true, Ordering::SeqCst) {
-        return Err("La preparación ya está en curso".into());
+        warn!("prepare_and_launch is already running, ignoring new invocation");
+        return Err("Setup is already in progress".into());
     }
 
-    // Si ya hay un proceso corriendo, no lo relanzamos.
+    // If a process is already running, don't relaunch it.
     if lock_jar_state(&jar_state).is_some() {
+        info!("a Java process is already running, skipping relaunch");
         LAUNCH_IN_PROGRESS.store(false, Ordering::SeqCst);
         emit_progress(&app, 100, true);
         return Ok(());
     }
+
+    info!("=== starting prepare_and_launch ===");
 
     let result = async {
         let target_dir = get_target_dir()?;
@@ -379,37 +470,61 @@ async fn prepare_and_launch(
             e
         })?;
 
-        let child = launch_jar(&java_bin, &jar_path).map_err(|e| {
+        let child = launch_jar(&java_bin, &jar_path, &app).map_err(|e| {
             emit_error(&app, "launch", &e);
             e
         })?;
 
         *lock_jar_state(&jar_state) = Some(child);
         emit_progress(&app, 100, true);
+        info!("=== prepare_and_launch completed successfully ===");
 
         Ok(())
     }
     .await;
 
+    if let Err(ref e) = result {
+        error!("=== prepare_and_launch failed: {} ===", e);
+    }
+
     LAUNCH_IN_PROGRESS.store(false, Ordering::SeqCst);
     result
 }
 
-/// Mata el proceso Java si sigue vivo. Se llama al cerrar la ventana.
+/// Kills the Java process if it's still running. Called when the window closes.
 fn kill_jar_process(jar_state: &JarProcess) {
     if let Some(mut child) = lock_jar_state(jar_state).take() {
-        let _ = child.kill();
+        info!("shutting down Java process (PID {})", child.id());
+        match child.kill() {
+            Ok(_) => info!("shutdown signal sent successfully"),
+            Err(e) => error!("error sending shutdown signal: {}", e),
+        }
         let _ = child.wait();
+        info!("Java process terminated");
+    } else {
+        debug!("no Java process was running at shutdown");
     }
 }
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     tauri::Builder::default()
+        .plugin(
+            tauri_plugin_log::Builder::new()
+                .level(log::LevelFilter::Info)
+                .clear_targets()
+                .target(tauri_plugin_log::Target::new(
+                    tauri_plugin_log::TargetKind::LogDir {
+                        file_name: Some("tauri-logs".to_string()),
+                    },
+                ))
+                .build(),
+        )
         .manage(JarProcess(Mutex::new(None)))
         .invoke_handler(tauri::generate_handler![prepare_and_launch])
         .on_window_event(|window, event| {
             if let tauri::WindowEvent::CloseRequested { .. } = event {
+                info!("window closed by user, stopping Java backend");
                 let jar_state = window.state::<JarProcess>();
                 kill_jar_process(&jar_state);
             }
