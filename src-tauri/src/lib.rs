@@ -1,4 +1,4 @@
-use log::{debug, error, info, warn};
+use log::{error, info, warn};
 use std::io::{BufRead, BufReader};
 use std::path::{Path, PathBuf};
 use std::process::{Child, Command, Stdio};
@@ -9,39 +9,6 @@ use tauri::path::BaseDirectory;
 use tauri::{AppHandle, Emitter, Manager, State};
 
 const JAR_RESOURCE_RELATIVE: &str = "app.jar";
-
-#[derive(Clone, serde::Serialize)]
-struct ProgressPayload {
-    percent: u32,
-    finished: bool,
-    error: Option<String>,
-}
-
-fn emit_progress(app: &AppHandle, percent: u32, finished: bool) {
-    debug!("progress: {}% (finished={})", percent, finished);
-    app.emit(
-        "download-progress",
-        ProgressPayload {
-            percent: percent.min(100),
-            finished,
-            error: None,
-        },
-    )
-    .ok();
-}
-
-fn emit_error(app: &AppHandle, step: &str, message: &str) {
-    error!("[{}] {}", step, message);
-    app.emit(
-        "download-progress",
-        ProgressPayload {
-            percent: 0,
-            finished: false,
-            error: Some(format!("[{}] {}", step, message)),
-        },
-    )
-    .ok();
-}
 
 fn java_executable_relative() -> &'static str {
     if cfg!(target_os = "windows") {
@@ -80,19 +47,6 @@ fn resolve_java_path(app: &AppHandle) -> Result<PathBuf, String> {
             "Bundled JRE executable not found at expected path: {:?}",
             path
         ));
-    }
-
-    #[cfg(unix)]
-    {
-        // Executable permissions can be lost when the archive is unpacked during CI/build.
-        use std::os::unix::fs::PermissionsExt;
-        if let Ok(metadata) = std::fs::metadata(&path) {
-            let mut perms = metadata.permissions();
-            if perms.mode() & 0o111 == 0 {
-                perms.set_mode(0o755);
-                std::fs::set_permissions(&path, perms).ok();
-            }
-        }
     }
 
     Ok(path)
@@ -189,10 +143,7 @@ fn launch_jar(java_path: &Path, jar_path: &Path, app: &AppHandle) -> Result<Chil
 static LAUNCH_IN_PROGRESS: AtomicBool = AtomicBool::new(false);
 
 #[tauri::command]
-async fn prepare_and_launch(
-    app: AppHandle,
-    jar_state: State<'_, JarProcess>,
-) -> Result<(), String> {
+async fn start_backend(app: AppHandle, jar_state: State<'_, JarProcess>) -> Result<(), String> {
     if LAUNCH_IN_PROGRESS.swap(true, Ordering::SeqCst) {
         warn!("prepare_and_launch is already running, ignoring new invocation");
         return Err("Setup is already in progress".into());
@@ -202,36 +153,19 @@ async fn prepare_and_launch(
     if lock_jar_state(&jar_state).is_some() {
         info!("a Java process is already running, skipping relaunch");
         LAUNCH_IN_PROGRESS.store(false, Ordering::SeqCst);
-        emit_progress(&app, 100, true);
         return Ok(());
     }
 
     info!("=== starting prepare_and_launch ===");
 
     let result = (|| {
-        emit_progress(&app, 20, false);
+        let jar_path = resolve_jar_path(&app)?;
 
-        let jar_path = resolve_jar_path(&app).map_err(|e| {
-            emit_error(&app, "jar", &e);
-            e
-        })?;
+        let java_bin = resolve_java_path(&app)?;
 
-        emit_progress(&app, 50, false);
-
-        let java_bin = resolve_java_path(&app).map_err(|e| {
-            emit_error(&app, "jre", &e);
-            e
-        })?;
-
-        emit_progress(&app, 80, false);
-
-        let child = launch_jar(&java_bin, &jar_path, &app).map_err(|e| {
-            emit_error(&app, "launch", &e);
-            e
-        })?;
+        let child = launch_jar(&java_bin, &jar_path, &app)?;
 
         *lock_jar_state(&jar_state) = Some(child);
-        emit_progress(&app, 100, true);
         info!("=== prepare_and_launch completed successfully ===");
 
         Ok(())
@@ -255,27 +189,20 @@ fn kill_jar_process(jar_state: &JarProcess) {
         }
         let _ = child.wait();
         info!("Java process terminated");
-    } else {
-        debug!("no Java process was running at shutdown");
     }
 }
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     tauri::Builder::default()
+        .plugin(tauri_plugin_updater::Builder::new().build())
         .plugin(
             tauri_plugin_log::Builder::new()
                 .level(log::LevelFilter::Info)
-                .clear_targets()
-                .target(tauri_plugin_log::Target::new(
-                    tauri_plugin_log::TargetKind::LogDir {
-                        file_name: Some("tauri-logs".to_string()),
-                    },
-                ))
                 .build(),
         )
         .manage(JarProcess(Mutex::new(None)))
-        .invoke_handler(tauri::generate_handler![prepare_and_launch])
+        .invoke_handler(tauri::generate_handler![start_backend])
         .on_window_event(|window, event| {
             if let tauri::WindowEvent::CloseRequested { .. } = event {
                 info!("window closed by user, stopping Java backend");
