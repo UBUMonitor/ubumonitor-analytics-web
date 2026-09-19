@@ -6,6 +6,13 @@ export interface Item {
   checked: boolean
 }
 
+export interface CourseItem {
+  id: number
+  name: string
+  startDate: string
+  endDate: string
+}
+
 export interface UserItem extends Item {
   imageUrl?: string
   lastAccess?: string
@@ -25,6 +32,10 @@ export interface ModuleItem extends Item {
 export type Info = "section" | "module"
 
 export const appStore = $state({
+  token: null as string | null,
+  userId: null as number | null,
+  currentCourseId: 0,
+  courseItems: [] as CourseItem[],
   userItems: [] as UserItem[],
   sectionItems: [] as SectionItem[],
   moduleItems: [] as ModuleItem[],
@@ -38,6 +49,10 @@ export const appStore = $state({
 })
 
 export function clearAppStore() {
+  appStore.token = null
+  appStore.userId = null
+  appStore.currentCourseId = 0
+  appStore.courseItems = []
   appStore.userItems = []
   appStore.sectionItems = []
   appStore.moduleItems = []

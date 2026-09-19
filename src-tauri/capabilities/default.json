@@ -9,6 +9,16 @@
     "core:default",
     "core:path:default",
     "core:webview:allow-create-webview-window",
-    "log:default"
+    "log:default",
+    "updater:default",
+    "process:allow-restart",
+    {
+      "identifier": "http:default",
+      "allow": [
+        {
+          "url": "http://localhost:9090"
+        }
+      ]
+    }
   ]
 }

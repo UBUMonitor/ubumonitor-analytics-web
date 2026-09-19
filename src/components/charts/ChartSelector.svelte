@@ -5,7 +5,6 @@
   import { HeatMapChart } from "@/lib/chart/HeatMapChart"
   import { RelativeCumulativeChart } from "@/lib/chart/RelativeCumulativeChart"
   import { TotalChart } from "@/lib/chart/TotalChart"
-  import { getCurrentCourseId } from "@/lib/sessionStore.svelte"
   import type { CourseLogsMetricsResponseDto } from "@/model"
   import { m } from "@/paraglide/messages"
   import { getCourseLogsMetrics } from "@/services/course-logs/course-logs"
@@ -39,7 +38,7 @@
 
     currentChart.setSelectedInfo(appStore.selectedInfo)
 
-    getCourseLogsMetrics(getCurrentCourseId(), {
+    getCourseLogsMetrics(appStore.currentCourseId, {
       fields: currentChart.getFields(),
       timeRange: { from: appStore.from, to: appStore.to },
       groupBy: currentChart.getGroupBy(),

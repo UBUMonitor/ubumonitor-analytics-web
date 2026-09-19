@@ -1,7 +1,7 @@
 <script lang="ts">
   import { m } from "@/paraglide/messages"
   import { invoke } from "@tauri-apps/api/core"
-  import { debug, error } from "@tauri-apps/plugin-log"
+  import { debug, error, info } from "@tauri-apps/plugin-log"
   import { relaunch } from "@tauri-apps/plugin-process"
   import { check } from "@tauri-apps/plugin-updater"
   import { onMount } from "svelte"
@@ -16,7 +16,7 @@
     currentStep = m.checking_updates_label()
 
     try {
-      debug("Checking for updates...")
+      info("Checking for updates...")
       const update = await check({ timeout: 5000 })
 
       if (update) {
@@ -52,7 +52,7 @@
     updateApp()
       .then(() => {
         currentStep = m.preparing_application_label()
-        return invoke<void>("start_backend")
+        return invoke<void>("ensure_backend_server")
       })
       .then(() => (done = true))
       .catch((err) => error(`Error in startup flow: ${err}`))

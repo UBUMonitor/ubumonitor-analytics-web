@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { getToken } from "@/lib/sessionStore.svelte"
+  import { appStore } from "@/lib/appStore.svelte"
   import CourseSelector from "./CourseSelector.svelte"
   import LocaleSelector from "./LocaleSelector.svelte"
   import LogoutButton from "./LogoutButton.svelte"
@@ -8,7 +8,7 @@
 
 <header class="navbar min-h-fit bg-primary">
   <h1 class="navbar-start font-bold text-primary-content">UBUMonitor</h1>
-  {#if getToken()}
+  {#if appStore.userId}
     <div class="navbar-center gap-2">
       <CourseSelector />
       <SyncButton />

@@ -7,7 +7,6 @@ export default defineConfig({
       target: "./src/services",
       schemas: "./src/model",
       client: "fetch",
-      //baseUrl: "http:///192.168.1.49:9090",
       baseUrl: "http:///localhost:9090",
       clean: true,
       override: {

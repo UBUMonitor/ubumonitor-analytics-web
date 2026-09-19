@@ -1,6 +1,5 @@
 <script lang="ts">
   import { appStore, getSelectedUsers } from "@/lib/appStore.svelte"
-  import { getCurrentCourseId } from "@/lib/sessionStore.svelte"
   import type { CourseLogsInfoResponseDto, LogEntryDto } from "@/model"
   import { getLocale } from "@/paraglide/runtime"
   import { getCourseLogs } from "@/services/course-logs/course-logs"
@@ -61,7 +60,7 @@
 
     const selectedUsers = getSelectedUsers()
     try {
-      const result = await getCourseLogs(getCurrentCourseId(), {
+      const result = await getCourseLogs(appStore.currentCourseId, {
         timeRange: { from: appStore.from, to: appStore.to },
         filters: {
           userIds: selectedUsers.map(({ id }) => id),

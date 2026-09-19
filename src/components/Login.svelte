@@ -7,13 +7,9 @@
     setHost,
     setUsername,
   } from "@/lib/localStore.svelte"
-  import { setToken, setUserId } from "@/lib/sessionStore.svelte"
+  import { login, syncCourses } from "@/lib/moodle"
   import { m } from "@/paraglide/messages.js"
-  import { authLogin, type authLoginResponseSuccess } from "@/services/auth/auth"
-  import { syncSiteInfo, type syncSiteInfoResponseSuccess } from "@/services/sites/sites"
   import { DatabaseIcon, KeyRoundIcon, LinkIcon, UserIcon } from "@lucide/svelte"
-  import { relaunch } from "@tauri-apps/plugin-process"
-  import { check } from "@tauri-apps/plugin-updater"
 
   let loading = $state(false)
 
@@ -21,41 +17,34 @@
     event.preventDefault()
     loading = true
 
-    const form = new FormData(event.target as HTMLFormElement)
-    const username = form.get("username") as string
-    const password = form.get("password") as string
-    const dbPassword = form.get("dbPassword") as string
-    const host = form.get("host") as string
-    const rememberUsername = form.get("rememberUsername")
-    const rememberHost = form.get("rememberHost")
+    try {
+      const form = new FormData(event.target as HTMLFormElement)
 
-    const loginResponse = (await authLogin({
-      username,
-      password,
-      dbPassword,
-      host,
-    })) as authLoginResponseSuccess
+      const username = form.get("username") as string
+      const password = form.get("password") as string
+      const dbPassword = form.get("dbPassword") as string
+      const host = form.get("host") as string
 
-    const accessToken = loginResponse.data.accessToken
+      const rememberUsername = form.get("rememberUsername")
+      const rememberHost = form.get("rememberHost")
 
-    setToken(accessToken)
+      await login(username, password, dbPassword, host)
 
-    const siteInfoResponse = (await syncSiteInfo()) as syncSiteInfoResponseSuccess
+      if (rememberUsername) {
+        setUsername(username)
+      } else {
+        clearUsername()
+      }
 
-    const userId = siteInfoResponse.data.user.id
+      if (rememberHost) {
+        setHost(host)
+      } else {
+        clearHost()
+      }
 
-    setUserId(userId)
-
-    if (rememberUsername) {
-      setUsername(username)
-    } else {
-      clearUsername()
-    }
-
-    if (rememberHost) {
-      setHost(host)
-    } else {
-      clearHost()
+      await syncCourses()
+    } finally {
+      loading = false
     }
   }
 </script>
@@ -64,11 +53,7 @@
   class="fieldset w-sm rounded-box border border-base-300 bg-base-200 p-4"
   onsubmit={handleSubmit}
 >
-  <img
-    class="m-auto size-52 object-contain"
-    src="https://raw.githubusercontent.com/yjx0003/UBUMonitor/master/src/main/resources/img/logo.png"
-    alt="UBUMonitor Logo"
-  />
+  <img class="m-auto size-52 object-contain" src="/logo.png" alt="UBUMonitor Logo" />
   <label class="input w-full">
     <UserIcon />
     <input
@@ -114,20 +99,3 @@
     {/if}
   </button>
 </form>
-
-{#await check() then updater}
-  {#if updater}
-    <dialog id="update_modal" class="modal" open>
-      <div class="modal-box">
-        <h3 class="text-lg font-bold">Hay una actualización!</h3>
-        <p class="py-4">Quieres actualizar a la versión {updater.version}</p>
-        <div class="modal-action">
-          <button class="btn" onclick={() => updater.downloadAndInstall().then(relaunch)}
-            >Actualizar</button
-          >
-          <button class="btn">Cancelar</button>
-        </div>
-      </div>
-    </dialog>
-  {/if}
-{/await}

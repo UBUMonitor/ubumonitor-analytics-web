@@ -933,6 +933,8 @@ components:
           type: integer
           format: int32
           example: 42
+      required:
+        - value
     CourseLogsMetricsResponseRowEventDto:
       type: object
       properties:
@@ -973,6 +975,8 @@ components:
         fullName:
           type: string
           example: María González
+      required:
+        - id
     CourseLogsMetricsRequestDto:
       type: object
       properties:
@@ -1110,6 +1114,7 @@ components:
           items:
             $ref: "#/components/schemas/LogEntryDto"
       required:
+        - page
         - content
     LogEntryDto:
       type: object
@@ -1219,6 +1224,7 @@ components:
         - page
         - size
         - totalElements
+        - totalPages
     CourseLogsInfoRequestDto:
       type: object
       properties:

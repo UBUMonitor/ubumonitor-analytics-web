@@ -3,9 +3,7 @@
   import Header from "@/components/header/Header.svelte"
   import Login from "@/components/Login.svelte"
   import SetUp from "@/components/SetUp.svelte"
-  import { getUserId } from "@/lib/sessionStore.svelte"
-
-  const userId = $derived(getUserId())
+  import { appStore } from "@/lib/appStore.svelte"
 
   let done = $state(false)
 </script>
@@ -15,7 +13,7 @@
   <main class="flex flex-1 items-center justify-center overflow-hidden">
     {#if !done}
       <SetUp bind:done />
-    {:else if userId}
+    {:else if appStore.userId}
       <Dashboard />
     {:else}
       <Login />

@@ -1,14 +1,16 @@
-use log::{error, info, warn};
-use std::io::{BufRead, BufReader};
-use std::path::{Path, PathBuf};
+use log::{debug, error, info, warn};
+use std::path::PathBuf;
 use std::process::{Child, Command, Stdio};
-use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::Mutex;
 use std::time::Duration;
-use tauri::path::BaseDirectory;
-use tauri::{AppHandle, Emitter, Manager, State};
+use tauri::{path::BaseDirectory, AppHandle, Manager};
+use tauri_plugin_dialog::{DialogExt, MessageDialogButtons, MessageDialogKind};
 
 const JAR_RESOURCE_RELATIVE: &str = "app.jar";
+const SERVER_PORT: u16 = 9090;
+
+#[derive(Default)]
+struct BackendProcess(Mutex<Option<Child>>);
 
 fn java_executable_relative() -> &'static str {
     if cfg!(target_os = "windows") {
@@ -26,12 +28,14 @@ fn resolve_jar_path(app: &AppHandle) -> Result<PathBuf, String> {
         .map_err(|e| format!("Could not resolve the JAR resource path: {}", e))?;
 
     if !path.exists() {
+        error!("Bundled JAR not found at expected path: {:?}", path);
         return Err(format!(
             "Bundled JAR not found at expected path: {:?}",
             path
         ));
     }
 
+    debug!("Resolved JAR path: {:?}", path);
     Ok(path)
 }
 
@@ -43,27 +47,97 @@ fn resolve_java_path(app: &AppHandle) -> Result<PathBuf, String> {
         .map_err(|e| format!("Could not resolve the JRE resource path: {}", e))?;
 
     if !path.exists() {
+        error!(
+            "Bundled JRE executable not found at expected path: {:?}",
+            path
+        );
         return Err(format!(
             "Bundled JRE executable not found at expected path: {:?}",
             path
         ));
     }
 
+    debug!("Resolved Java executable path: {:?}", path);
     Ok(path)
 }
 
-/// Shared state holding the launched Java process.
-struct JarProcess(Mutex<Option<Child>>);
+async fn is_server_healthy(port: u16) -> bool {
+    let url = format!("http://localhost:{}/actuator/health", port);
 
-fn lock_jar_state(state: &JarProcess) -> std::sync::MutexGuard<'_, Option<Child>> {
-    state.0.lock().unwrap_or_else(|poisoned| {
-        warn!("JarProcess mutex was poisoned, recovering inner state");
-        poisoned.into_inner()
-    })
+    let client = match reqwest::Client::builder()
+        .timeout(Duration::from_millis(100))
+        .build()
+    {
+        Ok(c) => c,
+        Err(e) => {
+            error!("Failed to build HTTP client for health check: {}", e);
+            return false;
+        }
+    };
+
+    match client.get(&url).send().await {
+        Ok(resp) if resp.status().is_success() => match resp.json::<serde_json::Value>().await {
+            Ok(json) => {
+                let healthy = json.get("status").and_then(|s| s.as_str()) == Some("UP");
+                debug!("Health check response: {:?} (healthy = {})", json, healthy);
+                healthy
+            }
+            Err(e) => {
+                warn!("Health check response was not valid JSON: {}", e);
+                false
+            }
+        },
+        Ok(resp) => {
+            debug!(
+                "Health check returned non-success status: {}",
+                resp.status()
+            );
+            false
+        }
+        Err(e) => {
+            debug!(
+                "Health check request failed (server likely not up yet): {}",
+                e
+            );
+            false
+        }
+    }
 }
 
-fn launch_jar(java_path: &Path, jar_path: &Path, app: &AppHandle) -> Result<Child, String> {
-    info!("launching: {:?} -jar {:?}", java_path, jar_path);
+async fn wait_for_server_healthy(port: u16, timeout_secs: u64) -> bool {
+    let start = std::time::Instant::now();
+    let timeout = Duration::from_secs(timeout_secs);
+
+    info!(
+        "Waiting for server on port {} to become healthy (timeout: {}s)",
+        port, timeout_secs
+    );
+
+    while start.elapsed() < timeout {
+        if is_server_healthy(port).await {
+            info!(
+                "Server on port {} became healthy after {:.1}s",
+                port,
+                start.elapsed().as_secs_f32()
+            );
+            return true;
+        }
+        tokio::time::sleep(Duration::from_millis(200)).await;
+    }
+
+    error!(
+        "Server on port {} did not become healthy within {}s",
+        port, timeout_secs
+    );
+    false
+}
+
+fn spawn_java_process(
+    java_path: &PathBuf,
+    jar_path: &PathBuf,
+    app: &AppHandle,
+) -> Result<Child, String> {
+    info!("Launching backend: {:?} -jar {:?}", java_path, jar_path);
 
     let app_local_data_dir = app
         .path()
@@ -71,143 +145,137 @@ fn launch_jar(java_path: &Path, jar_path: &Path, app: &AppHandle) -> Result<Chil
         .map_err(|e| format!("Could not get the local data directory: {}", e))?;
 
     if !app_local_data_dir.exists() {
-        std::fs::create_dir_all(&app_local_data_dir).map_err(|e| e.to_string())?;
+        debug!("Creating local data directory: {:?}", app_local_data_dir);
+        std::fs::create_dir_all(&app_local_data_dir).map_err(|e| {
+            format!(
+                "Could not create local data directory {:?}: {}",
+                app_local_data_dir, e
+            )
+        })?;
     }
 
     let mut cmd = Command::new(java_path);
     cmd.current_dir(&app_local_data_dir)
         .arg("-jar")
-        .arg(jar_path);
+        .arg(jar_path)
+        .stdin(Stdio::null())
+        .stdout(Stdio::null())
+        .stderr(Stdio::null());
 
-    cmd.stdout(Stdio::piped());
-    cmd.stderr(Stdio::piped());
-
-    #[cfg(target_os = "windows")]
-    {
-        use std::os::windows::process::CommandExt;
-        const CREATE_NO_WINDOW: u32 = 0x08000000;
-        cmd.creation_flags(CREATE_NO_WINDOW);
-    }
-
-    let mut child = cmd
+    let child = cmd
         .spawn()
-        .map_err(|e| format!("Could not start the application: {}", e))?;
+        .map_err(|e| format!("Failed to spawn Java process: {}", e))?;
 
-    info!("Java process launched with PID {}", child.id());
-
-    if let Some(stdout) = child.stdout.take() {
-        let app_handle = app.clone();
-        std::thread::spawn(move || {
-            let reader = BufReader::new(stdout);
-            for line in reader.lines().map_while(Result::ok) {
-                info!("[java stdout] {}", line);
-                app_handle.emit("java-log", &line).ok();
-            }
-        });
-    }
-
-    if let Some(stderr) = child.stderr.take() {
-        let app_handle = app.clone();
-        std::thread::spawn(move || {
-            let reader = BufReader::new(stderr);
-            for line in reader.lines().map_while(Result::ok) {
-                warn!("[java stderr] {}", line);
-                app_handle.emit("java-log", &line).ok();
-            }
-        });
-    }
-
-    std::thread::sleep(Duration::from_millis(500));
-    match child.try_wait() {
-        Ok(Some(status)) => {
-            let msg = format!(
-                "The Java process exited immediately (code: {:?})",
-                status.code()
-            );
-            error!("{}", msg);
-            Err(msg)
-        }
-        Ok(None) => {
-            info!("Java process is still running after the initial check");
-            Ok(child)
-        }
-        Err(e) => {
-            let msg = format!("Error checking the process: {}", e);
-            error!("{}", msg);
-            Err(msg)
-        }
-    }
+    info!("Java process spawned successfully (PID: {})", child.id());
+    Ok(child)
 }
 
-// Guard against concurrent/duplicate invocations of prepare_and_launch
-static LAUNCH_IN_PROGRESS: AtomicBool = AtomicBool::new(false);
+fn kill_process(child: &mut Child) -> Result<(), String> {
+    child
+        .kill()
+        .map_err(|e| format!("Could not terminate the backend process: {}", e))?;
+
+    child
+        .wait()
+        .map_err(|e| format!("Could not wait for the backend process to terminate: {}", e))?;
+
+    Ok(())
+}
 
 #[tauri::command]
-async fn start_backend(app: AppHandle, jar_state: State<'_, JarProcess>) -> Result<(), String> {
-    if LAUNCH_IN_PROGRESS.swap(true, Ordering::SeqCst) {
-        warn!("prepare_and_launch is already running, ignoring new invocation");
-        return Err("Setup is already in progress".into());
-    }
+async fn ensure_backend_server(
+    app: AppHandle,
+    state: tauri::State<'_, BackendProcess>,
+) -> Result<(), String> {
+    info!("ensure_backend_server invoked");
 
-    // If a process is already running, don't relaunch it.
-    if lock_jar_state(&jar_state).is_some() {
-        info!("a Java process is already running, skipping relaunch");
-        LAUNCH_IN_PROGRESS.store(false, Ordering::SeqCst);
+    if is_server_healthy(SERVER_PORT).await {
+        info!("Server on port {} is already running", SERVER_PORT);
         return Ok(());
     }
 
-    info!("=== starting prepare_and_launch ===");
+    info!("Server not detected on port {}, starting it", SERVER_PORT);
 
-    let result = (|| {
-        let jar_path = resolve_jar_path(&app)?;
+    let jar_path = resolve_jar_path(&app)?;
+    let java_path = resolve_java_path(&app)?;
 
-        let java_bin = resolve_java_path(&app)?;
+    let child = spawn_java_process(&java_path, &jar_path, &app)?;
 
-        let child = launch_jar(&java_bin, &jar_path, &app)?;
-
-        *lock_jar_state(&jar_state) = Some(child);
-        info!("=== prepare_and_launch completed successfully ===");
-
-        Ok(())
-    })();
-
-    if let Err(ref e) = result {
-        error!("=== prepare_and_launch failed: {} ===", e);
+    // Store the Child handle so we can guarantee termination on app close.
+    {
+        let mut guard = state
+            .0
+            .lock()
+            .map_err(|_| "Backend state lock poisoned".to_string())?;
+        *guard = Some(child);
     }
 
-    LAUNCH_IN_PROGRESS.store(false, Ordering::SeqCst);
-    result
-}
-
-/// Kills the Java process if it's still running. Called when the window closes.
-fn kill_jar_process(jar_state: &JarProcess) {
-    if let Some(mut child) = lock_jar_state(jar_state).take() {
-        info!("shutting down Java process (PID {})", child.id());
-        match child.kill() {
-            Ok(_) => info!("shutdown signal sent successfully"),
-            Err(e) => error!("error sending shutdown signal: {}", e),
-        }
-        let _ = child.wait();
-        info!("Java process terminated");
+    if wait_for_server_healthy(SERVER_PORT, 20).await {
+        Ok(())
+    } else {
+        Err("Server did not report healthy status within the timeout.".into())
     }
 }
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     tauri::Builder::default()
-        .plugin(tauri_plugin_updater::Builder::new().build())
+        .plugin(tauri_plugin_single_instance::init(|_app, _args, _cwd| {}))
         .plugin(
             tauri_plugin_log::Builder::new()
                 .level(log::LevelFilter::Info)
                 .build(),
         )
-        .manage(JarProcess(Mutex::new(None)))
-        .invoke_handler(tauri::generate_handler![start_backend])
+        .plugin(tauri_plugin_http::init())
+        .plugin(tauri_plugin_updater::Builder::new().build())
+        .plugin(tauri_plugin_dialog::init())
+        .manage(BackendProcess::default())
+        .invoke_handler(tauri::generate_handler![ensure_backend_server])
         .on_window_event(|window, event| {
-            if let tauri::WindowEvent::CloseRequested { .. } = event {
-                info!("window closed by user, stopping Java backend");
-                let jar_state = window.state::<JarProcess>();
-                kill_jar_process(&jar_state);
+            if let tauri::WindowEvent::CloseRequested { api, .. } = event {
+                let app_handle = window.app_handle();
+
+                // Only take the child if we actually launched one.
+                let child_opt = {
+                    let state = app_handle.state::<BackendProcess>();
+                    let mut guard = state.0.lock().unwrap();
+                    guard.take()
+                };
+
+                let Some(mut child) = child_opt else {
+                    // We never started a backend process (it was already
+                    // running before this app launched) — nothing to do.
+                    info!("No backend process owned by this app instance, closing normally");
+                    return;
+                };
+
+                // Prevent the window from closing immediately: we need to
+                // await the shutdown before the app actually exits.
+                api.prevent_close();
+                info!("Close requested: shutting down backend before exiting");
+
+                match kill_process(&mut child) {
+                    Ok(()) => {
+                        info!("Backend shut down successfully, closing app");
+                        app_handle.exit(0);
+                    }
+                    Err(err_msg) => {
+                        error!("Failed to guarantee backend shutdown: {}", err_msg);
+
+                        app_handle
+                            .dialog()
+                            .message(format!(
+                                "The background server could not be stopped cleanly.\n\n{}\n\nYou may need to end the process manually from Task Manager / Activity Monitor.",
+                                err_msg
+                            ))
+                            .kind(MessageDialogKind::Error)
+                            .title("Shutdown error")
+                            .buttons(MessageDialogButtons::Ok)
+                            .blocking_show();
+
+                        app_handle.exit(0);
+                    }
+                }
             }
         })
         .run(tauri::generate_context!())

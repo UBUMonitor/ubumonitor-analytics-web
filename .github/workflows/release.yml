@@ -8,7 +8,7 @@ on:
 
 env:
   TEMURIN_VERSION: "25.0.3+9"
-  JAR_URL: "https://github.com/UBUMonitor/ubumonitor-analytics-api/releases/download/v0.0.1/ubumonitoranalytics-0.0.1.jar"
+  JAR_URL: "https://github.com/UBUMonitor/ubumonitor-analytics-api/releases/download/v0.0.3/ubumonitoranalytics-0.0.3.jar"
 
 jobs:
   publish-tauri:
