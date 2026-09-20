@@ -10,6 +10,7 @@
   import { login, syncCourses } from "@/lib/moodle"
   import { m } from "@/paraglide/messages.js"
   import { DatabaseIcon, KeyRoundIcon, LinkIcon, UserIcon } from "@lucide/svelte"
+  import LocaleSelector from "@/components/header/LocaleSelector.svelte"
 
   let loading = $state(false)
 
@@ -53,6 +54,7 @@
   class="fieldset w-sm rounded-box border border-base-300 bg-base-200 p-4"
   onsubmit={handleSubmit}
 >
+  <LocaleSelector class="ml-auto" />
   <img class="m-auto size-52 object-contain" src="/logo.png" alt="UBUMonitor Logo" />
   <label class="input w-full">
     <UserIcon />

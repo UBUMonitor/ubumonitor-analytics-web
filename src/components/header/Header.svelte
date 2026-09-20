@@ -1,9 +1,8 @@
 <script lang="ts">
   import { appStore } from "@/lib/appStore.svelte"
-  import CourseSelector from "./CourseSelector.svelte"
-  import LocaleSelector from "./LocaleSelector.svelte"
-  import LogoutButton from "./LogoutButton.svelte"
-  import SyncButton from "./SyncButton.svelte"
+  import CourseSelector from "@/components/header/CourseSelector.svelte"
+  import LogoutButton from "@/components/header/LogoutButton.svelte"
+  import SyncButton from "@/components/header/SyncButton.svelte"
 </script>
 
 <header class="navbar min-h-fit bg-primary">
@@ -15,7 +14,6 @@
     </div>
   {/if}
   <div class="navbar-end gap-4">
-    <LocaleSelector />
     <LogoutButton />
   </div>
 </header>
