@@ -1,4 +1,4 @@
-import type { CourseLogsMetricsRequestDtoInterval } from "@/model"
+import type { CourseLogsMetricsRequestDtoInterval } from "@/backend/model"
 
 export interface Item {
   id: number
@@ -9,8 +9,8 @@ export interface Item {
 export interface CourseItem {
   id: number
   name: string
-  startDate: string
-  endDate: string
+  startDate?: string
+  endDate?: string
 }
 
 export interface UserItem extends Item {
@@ -41,8 +41,8 @@ export const appStore = $state({
   moduleItems: [] as ModuleItem[],
   roleItems: [] as Item[],
   groupItems: [] as Item[],
-  from: "2023-01-01T02:00",
-  to: "2023-12-31T23:59:59",
+  from: "2026-01-01T02:00",
+  to: "2026-12-31T23:59:59",
   group: "MONTHLY" as CourseLogsMetricsRequestDtoInterval,
   scale: 60,
   selectedInfo: "section" as Info,

@@ -1,39 +1,14 @@
-import { authLogin, type authLoginResponseSuccess } from "@/services/auth/auth"
-import { syncSiteInfo, type syncSiteInfoResponseSuccess } from "@/services/sites/sites"
-import {
-  syncUserEnrollments,
-  type syncUserEnrollmentsResponseSuccess,
-} from "@/services/user-enrollments/user-enrollments"
+import type { CourseContentResponseDto, CourseEnrollmentsResponseDto } from "@/backend/model"
+import { getCourseUsersContentInfo } from "@/backend/services/course-content"
+import { getCourseUsersEnrollmentsInfo } from "@/backend/services/course-enrollments"
+import { syncUserEnrollments } from "@/backend/services/user-enrollments"
 import { appStore } from "@/lib/appStore.svelte"
-import { getCourseUsersEnrollmentsInfo } from "@/services/course-enrollments/course-enrollments"
-import type {
-  CourseContentResponseDto,
-  CourseContentSectionDto,
-  CourseEnrollmentsResponseDto,
-  UserEnrollmentInfoDto,
-} from "@/model"
-import { dedupeBy } from "./utils"
-import { getCourseUsersContentInfo } from "@/services/course-content/course-content"
-
-export async function login(username: string, password: string, dbPassword: string, host: string) {
-  const loginResponse = (await authLogin({
-    username,
-    password,
-    dbPassword,
-    host,
-  })) as authLoginResponseSuccess
-
-  appStore.token = loginResponse.data.accessToken
-
-  const siteInfoResponse = (await syncSiteInfo()) as syncSiteInfoResponseSuccess
-
-  appStore.userId = siteInfoResponse.data.user.id
-}
+import { dedupeBy } from "@/lib/utils"
 
 export async function syncCourses() {
-  const enrollmentsResponse = (await syncUserEnrollments()) as syncUserEnrollmentsResponseSuccess
+  const enrollmentsResponse = await syncUserEnrollments()
 
-  appStore.courseItems = enrollmentsResponse.data.courses.map((course) => ({
+  appStore.courseItems = enrollmentsResponse.courses.map((course) => ({
     id: course.id,
     name: course.fullName,
     startDate: course.startDate,
@@ -48,26 +23,28 @@ export function setCourse(courseId: number) {
 
   appStore.currentCourseId = course.id
 
-  appStore.from =
-    course?.startDate?.slice(0, 16) ??
-    ((d) => (d.setMonth(d.getMonth() - 6), d))(new Date()).toISOString().slice(0, 16)
-  appStore.to = course?.endDate?.slice(0, 16) ?? new Date().toISOString().slice(0, 16)
+  if (course.startDate) {
+    appStore.from = course.startDate.slice(0, 16)
+  } else {
+    // Default to 6 months ago if no start date is available
+    appStore.from = new Date(Date.now() - 180 * 24 * 60 * 60 * 1000).toISOString().slice(0, 16)
+  }
 
-  update(
-    getCourseUsersEnrollmentsInfo(courseId).then(
-      ({ data }) => (data as CourseEnrollmentsResponseDto).users,
-    ),
-    getCourseUsersContentInfo(courseId).then(
-      ({ data }) => (data as CourseContentResponseDto).sections,
-    ),
-  )
+  if (course.endDate) {
+    appStore.to = course.endDate.slice(0, 16)
+  } else {
+    // Default to current date if no end date is available
+    appStore.to = new Date().toISOString().slice(0, 16)
+  }
+
+  update(getCourseUsersEnrollmentsInfo(courseId), getCourseUsersContentInfo(courseId))
 }
 
 export function update(
-  users: Promise<UserEnrollmentInfoDto[]>,
-  sections: Promise<CourseContentSectionDto[]>,
+  enrollmentsResponse: Promise<CourseEnrollmentsResponseDto>,
+  contentResponse: Promise<CourseContentResponseDto>,
 ) {
-  const usersPromise = users.then((users) => {
+  const usersPromise = enrollmentsResponse.then(({ users }) => {
     appStore.userItems = users.map(
       ({ id, imageUrl, fullName, lastAccess, lastCourseAccess, roles, groups }) => ({
         id,
@@ -93,7 +70,7 @@ export function update(
     ).map(({ id, name }) => ({ id, name, checked: false }))
   })
 
-  const sectionsPromise = sections.then((sections) => {
+  const sectionsPromise = contentResponse.then(({ sections }) => {
     const modules = sections.flatMap(({ modules }) => modules)
 
     appStore.sectionItems = sections.map(({ id, name, modules }) => ({

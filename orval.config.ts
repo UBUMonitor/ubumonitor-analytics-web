@@ -3,9 +3,10 @@ import { defineConfig } from "orval"
 export default defineConfig({
   "ubumonitor-analytics": {
     output: {
-      mode: "tags-split",
-      target: "./src/services",
-      schemas: "./src/model",
+      formatter: "prettier",
+      mode: "tags",
+      target: "./src/backend/services",
+      schemas: "./src/backend/model",
       client: "fetch",
       baseUrl: "http:///localhost:9090",
       clean: true,
@@ -14,6 +15,7 @@ export default defineConfig({
           path: "./src/lib/orvalFetch.ts",
           name: "orvalFetch",
         },
+        fetch: { includeHttpResponseReturnType: false },
       },
     },
     input: {

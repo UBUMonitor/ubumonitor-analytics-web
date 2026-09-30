@@ -3,8 +3,10 @@ use std::path::PathBuf;
 use std::process::{Child, Command, Stdio};
 use std::sync::Mutex;
 use std::time::Duration;
+use tauri::WindowEvent;
 use tauri::{path::BaseDirectory, AppHandle, Manager};
-use tauri_plugin_dialog::{DialogExt, MessageDialogButtons, MessageDialogKind};
+
+mod commands;
 
 const JAR_RESOURCE_RELATIVE: &str = "app.jar";
 const SERVER_PORT: u16 = 9090;
@@ -158,6 +160,8 @@ fn spawn_java_process(
     cmd.current_dir(&app_local_data_dir)
         .arg("-jar")
         .arg(jar_path)
+        .arg("--spring.main.lazy-initialization=true")
+        .arg("--spring.profiles.active=dev")
         .stdin(Stdio::null())
         .stdout(Stdio::null())
         .stderr(Stdio::null());
@@ -226,57 +230,49 @@ pub fn run() {
                 .level(log::LevelFilter::Info)
                 .build(),
         )
-        .plugin(tauri_plugin_http::init())
         .plugin(tauri_plugin_updater::Builder::new().build())
-        .plugin(tauri_plugin_dialog::init())
         .manage(BackendProcess::default())
-        .invoke_handler(tauri::generate_handler![ensure_backend_server])
-        .on_window_event(|window, event| {
-            if let tauri::WindowEvent::CloseRequested { api, .. } = event {
-                let app_handle = window.app_handle();
+        .invoke_handler(tauri::generate_handler![
+            ensure_backend_server,
+            commands::open_moodle_login
+        ])
+        .setup(|app| {
+            let window = app
+                .get_webview_window("main")
+                .expect("Main window not found");
 
-                // Only take the child if we actually launched one.
-                let child_opt = {
-                    let state = app_handle.state::<BackendProcess>();
-                    let mut guard = state.0.lock().unwrap();
-                    guard.take()
-                };
+            let app_handle = app.handle().clone();
 
-                let Some(mut child) = child_opt else {
-                    // We never started a backend process (it was already
-                    // running before this app launched) — nothing to do.
-                    info!("No backend process owned by this app instance, closing normally");
-                    return;
-                };
+            window.on_window_event(move |event| {
+                if let WindowEvent::CloseRequested { .. } = event {
+                    // Only take the child if we actually launched one.
+                    let child_opt = {
+                        let state = app_handle.state::<BackendProcess>();
+                        let mut guard = state.0.lock().unwrap();
+                        guard.take()
+                    };
 
-                // Prevent the window from closing immediately: we need to
-                // await the shutdown before the app actually exits.
-                api.prevent_close();
-                info!("Close requested: shutting down backend before exiting");
+                    let Some(mut child) = child_opt else {
+                        // We never started a backend process (it was already
+                        // running before this app launched) — nothing to do.
+                        info!("No backend process owned by this app instance, closing normally");
+                        return;
+                    };
 
-                match kill_process(&mut child) {
-                    Ok(()) => {
-                        info!("Backend shut down successfully, closing app");
-                        app_handle.exit(0);
-                    }
-                    Err(err_msg) => {
-                        error!("Failed to guarantee backend shutdown: {}", err_msg);
+                    info!("Close requested: shutting down backend before exiting");
 
-                        app_handle
-                            .dialog()
-                            .message(format!(
-                                "The background server could not be stopped cleanly.\n\n{}\n\nYou may need to end the process manually from Task Manager / Activity Monitor.",
-                                err_msg
-                            ))
-                            .kind(MessageDialogKind::Error)
-                            .title("Shutdown error")
-                            .buttons(MessageDialogButtons::Ok)
-                            .blocking_show();
-
-                        app_handle.exit(0);
+                    match kill_process(&mut child) {
+                        Ok(()) => {
+                            info!("Backend shut down successfully, closing app");
+                        }
+                        Err(err_msg) => {
+                            error!("Failed to guarantee backend shutdown: {}", err_msg);
+                        }
                     }
                 }
-            }
+            });
+
+            Ok(())
         })
         .run(tauri::generate_context!())
         .expect("error running tauri app");

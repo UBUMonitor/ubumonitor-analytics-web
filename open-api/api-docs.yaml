@@ -82,6 +82,37 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
+  /api/public/auth/sso:
+    post:
+      tags:
+        - Auth
+      summary: Get Moodle token from sso header
+      description: "Receives host, username, and password. A JWT token is returned\
+        \ to be used in subsequent Moodle API calls. This endpoint is essential for\
+        \ authenticating users and establishing a secure session with the Moodle instance.\
+        \ The token can be used in the Authorization header of future requests to\
+        \ access protected resources and perform actions on behalf of the authenticated\
+        \ user. "
+      operationId: authSSO
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AuthSSORequestDto"
+        required: true
+      responses:
+        "200":
+          description: JWT token retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AuthResponseDto"
+        "401":
+          description: Unauthorized - token missing or invalid
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
   /api/public/auth/offline:
     post:
       tags:
@@ -454,7 +485,9 @@ paths:
           description: hash to check if has changes
           required: false
           schema:
-            type: string
+            type:
+              - string
+              - "null"
       responses:
         "200":
           description: Image of the user
@@ -510,6 +543,30 @@ paths:
               schema:
                 type: string
                 format: binary
+  /api/public/sites/info:
+    get:
+      tags:
+        - Sites
+      summary: Get public site info
+      description: Get public site info
+      operationId: getPublicSiteInfo
+      parameters:
+        - name: host
+          in: query
+          description: The Moodle host
+          required: true
+          schema:
+            type: string
+            format: uri
+      responses:
+        "200":
+          description: Site information
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PublicSiteInfoResponseDto"
+      security:
+        - bearerAuth: []
   /api/enrollments/info:
     get:
       tags:
@@ -603,17 +660,7 @@ paths:
         - bearerAuth: []
 components:
   schemas:
-    SiteInfoResponseDto:
-      type: object
-      properties:
-        site:
-          $ref: "#/components/schemas/Site_Information"
-        user:
-          $ref: "#/components/schemas/User_Information"
-      required:
-        - site
-        - user
-    Site_Information:
+    SiteInfo:
       type: object
       description: Basic information about the Moodle site.
       properties:
@@ -629,22 +676,54 @@ components:
           description: The URL of the Moodle site.
         typeOfLogin:
           type: string
-          description: "The type of login method used by the Moodle site (e.g., APP,\
-            \ EMBEDDED, BROWSER)."
+          description: The type of login method used by the Moodle site.
           enum:
             - APP
-            - EMBEDDED
             - BROWSER
+            - EMBEDDED
         launchUrl:
-          type: string
+          type:
+            - string
+            - "null"
           format: uri
           description: "The SSO login launch URL for the Moodle site, if applicable."
+        enableMobileWebService:
+          type:
+            - boolean
+            - "null"
+          description: Indicates if the mobile web service is enabled for the Moodle
+            site.
+        enableWebServices:
+          type:
+            - boolean
+            - "null"
+          description: Indicates if web services are enabled for the Moodle site.
+        maintenanceEnabled:
+          type:
+            - boolean
+            - "null"
+          description: Indicates if maintenance mode is enabled for the Moodle site.
+        maintenanceMessage:
+          type:
+            - string
+            - "null"
+          description: "The maintenance message for the Moodle site, if applicable."
       required:
         - siteName
         - siteUrl
         - siteVersion
         - typeOfLogin
-    User_Information:
+    SiteInfoResponseDto:
+      type: object
+      properties:
+        site:
+          $ref: "#/components/schemas/SiteInfo"
+        user:
+          $ref: "#/components/schemas/UserInfo"
+      required:
+        - site
+        - user
+    UserInfo:
       type: object
       description: Information about the authenticated user.
       properties:
@@ -705,7 +784,9 @@ components:
           description: The date and time when the error occurred.
           example: 2026-03-05T20:57:38Z
         traceId:
-          type: string
+          type:
+            - string
+            - "null"
           description: "A unique identifier for the request trace, useful for debugging."
           example: 550e8400-e29b-41d4-a716-446655440000
         errors:
@@ -730,6 +811,38 @@ components:
       required:
         - accessToken
         - tokenType
+    AuthTokenRequestCookiesInnerDto:
+      type: object
+      properties:
+        name:
+          type: string
+          description: Cookie name.
+        value:
+          type: string
+          description: Cookie value.
+        domain:
+          type:
+            - string
+            - "null"
+          description: Cookie domain.
+        path:
+          type:
+            - string
+            - "null"
+          description: Cookie path.
+        secure:
+          type:
+            - boolean
+            - "null"
+          description: Whether the cookie is only sent over HTTPS.
+        httpOnly:
+          type:
+            - boolean
+            - "null"
+          description: Whether the cookie is inaccessible to client-side scripts.
+      required:
+        - name
+        - value
     AuthTokenRequestDto:
       type: object
       properties:
@@ -738,10 +851,6 @@ components:
           format: uri
           description: Moodle site URL
           example: https://school.moodledemo.net
-        username:
-          type: string
-          description: Moodle username
-          example: teacher
         token:
           type: string
           description: Moodle token
@@ -753,11 +862,58 @@ components:
             \ information is protected while allowing the application to access the\
             \ database when needed."
           example: U2FsdGVkX1+5sQ9v3y
+        cookies:
+          type: array
+          description: "Cookies from SSO request, if any."
+          example:
+            - name: MoodleSession
+              value: abc123...
+              domain: moodle.midominio.com
+              path: /
+              secure: true
+              httpOnly: true
+          items:
+            $ref: "#/components/schemas/AuthTokenRequestCookiesInnerDto"
       required:
         - dbPassword
         - host
         - token
-        - username
+    AuthSSORequestDto:
+      type: object
+      properties:
+        host:
+          type: string
+          format: uri
+          description: Moodle site URL
+          example: https://school.moodledemo.net
+        moodleLaunchCredential:
+          type: string
+          description: Moodle launch credential from SSO
+          example: moodlemobile://token=YTVkZDliM2I5MGZhMzllOGVhOWFkMzJiZTU4NjE5NzI6Ojo2MmNlMDg2ZmI2ZjE3YmZkODcwMDExZGFhN2Q3Nzc4Nw==
+        dbPassword:
+          type: string
+          description: "Database password encrypted with AES-256. This is used to\
+            \ securely store the database password in the system, ensuring that sensitive\
+            \ information is protected while allowing the application to access the\
+            \ database when needed."
+          example: U2FsdGVkX1+5sQ9v3y
+        cookies:
+          type: array
+          description: "Cookies from SSO request, if any."
+          example:
+            - name: MoodleSession
+              value: abc123...
+              domain: moodle.midominio.com
+              path: /
+              secure: true
+              httpOnly: true
+          items:
+            $ref: "#/components/schemas/AuthTokenRequestCookiesInnerDto"
+      required:
+        - cookies
+        - dbPassword
+        - host
+        - moodleLaunchCredential
     AuthOfflineRequestDto:
       type: object
       properties:
@@ -893,17 +1049,23 @@ components:
       type: object
       properties:
         id:
-          type: integer
+          type:
+            - integer
+            - "null"
           format: int32
           example: 2
         name:
-          type: string
+          type:
+            - string
+            - "null"
           example: forum
     CourseLogsMetricsResponseRowDto:
       type: object
       properties:
         timeBucket:
-          type: string
+          type:
+            - string
+            - "null"
           example: 2026-05-01
         user:
           $ref: "#/components/schemas/CourseLogsMetricsResponseRowUserDto"
@@ -916,18 +1078,26 @@ components:
         origin:
           $ref: "#/components/schemas/CourseLogsMetricsResponseRowOriginDto"
         ipAddress:
-          type: string
+          type:
+            - string
+            - "null"
           example: 192.168.1.150
         courseId:
-          type: integer
+          type:
+            - integer
+            - "null"
           format: int32
           example: 105
         sectionId:
-          type: integer
+          type:
+            - integer
+            - "null"
           format: int32
           example: 3
         sectionName:
-          type: string
+          type:
+            - string
+            - "null"
           example: "Unidad 1: Introducción"
         value:
           type: integer
@@ -939,31 +1109,43 @@ components:
       type: object
       properties:
         id:
-          type: integer
+          type:
+            - integer
+            - "null"
           format: int32
           example: 15
         name:
-          type: string
+          type:
+            - string
+            - "null"
           example: discussion_created
     CourseLogsMetricsResponseRowModuleDto:
       type: object
       properties:
         id:
-          type: integer
+          type:
+            - integer
+            - "null"
           format: int32
           example: 874
         name:
-          type: string
+          type:
+            - string
+            - "null"
           example: Foro de dudas generales
     CourseLogsMetricsResponseRowOriginDto:
       type: object
       properties:
         id:
-          type: integer
+          type:
+            - integer
+            - "null"
           format: int32
           example: 1
         name:
-          type: string
+          type:
+            - string
+            - "null"
           example: web
     CourseLogsMetricsResponseRowUserDto:
       type: object
@@ -976,6 +1158,7 @@ components:
           type: string
           example: María González
       required:
+        - fullName
         - id
     CourseLogsMetricsRequestDto:
       type: object
@@ -1015,7 +1198,9 @@ components:
               - IP_ADDRESS
               - SECTION_ID
         interval:
-          type: string
+          type:
+            - string
+            - "null"
           description: "Optional time aggregation interval for grouping logs by time\
             \ buckets. If not provided, no time-based grouping is applied. "
           enum:
@@ -1026,7 +1211,9 @@ components:
             - DAY_OF_WEEK
           example: DAILY
         fillGapsStrategy:
-          type: string
+          type:
+            - string
+            - "null"
           enum:
             - NONE
             - ZERO
@@ -1045,31 +1232,43 @@ components:
             type: integer
             format: int32
         moduleIds:
-          type: array
+          type:
+            - array
+            - "null"
           items:
             type: integer
             format: int32
         componentIds:
-          type: array
+          type:
+            - array
+            - "null"
           items:
             type: integer
             format: int32
         eventIds:
-          type: array
+          type:
+            - array
+            - "null"
           items:
             type: integer
             format: int32
         originIds:
-          type: array
+          type:
+            - array
+            - "null"
           items:
             type: integer
             format: int32
         ipAddresses:
-          type: array
+          type:
+            - array
+            - "null"
           items:
             type: string
         sectionIds:
-          type: array
+          type:
+            - array
+            - "null"
           items:
             type: integer
             format: int32
@@ -1096,11 +1295,15 @@ components:
       type: object
       properties:
         from:
-          type: string
+          type:
+            - string
+            - "null"
           example: 2026-05-01T00:00:00
           pattern: "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}(:\\d{2})?$"
         to:
-          type: string
+          type:
+            - string
+            - "null"
           example: 2026-05-31T23:59:59
           pattern: "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}(:\\d{2})?$"
     CourseLogsInfoResponseDto:
@@ -1114,8 +1317,8 @@ components:
           items:
             $ref: "#/components/schemas/LogEntryDto"
       required:
-        - page
         - content
+        - page
     LogEntryDto:
       type: object
       properties:
@@ -1209,15 +1412,21 @@ components:
           description: Total number of pages
           example: 60
         first:
-          type: boolean
+          type:
+            - boolean
+            - "null"
           description: Whether this is the first page
           example: true
         last:
-          type: boolean
+          type:
+            - boolean
+            - "null"
           description: Whether this is the last page
           example: false
         empty:
-          type: boolean
+          type:
+            - boolean
+            - "null"
           description: Whether the page has no content
           example: false
       required:
@@ -1272,7 +1481,9 @@ components:
       type: object
       properties:
         userIds:
-          type: array
+          type:
+            - array
+            - "null"
           example:
             - 123
             - 456
@@ -1281,7 +1492,9 @@ components:
             type: integer
             format: int32
         moduleIds:
-          type: array
+          type:
+            - array
+            - "null"
           example:
             - 10
             - 20
@@ -1289,7 +1502,9 @@ components:
             type: integer
             format: int32
         componentIds:
-          type: array
+          type:
+            - array
+            - "null"
           example:
             - 5
             - 6
@@ -1297,7 +1512,9 @@ components:
             type: integer
             format: int32
         sectionIds:
-          type: array
+          type:
+            - array
+            - "null"
           example:
             - 2
             - 4
@@ -1305,7 +1522,9 @@ components:
             type: integer
             format: int32
         eventIds:
-          type: array
+          type:
+            - array
+            - "null"
           example:
             - 1
             - 2
@@ -1313,14 +1532,18 @@ components:
             type: integer
             format: int32
         originIds:
-          type: array
+          type:
+            - array
+            - "null"
           example:
             - 3
           items:
             type: integer
             format: int32
         ipAddresses:
-          type: array
+          type:
+            - array
+            - "null"
           example:
             - 192.168.1.1
             - 10.0.0.1
@@ -1341,10 +1564,14 @@ components:
       type: object
       properties:
         field:
-          type: string
+          type:
+            - string
+            - "null"
           example: TIMESTAMP
         direction:
-          type: string
+          type:
+            - string
+            - "null"
           enum:
             - ASC
             - DESC
@@ -1353,11 +1580,15 @@ components:
       type: object
       properties:
         from:
-          type: string
+          type:
+            - string
+            - "null"
           example: 2026-05-01T00:00:00
           pattern: "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}(:\\d{2})?$"
         to:
-          type: string
+          type:
+            - string
+            - "null"
           example: 2026-05-31T23:59:59
           pattern: "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}(:\\d{2})?$"
     CourseEnrollmentsResponseDto:
@@ -1535,6 +1766,13 @@ components:
         - position
         - summary
         - visible
+    PublicSiteInfoResponseDto:
+      type: object
+      properties:
+        site:
+          $ref: "#/components/schemas/SiteInfo"
+      required:
+        - site
   securitySchemes:
     bearerAuth:
       type: http

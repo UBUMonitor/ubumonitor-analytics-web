@@ -10,6 +10,7 @@
   "db_password_label": "Database password",
   "host_label": "Host",
   "login_button": "Log In",
+  "login_sso_button": "Log In with SSO",
   "remember_username_label": "Remember username",
   "remember_host_label": "Remember host",
   "select_course_label": "Select a course",

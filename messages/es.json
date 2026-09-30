@@ -10,6 +10,7 @@
   "db_password_label": "Contraseña de la base de datos",
   "host_label": "Sitio",
   "login_button": "Iniciar sesión",
+  "login_sso_button": "Iniciar sesión con SSO",
   "remember_username_label": "Recordar usuario",
   "remember_host_label": "Recordar sitio",
   "select_course_label": "Selecciona un curso",

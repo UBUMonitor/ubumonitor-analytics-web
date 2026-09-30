@@ -1,5 +1,4 @@
-import { fetch } from "@tauri-apps/plugin-http"
-import { appStore } from "./appStore.svelte"
+import { appStore } from "@/lib/appStore.svelte"
 
 export const orvalFetch = async <T>(url: string, options: RequestInit = {}): Promise<T> => {
   const token = appStore.token
@@ -16,9 +15,5 @@ export const orvalFetch = async <T>(url: string, options: RequestInit = {}): Pro
     throw new Error(`HTTP error! status: ${response.status}`)
   }
 
-  return {
-    data: response.status === 204 ? null : await response.json(),
-    status: response.status,
-    headers: response.headers,
-  } as T
+  return response.status === 204 ? (null as T) : ((await response.json()) as T)
 }
