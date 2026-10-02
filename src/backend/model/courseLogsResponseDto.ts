@@ -5,12 +5,10 @@
  * API documentation for UBUMonitor Analytics
  * OpenAPI spec version: 1.0.0
  */
+import type { CourseLogsResponseStatsDto } from "./courseLogsResponseStatsDto"
+import type { LogColumn } from "./logColumn"
 
 export interface CourseLogsResponseDto {
-  /** Number of logs imported */
-  saved: number
-  /** Number of logs ignored (e.g. duplicates or don't have a mapper for component, event or origin) */
-  ignored: number
-  /** Number of logs that failed to import due to errors */
-  failed: number
+  stats: CourseLogsResponseStatsDto
+  column?: LogColumn
 }

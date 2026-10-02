@@ -5,10 +5,11 @@
  * API documentation for UBUMonitor Analytics
  * OpenAPI spec version: 1.0.0
  */
-import { orvalFetch } from "../../lib/orvalFetch"
+import { orvalFetch } from "../../shared/lib/orvalFetch"
 import type {
-  CourseLogsInfoRequestDto,
   CourseLogsInfoResponseDto,
+  CourseLogsListRequestDto,
+  CourseLogsListResponseDto,
   CourseLogsMetricsRequestDto,
   CourseLogsMetricsResponseDto,
   CourseLogsResponseDto,
@@ -53,7 +54,28 @@ export const getCourseLogsMetrics = async (
   })
 }
 
-export const getGetCourseLogsUrl = (courseId: number) => {
+export const getGetCourseListLogsUrl = (courseId: number) => {
+  return `http:///localhost:9090/api/courses/${courseId}/logs/list`
+}
+
+/**
+ * Retrieves logs for a specific course with optional filtering by date range and selectable log columns.
+ * @summary Get course logs with filters
+ */
+export const getCourseListLogs = async (
+  courseId: number,
+  courseLogsListRequestDto: CourseLogsListRequestDto,
+  options?: RequestInit,
+): Promise<CourseLogsListResponseDto> => {
+  return orvalFetch<CourseLogsListResponseDto>(getGetCourseListLogsUrl(courseId), {
+    ...options,
+    method: "POST",
+    headers: { "Content-Type": "application/json", ...options?.headers },
+    body: JSON.stringify(courseLogsListRequestDto),
+  })
+}
+
+export const getGetCourseInfoLogsUrl = (courseId: number) => {
   return `http:///localhost:9090/api/courses/${courseId}/logs/info`
 }
 
@@ -61,16 +83,13 @@ export const getGetCourseLogsUrl = (courseId: number) => {
  * Retrieves logs for a specific course with optional filtering by date range and selectable log columns.
  * @summary Get course logs with filters
  */
-export const getCourseLogs = async (
+export const getCourseInfoLogs = async (
   courseId: number,
-  courseLogsInfoRequestDto: CourseLogsInfoRequestDto,
   options?: RequestInit,
 ): Promise<CourseLogsInfoResponseDto> => {
-  return orvalFetch<CourseLogsInfoResponseDto>(getGetCourseLogsUrl(courseId), {
+  return orvalFetch<CourseLogsInfoResponseDto>(getGetCourseInfoLogsUrl(courseId), {
     ...options,
     method: "POST",
-    headers: { "Content-Type": "application/json", ...options?.headers },
-    body: JSON.stringify(courseLogsInfoRequestDto),
   })
 }
 

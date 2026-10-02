@@ -9,7 +9,7 @@ export default defineConfig({
   plugins: [
     paraglideVitePlugin({
       project: "./project.inlang",
-      outdir: "./src/paraglide",
+      outdir: "./src/shared/paraglide",
       strategy: ["localStorage", "baseLocale"],
     }),
     tailwindcss(),

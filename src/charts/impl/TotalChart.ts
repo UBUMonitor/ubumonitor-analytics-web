@@ -4,7 +4,7 @@ import {
   type CourseLogsMetricsResponseRowDto,
 } from "@/backend/model"
 import { Chart, type Resolve } from "@/charts/impl/Chart"
-import type { Info, Item } from "@/lib/appStore.svelte"
+import type { Info, Item } from "@/dashboard/dashboard.svelte"
 import type { EChartsOption } from "echarts"
 
 const FIELDS = {

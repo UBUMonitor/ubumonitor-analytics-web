@@ -5,11 +5,8 @@
  * API documentation for UBUMonitor Analytics
  * OpenAPI spec version: 1.0.0
  */
-import type { LogEntryDto } from "./logEntryDto"
-import type { PaginationInfoDto } from "./paginationInfoDto"
+import type { LogColumn } from "./logColumn"
 
 export interface CourseLogsInfoResponseDto {
-  page: PaginationInfoDto
-  /** List of log rows (dynamic fields based on columns) */
-  content: LogEntryDto[]
+  column: LogColumn
 }

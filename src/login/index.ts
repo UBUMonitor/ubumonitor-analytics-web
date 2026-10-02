@@ -1,7 +1,7 @@
-import { authSSO } from "../backend/services/auth"
+import { authLogout, authSSO } from "@/backend/services/auth"
 import { authLogin } from "@/backend/services/auth"
 import { getPublicSiteInfo, syncSiteInfo } from "@/backend/services/sites"
-import { appStore } from "@/lib/appStore.svelte"
+import { loginStore } from "@/login/login.svelte"
 import { invoke } from "@tauri-apps/api/core"
 import { once, type UnlistenFn } from "@tauri-apps/api/event"
 
@@ -23,11 +23,11 @@ export async function appLogin(
     host,
   })
 
-  appStore.token = loginResponse.accessToken
+  loginStore.token = loginResponse.accessToken
 
   const siteInfoResponse = await syncSiteInfo()
 
-  appStore.userId = siteInfoResponse.user.id
+  loginStore.userId = siteInfoResponse.user.id
 }
 
 export interface CookieInfo {
@@ -55,7 +55,6 @@ export async function loginWeb(host: string, dbPassword: string, launchUrl: stri
     }
 
     const handleToken = async (moodle: MoodleLoginPayload) => {
-      console.log({ moodle })
       cleanup()
       try {
         const response = await authSSO({
@@ -65,9 +64,9 @@ export async function loginWeb(host: string, dbPassword: string, launchUrl: stri
           cookies: moodle.cookies.map(({ name, value }) => ({ name, value })),
         })
 
-        appStore.token = response.accessToken
+        loginStore.token = response.accessToken
         const siteInfoResponse = await syncSiteInfo()
-        appStore.userId = siteInfoResponse.user.id
+        loginStore.userId = siteInfoResponse.user.id
 
         resolve()
       } catch (err) {
@@ -93,4 +92,10 @@ export async function loginWeb(host: string, dbPassword: string, launchUrl: stri
       reject(err)
     })
   })
+}
+
+export async function logout() {
+  await authLogout()
+  loginStore.token = null
+  loginStore.userId = null
 }

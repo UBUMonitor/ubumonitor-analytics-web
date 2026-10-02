@@ -12,7 +12,7 @@ export interface AuthTokenRequestDto {
   host: string
   /** Moodle token */
   token: string
-  /** Database password encrypted with AES-256. This is used to securely store the database password in the system, ensuring that sensitive information is protected while allowing the application to access the database when needed. */
+  /** Secret key used to encrypt the database using AES-256. This value must be kept securely and must not be stored or exposed in plain text. */
   dbPassword: string
   /** Cookies from SSO request, if any. */
   cookies?: AuthTokenRequestCookiesInnerDto[]

@@ -12,7 +12,7 @@ export default defineConfig({
       clean: true,
       override: {
         mutator: {
-          path: "./src/lib/orvalFetch.ts",
+          path: "./src/shared/lib/orvalFetch.ts",
           name: "orvalFetch",
         },
         fetch: { includeHttpResponseReturnType: false },

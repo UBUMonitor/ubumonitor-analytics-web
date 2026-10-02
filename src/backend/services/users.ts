@@ -5,7 +5,7 @@
  * API documentation for UBUMonitor Analytics
  * OpenAPI spec version: 1.0.0
  */
-import { orvalFetch } from "../../lib/orvalFetch"
+import { orvalFetch } from "../../shared/lib/orvalFetch"
 import type { GetUserImagesProfileParams } from "../model"
 
 export const getGetUserImagesProfileUrl = (userId: number, params: GetUserImagesProfileParams) => {

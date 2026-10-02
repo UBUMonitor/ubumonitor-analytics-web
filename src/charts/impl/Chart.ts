@@ -4,7 +4,7 @@ import type {
   CourseLogsMetricsRequestDtoInterval,
   CourseLogsMetricsResponseRowDto,
 } from "@/backend/model"
-import type { Info, ModuleItem, SectionItem, UserItem } from "@/lib/appStore.svelte"
+import type { Info, ModuleItem, SectionItem, UserItem } from "@/dashboard/dashboard.svelte"
 import type { EChartsOption } from "echarts"
 
 export interface Resolve {
