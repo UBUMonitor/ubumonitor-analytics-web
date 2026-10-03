@@ -13,7 +13,7 @@ import type {
 } from "../model"
 
 export const getSyncSiteInfoUrl = () => {
-  return `http:///localhost:9090/api/sites/sync`
+  return `http://localhost:9090/api/sites/sync`
 }
 
 /**
@@ -28,7 +28,7 @@ export const syncSiteInfo = async (options?: RequestInit): Promise<SiteInfoRespo
 }
 
 export const getGetSiteInfoUrl = () => {
-  return `http:///localhost:9090/api/sites/info`
+  return `http://localhost:9090/api/sites/info`
 }
 
 /**
@@ -54,8 +54,8 @@ export const getGetPublicSiteInfoUrl = (params: GetPublicSiteInfoParams) => {
   const stringifiedParams = normalizedParams.toString()
 
   return stringifiedParams.length > 0
-    ? `http:///localhost:9090/api/public/sites/info?${stringifiedParams}`
-    : `http:///localhost:9090/api/public/sites/info`
+    ? `http://localhost:9090/api/public/sites/info?${stringifiedParams}`
+    : `http://localhost:9090/api/public/sites/info`
 }
 
 /**

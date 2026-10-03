@@ -15,7 +15,7 @@ import type {
 } from "../model"
 
 export const getAuthTokenUrl = () => {
-  return `http:///localhost:9090/api/public/auth/token`
+  return `http://localhost:9090/api/public/auth/token`
 }
 
 /**
@@ -35,7 +35,7 @@ export const authToken = async (
 }
 
 export const getAuthSSOUrl = () => {
-  return `http:///localhost:9090/api/public/auth/sso`
+  return `http://localhost:9090/api/public/auth/sso`
 }
 
 /**
@@ -55,7 +55,7 @@ export const authSSO = async (
 }
 
 export const getAuthOfflineUrl = () => {
-  return `http:///localhost:9090/api/public/auth/offline`
+  return `http://localhost:9090/api/public/auth/offline`
 }
 
 /**
@@ -75,7 +75,7 @@ export const authOffline = async (
 }
 
 export const getAuthLoginUrl = () => {
-  return `http:///localhost:9090/api/public/auth/credentials`
+  return `http://localhost:9090/api/public/auth/credentials`
 }
 
 /**
@@ -95,7 +95,7 @@ export const authLogin = async (
 }
 
 export const getAuthLogoutUrl = () => {
-  return `http:///localhost:9090/api/auth/logout`
+  return `http://localhost:9090/api/auth/logout`
 }
 
 /**

@@ -9,7 +9,7 @@ import { orvalFetch } from "../../shared/lib/orvalFetch"
 import type { EnrollmentsResponseDto } from "../model"
 
 export const getSyncUserEnrollmentsUrl = () => {
-  return `http:///localhost:9090/api/enrollments/sync`
+  return `http://localhost:9090/api/enrollments/sync`
 }
 
 /**
@@ -26,7 +26,7 @@ export const syncUserEnrollments = async (
 }
 
 export const getGetActualUserEnrollmentsUrl = () => {
-  return `http:///localhost:9090/api/enrollments/info`
+  return `http://localhost:9090/api/enrollments/info`
 }
 
 /**

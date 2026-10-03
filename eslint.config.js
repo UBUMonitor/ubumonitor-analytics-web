@@ -12,7 +12,7 @@ const gitignorePath = path.resolve(import.meta.dirname, ".gitignore")
 export default defineConfig(
   includeIgnoreFile(gitignorePath),
   {
-    ignores: ["src-tauri/", "src/paraglide"],
+    ignores: ["src-tauri/"],
   },
   js.configs.recommended,
   ts.configs.recommended,

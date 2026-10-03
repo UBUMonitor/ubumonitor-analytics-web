@@ -20,8 +20,8 @@ export const getGetUserImagesProfileUrl = (userId: number, params: GetUserImages
   const stringifiedParams = normalizedParams.toString()
 
   return stringifiedParams.length > 0
-    ? `http:///localhost:9090/api/public/users/${userId}/images/profile?${stringifiedParams}`
-    : `http:///localhost:9090/api/public/users/${userId}/images/profile`
+    ? `http://localhost:9090/api/public/users/${userId}/images/profile?${stringifiedParams}`
+    : `http://localhost:9090/api/public/users/${userId}/images/profile`
 }
 
 /**

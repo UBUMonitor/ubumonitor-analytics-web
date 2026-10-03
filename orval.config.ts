@@ -8,7 +8,7 @@ export default defineConfig({
       target: "./src/backend/services",
       schemas: "./src/backend/model",
       client: "fetch",
-      baseUrl: "http:///localhost:9090",
+      baseUrl: "http://localhost:9090",
       clean: true,
       override: {
         mutator: {

@@ -9,7 +9,7 @@ import { orvalFetch } from "../../shared/lib/orvalFetch"
 import type { CourseContentResponseDto } from "../model"
 
 export const getSyncCourseContentUrl = (courseId: number) => {
-  return `http:///localhost:9090/api/courses/${courseId}/content/sync`
+  return `http://localhost:9090/api/courses/${courseId}/content/sync`
 }
 
 /**
@@ -27,7 +27,7 @@ export const syncCourseContent = async (
 }
 
 export const getGetCourseUsersContentInfoUrl = (courseId: number) => {
-  return `http:///localhost:9090/api/courses/${courseId}/content/info`
+  return `http://localhost:9090/api/courses/${courseId}/content/info`
 }
 
 /**
