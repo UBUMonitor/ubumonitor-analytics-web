@@ -7,8 +7,6 @@
  */
 
 export interface LogComponentDto {
-  /** @nullable */
-  id?: number | null
-  /** @nullable */
-  name?: string | null
+  id: number
+  name: string
 }

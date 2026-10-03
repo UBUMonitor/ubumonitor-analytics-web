@@ -28,6 +28,8 @@
 
   const sections = $derived(dashboardStore.sectionItems.filter(({ checked }) => checked))
   const modules = $derived(dashboardStore.moduleItems.filter(({ checked }) => checked))
+  const components = $derived(dashboardStore.componentItems.filter(({ checked }) => checked))
+  const events = $derived(dashboardStore.eventItems.filter(({ checked }) => checked))
 
   let option = $state<EChartsOption>()
 
@@ -41,12 +43,16 @@
     if (
       selectedUsers.length === 0 ||
       (dashboardStore.selectedInfo === "module" && modules.length === 0) ||
-      (dashboardStore.selectedInfo === "section" && sections.length === 0)
+      (dashboardStore.selectedInfo === "section" && sections.length === 0) ||
+      (dashboardStore.selectedInfo === "component" && components.length === 0) ||
+      (dashboardStore.selectedInfo === "event" && events.length === 0)
     ) {
       option = currentChart.resolveOptions({
         userItems: selectedUsers,
         sectionItems: sections,
         moduleItems: modules,
+        componentItems: components,
+        eventItems: events,
         startDateTime: chartStore.from,
         endDateTime: chartStore.to,
         interval: chartStore.group,
@@ -66,6 +72,9 @@
           dashboardStore.selectedInfo === "module" ? modules.map(({ id }) => id) : undefined,
         sectionIds:
           dashboardStore.selectedInfo === "section" ? sections.map(({ id }) => id) : undefined,
+        componentIds:
+          dashboardStore.selectedInfo === "component" ? components.map(({ id }) => id) : undefined,
+        eventIds: dashboardStore.selectedInfo === "event" ? events.map(({ id }) => id) : undefined,
       },
       interval: showGroup ? chartStore.group : undefined,
     }).then(({ rows }) => {
@@ -73,6 +82,8 @@
         userItems: selectedUsers,
         sectionItems: sections,
         moduleItems: modules,
+        componentItems: components,
+        eventItems: events,
         startDateTime: chartStore.from,
         endDateTime: chartStore.to,
         interval: chartStore.group,

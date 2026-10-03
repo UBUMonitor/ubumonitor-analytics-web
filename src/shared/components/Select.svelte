@@ -35,7 +35,12 @@
       <ListIcon />
     </button>
   </div>
-  <div class="list overflow-y-auto" role="listbox" tabindex="-1" onkeydown={handleKeydown}>
+  <div
+    class="list overflow-y-auto scrollbar-thin"
+    role="listbox"
+    tabindex="-1"
+    onkeydown={handleKeydown}
+  >
     {#each items as item (item.id)}
       <label class="cursor-pointer select-none has-checked:bg-accent">
         <input class="hidden" type="checkbox" bind:checked={item.checked} id={item.id.toString()} />

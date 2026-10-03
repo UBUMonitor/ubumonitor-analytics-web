@@ -1,6 +1,6 @@
 <script lang="ts">
   import type { LogEntryDto } from "@/backend/model"
-  import { getCourseListLogs } from "@/backend/services/course-logs"
+  import { getCourseLogsList } from "@/backend/services/course-logs"
   import { chartStore } from "@/charts/chart.svelte"
   import { dashboardStore, getSelectedUsers } from "@/dashboard/dashboard.svelte"
   import { courseStore } from "@/header/course.svelte"
@@ -15,6 +15,8 @@
 
   const sections = $derived(dashboardStore.sectionItems.filter(({ checked }) => checked))
   const modules = $derived(dashboardStore.moduleItems.filter(({ checked }) => checked))
+  const components = $derived(dashboardStore.componentItems.filter(({ checked }) => checked))
+  const events = $derived(dashboardStore.eventItems.filter(({ checked }) => checked))
 
   const fetchSize = 30
 
@@ -62,7 +64,7 @@
 
     const selectedUsers = getSelectedUsers()
     try {
-      const response = await getCourseListLogs(courseStore.currentCourseId, {
+      const response = await getCourseLogsList(courseStore.currentCourseId, {
         timeRange: { from: chartStore.from, to: chartStore.to },
         filters: {
           userIds: selectedUsers.map(({ id }) => id),
@@ -70,6 +72,12 @@
             dashboardStore.selectedInfo === "module" ? modules.map(({ id }) => id) : undefined,
           sectionIds:
             dashboardStore.selectedInfo === "section" ? sections.map(({ id }) => id) : undefined,
+          componentIds:
+            dashboardStore.selectedInfo === "component"
+              ? components.map(({ id }) => id)
+              : undefined,
+          eventIds:
+            dashboardStore.selectedInfo === "event" ? events.map(({ id }) => id) : undefined,
         },
         fields: [
           "TIMESTAMP",
@@ -122,6 +130,8 @@
     void dashboardStore.selectedInfo
     void sections
     void modules
+    void components
+    void events
     void getSelectedUsers()
     untrack(() => resetAndLoad())
   })

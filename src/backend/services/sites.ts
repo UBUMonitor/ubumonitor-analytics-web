@@ -32,8 +32,8 @@ export const getGetSiteInfoUrl = () => {
 }
 
 /**
- * Get site info and actual user logged
- * @summary Get site info and actual user logged
+ * Retrieves the Moodle site information and the authenticated user's information.
+ * @summary Get site and current-user information
  */
 export const getSiteInfo = async (options?: RequestInit): Promise<SiteInfoResponseDto> => {
   return orvalFetch<SiteInfoResponseDto>(getGetSiteInfoUrl(), {
@@ -59,8 +59,8 @@ export const getGetPublicSiteInfoUrl = (params: GetPublicSiteInfoParams) => {
 }
 
 /**
- * Get public site info
- * @summary Get public site info
+ * Retrieves public information from the Moodle site without authentication.
+ * @summary Get public site information
  */
 export const getPublicSiteInfo = async (
   params: GetPublicSiteInfoParams,

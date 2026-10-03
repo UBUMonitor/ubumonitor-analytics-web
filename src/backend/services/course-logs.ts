@@ -7,7 +7,6 @@
  */
 import { orvalFetch } from "../../shared/lib/orvalFetch"
 import type {
-  CourseLogsInfoResponseDto,
   CourseLogsListRequestDto,
   CourseLogsListResponseDto,
   CourseLogsMetricsRequestDto,
@@ -54,7 +53,7 @@ export const getCourseLogsMetrics = async (
   })
 }
 
-export const getGetCourseListLogsUrl = (courseId: number) => {
+export const getGetCourseLogsListUrl = (courseId: number) => {
   return `http://localhost:9090/api/courses/${courseId}/logs/list`
 }
 
@@ -62,12 +61,12 @@ export const getGetCourseListLogsUrl = (courseId: number) => {
  * Retrieves logs for a specific course with optional filtering by date range and selectable log columns.
  * @summary Get course logs with filters
  */
-export const getCourseListLogs = async (
+export const getCourseLogsList = async (
   courseId: number,
   courseLogsListRequestDto: CourseLogsListRequestDto,
   options?: RequestInit,
 ): Promise<CourseLogsListResponseDto> => {
-  return orvalFetch<CourseLogsListResponseDto>(getGetCourseListLogsUrl(courseId), {
+  return orvalFetch<CourseLogsListResponseDto>(getGetCourseLogsListUrl(courseId), {
     ...options,
     method: "POST",
     headers: { "Content-Type": "application/json", ...options?.headers },
@@ -75,7 +74,7 @@ export const getCourseListLogs = async (
   })
 }
 
-export const getGetCourseInfoLogsUrl = (courseId: number) => {
+export const getGetCourseLogsInfoUrl = (courseId: number) => {
   return `http://localhost:9090/api/courses/${courseId}/logs/info`
 }
 
@@ -83,11 +82,11 @@ export const getGetCourseInfoLogsUrl = (courseId: number) => {
  * Retrieves logs for a specific course with optional filtering by date range and selectable log columns.
  * @summary Get course logs with filters
  */
-export const getCourseInfoLogs = async (
+export const getCourseLogsInfo = async (
   courseId: number,
   options?: RequestInit,
-): Promise<CourseLogsInfoResponseDto> => {
-  return orvalFetch<CourseLogsInfoResponseDto>(getGetCourseInfoLogsUrl(courseId), {
+): Promise<CourseLogsResponseDto> => {
+  return orvalFetch<CourseLogsResponseDto>(getGetCourseLogsInfoUrl(courseId), {
     ...options,
     method: "POST",
   })

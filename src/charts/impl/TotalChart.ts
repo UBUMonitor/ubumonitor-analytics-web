@@ -10,16 +10,22 @@ import type { EChartsOption } from "echarts"
 const FIELDS = {
   section: "SECTION_ID",
   module: "MODULE_ID",
+  component: "COMPONENT_ID",
+  event: "EVENT_ID",
 } as const satisfies Record<Info, CourseLogsMetricsRequestDtoFieldsItem>
 
 const ITEMS_KEY = {
   section: "sectionItems",
   module: "moduleItems",
+  component: "componentItems",
+  event: "eventItems",
 } as const satisfies Record<Info, keyof Resolve>
 
 const ROW_MATCHER = {
   section: (row: CourseLogsMetricsResponseRowDto, id: number) => row.sectionId === id,
   module: (row: CourseLogsMetricsResponseRowDto, id: number) => row.module?.id === id,
+  component: (row: CourseLogsMetricsResponseRowDto, id: number) => row.component?.id === id,
+  event: (row: CourseLogsMetricsResponseRowDto, id: number) => row.event?.id === id,
 } as const satisfies Record<Info, (row: CourseLogsMetricsResponseRowDto, id: number) => boolean>
 
 export class TotalChart extends Chart {

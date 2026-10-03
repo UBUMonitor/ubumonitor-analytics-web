@@ -8,11 +8,11 @@
 
 export type GetUserImagesProfileParams = {
   /**
-   * The Moodle host
+   * Moodle site URL.
    */
   host: string
   /**
-   * The user name
+   * Moodle username.
    */
   username: string
 }

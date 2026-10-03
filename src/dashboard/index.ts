@@ -1,10 +1,15 @@
-import type { CourseContentResponseDto, CourseEnrollmentsResponseDto } from "@/backend/model"
+import type {
+  CourseContentResponseDto,
+  CourseEnrollmentsResponseDto,
+  CourseLogsResponseDto,
+} from "@/backend/model"
 import { dashboardStore } from "@/dashboard/dashboard.svelte"
 import { dedupeBy } from "@/shared/lib/utils"
 
 export function updateDashboard(
   enrollmentsResponse: Promise<CourseEnrollmentsResponseDto>,
   contentResponse: Promise<CourseContentResponseDto>,
+  logsResponse: Promise<CourseLogsResponseDto>,
 ) {
   const usersPromise = enrollmentsResponse.then(({ users }) => {
     dashboardStore.userItems = users.map(
@@ -49,5 +54,19 @@ export function updateDashboard(
     }))
   })
 
-  return Promise.all([usersPromise, sectionsPromise])
+  const logsPromise = logsResponse.then(({ column }) => {
+    dashboardStore.componentItems = column.components.map(({ id, name }) => ({
+      id,
+      name,
+      checked: false,
+    }))
+
+    dashboardStore.eventItems = column.events.map(({ id, name }) => ({
+      id,
+      name,
+      checked: false,
+    }))
+  })
+
+  return Promise.all([usersPromise, sectionsPromise, logsPromise])
 }

@@ -19,8 +19,8 @@ export const getAuthTokenUrl = () => {
 }
 
 /**
- * Receives host, username, and password. A JWT token is returned to be used in subsequent Moodle API calls. This endpoint is essential for authenticating users and establishing a secure session with the Moodle instance. The token can be used in the Authorization header of future requests to access protected resources and perform actions on behalf of the authenticated user.
- * @summary Get Moodle token
+ * Receives a Moodle site URL, an existing Moodle web-service token, and the database encryption key. Returns an application JWT for subsequent authenticated requests.
+ * @summary Authenticate with a Moodle token
  */
 export const authToken = async (
   authTokenRequestDto: AuthTokenRequestDto,
@@ -39,8 +39,8 @@ export const getAuthSSOUrl = () => {
 }
 
 /**
- * Receives host, username, and password. A JWT token is returned to be used in subsequent Moodle API calls. This endpoint is essential for authenticating users and establishing a secure session with the Moodle instance. The token can be used in the Authorization header of future requests to access protected resources and perform actions on behalf of the authenticated user.
- * @summary Get Moodle token from sso header
+ * Receives a Moodle site URL, an SSO launch credential, and the database encryption key. Returns an application JWT for subsequent authenticated requests.
+ * @summary Authenticate with an SSO launch credential
  */
 export const authSSO = async (
   authSSORequestDto: AuthSSORequestDto,
@@ -59,8 +59,8 @@ export const getAuthOfflineUrl = () => {
 }
 
 /**
- * Receives host, username, and password. A JWT token is returned to be used in subsequent Moodle API calls. This endpoint is essential for authenticating users and establishing a secure session with the Moodle instance. The token can be used in the Authorization header of future requests to access protected resources and perform actions on behalf of the authenticated user.
- * @summary Get Moodle token
+ * Receives the Moodle site URL, username, and database encryption key. Returns an application JWT for an offline session.
+ * @summary Create an offline application session
  */
 export const authOffline = async (
   authOfflineRequestDto: AuthOfflineRequestDto,
@@ -79,8 +79,8 @@ export const getAuthLoginUrl = () => {
 }
 
 /**
- * Receives host, username, and password. A JWT token is returned to be used in subsequent Moodle API calls. This endpoint is essential for authenticating users and establishing a secure session with the Moodle instance. The token can be used in the Authorization header of future requests to access protected resources and perform actions on behalf of the authenticated user.
- * @summary Get Moodle token
+ * Receives a Moodle site URL, username, password, and database encryption key. Returns an application JWT for subsequent authenticated requests.
+ * @summary Authenticate with Moodle credentials
  */
 export const authLogin = async (
   authLoginRequestDto: AuthLoginRequestDto,

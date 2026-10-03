@@ -20,12 +20,14 @@ export interface ModuleItem extends Item {
   modName?: string
 }
 
-export type Info = "section" | "module"
+export type Info = "section" | "module" | "component" | "event"
 
 export const dashboardStore = $state({
   userItems: [] as UserItem[],
   sectionItems: [] as SectionItem[],
   moduleItems: [] as ModuleItem[],
+  componentItems: [] as Item[],
+  eventItems: [] as Item[],
   roleItems: [] as Item[],
   groupItems: [] as Item[],
   selectedInfo: "section" as Info,

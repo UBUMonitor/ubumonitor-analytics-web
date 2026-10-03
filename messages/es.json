@@ -15,6 +15,8 @@
   "remember_host_label": "Recordar sitio",
   "select_course_label": "Selecciona un curso",
   "records_label": "Registros",
+  "components_label": "Componentes",
+  "events_label": "Eventos",
   "section_label": "Sección",
   "modules_label": "Módulos",
   "last_access_label": "Último acceso",

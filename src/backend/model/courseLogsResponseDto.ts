@@ -9,6 +9,6 @@ import type { CourseLogsResponseStatsDto } from "./courseLogsResponseStatsDto"
 import type { LogColumn } from "./logColumn"
 
 export interface CourseLogsResponseDto {
-  stats: CourseLogsResponseStatsDto
-  column?: LogColumn
+  stats?: CourseLogsResponseStatsDto
+  column: LogColumn
 }

@@ -1,5 +1,6 @@
 import { getCourseUsersContentInfo } from "@/backend/services/course-content"
 import { getCourseUsersEnrollmentsInfo } from "@/backend/services/course-enrollments"
+import { getCourseLogsInfo } from "@/backend/services/course-logs"
 import { updateChart } from "@/charts"
 import { updateDashboard } from "@/dashboard"
 import { courseStore } from "@/header/course.svelte"
@@ -12,5 +13,9 @@ export function setCourse(courseId: number) {
   courseStore.currentCourseId = course.id
 
   updateChart(course.startDate, course.endDate)
-  updateDashboard(getCourseUsersEnrollmentsInfo(courseId), getCourseUsersContentInfo(courseId))
+  updateDashboard(
+    getCourseUsersEnrollmentsInfo(courseId),
+    getCourseUsersContentInfo(courseId),
+    getCourseLogsInfo(courseId),
+  )
 }

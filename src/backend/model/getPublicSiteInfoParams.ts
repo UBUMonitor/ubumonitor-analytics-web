@@ -8,7 +8,7 @@
 
 export type GetPublicSiteInfoParams = {
   /**
-   * The Moodle host
+   * Moodle site URL.
    */
   host: string
 }

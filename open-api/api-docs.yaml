@@ -55,13 +55,10 @@ paths:
     post:
       tags:
         - Auth
-      summary: Get Moodle token
-      description: "Receives host, username, and password. A JWT token is returned\
-        \ to be used in subsequent Moodle API calls. This endpoint is essential for\
-        \ authenticating users and establishing a secure session with the Moodle instance.\
-        \ The token can be used in the Authorization header of future requests to\
-        \ access protected resources and perform actions on behalf of the authenticated\
-        \ user. "
+      summary: Authenticate with a Moodle token
+      description: "Receives a Moodle site URL, an existing Moodle web-service token,\
+        \ and the database encryption key. Returns an application JWT for subsequent\
+        \ authenticated requests. "
       operationId: authToken
       requestBody:
         content:
@@ -86,13 +83,10 @@ paths:
     post:
       tags:
         - Auth
-      summary: Get Moodle token from sso header
-      description: "Receives host, username, and password. A JWT token is returned\
-        \ to be used in subsequent Moodle API calls. This endpoint is essential for\
-        \ authenticating users and establishing a secure session with the Moodle instance.\
-        \ The token can be used in the Authorization header of future requests to\
-        \ access protected resources and perform actions on behalf of the authenticated\
-        \ user. "
+      summary: Authenticate with an SSO launch credential
+      description: "Receives a Moodle site URL, an SSO launch credential, and the\
+        \ database encryption key. Returns an application JWT for subsequent authenticated\
+        \ requests. "
       operationId: authSSO
       requestBody:
         content:
@@ -117,13 +111,9 @@ paths:
     post:
       tags:
         - Auth
-      summary: Get Moodle token
-      description: "Receives host, username, and password. A JWT token is returned\
-        \ to be used in subsequent Moodle API calls. This endpoint is essential for\
-        \ authenticating users and establishing a secure session with the Moodle instance.\
-        \ The token can be used in the Authorization header of future requests to\
-        \ access protected resources and perform actions on behalf of the authenticated\
-        \ user. "
+      summary: Create an offline application session
+      description: "Receives the Moodle site URL, username, and database encryption\
+        \ key. Returns an application JWT for an offline session. "
       operationId: authOffline
       requestBody:
         content:
@@ -148,13 +138,9 @@ paths:
     post:
       tags:
         - Auth
-      summary: Get Moodle token
-      description: "Receives host, username, and password. A JWT token is returned\
-        \ to be used in subsequent Moodle API calls. This endpoint is essential for\
-        \ authenticating users and establishing a secure session with the Moodle instance.\
-        \ The token can be used in the Authorization header of future requests to\
-        \ access protected resources and perform actions on behalf of the authenticated\
-        \ user. "
+      summary: Authenticate with Moodle credentials
+      description: "Receives a Moodle site URL, username, password, and database encryption\
+        \ key. Returns an application JWT for subsequent authenticated requests. "
       operationId: authLogin
       requestBody:
         content:
@@ -179,11 +165,9 @@ paths:
     post:
       tags:
         - UserEnrollments
-      summary: Synchronize enrollments of the logged user courses information
-      description: Synchronizes the enrollments of the logged user courses information.
-        This endpoint retrieves the latest enrollment data for the courses the user
-        is enrolled in and updates the local database accordingly. It ensures that
-        the user's course enrollments are up-to-date with the Moodle site.
+      summary: Synchronize the current user's enrollments
+      description: Retrieves the current user's latest course enrollments from Moodle
+        and updates the local tenant database.
       operationId: syncUserEnrollments
       responses:
         "200":
@@ -272,7 +256,7 @@ paths:
       summary: Get course logs with filters
       description: "Retrieves logs for a specific course with optional filtering by
         date range and selectable log columns. "
-      operationId: getCourseListLogs
+      operationId: getCourseLogsList
       parameters:
         - name: courseId
           in: path
@@ -309,7 +293,7 @@ paths:
       summary: Get course logs with filters
       description: "Retrieves logs for a specific course with optional filtering by
         date range and selectable log columns. "
-      operationId: getCourseInfoLogs
+      operationId: getCourseLogsInfo
       parameters:
         - name: courseId
           in: path
@@ -324,7 +308,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/CourseLogsInfoResponseDto"
+                $ref: "#/components/schemas/CourseLogsResponseDto"
         "401":
           description: Unauthorized - token missing or invalid
           content:
@@ -376,11 +360,9 @@ paths:
     post:
       tags:
         - CourseEnrollments
-      summary: Synchronize course users has been enrolled information
-      description: Synchronizes the enrollments of the logged user courses information.
-        This endpoint retrieves the latest enrollment data for the courses the user
-        is enrolled in and updates the local database accordingly. It ensures that
-        the user's course enrollments are up-to-date with the Moodle site.
+      summary: Synchronize course enrollments
+      description: Retrieves the latest enrollment data for users in the specified
+        course and updates the local tenant database.
       operationId: syncCourseUsersEnrollments
       parameters:
         - name: courseId
@@ -411,11 +393,9 @@ paths:
     post:
       tags:
         - CourseContent
-      summary: Synchronize course users has been enrolled information
-      description: Synchronizes the enrollments of the logged user courses information.
-        This endpoint retrieves the latest enrollment data for the courses the user
-        is enrolled in and updates the local database accordingly. It ensures that
-        the user's course enrollments are up-to-date with the Moodle site.
+      summary: Synchronize course content
+      description: Retrieves the latest sections and modules for the specified course
+        from Moodle and stores them in the local tenant database.
       operationId: syncCourseContent
       parameters:
         - name: courseId
@@ -465,8 +445,9 @@ paths:
     get:
       tags:
         - Sites
-      summary: Get site info and actual user logged
-      description: Get site info and actual user logged
+      summary: Get site and current-user information
+      description: Retrieves the Moodle site information and the authenticated user's
+        information.
       operationId: getSiteInfo
       responses:
         "200":
@@ -488,32 +469,33 @@ paths:
       tags:
         - Users
       summary: Get user profile image
-      description: Get user profile image
+      description: Retrieves a user's Moodle profile image and supports conditional
+        requests with an ETag.
       operationId: getUserImagesProfile
       parameters:
         - name: userId
           in: path
-          description: The user id
+          description: Moodle user identifier.
           required: true
           schema:
             type: integer
             format: int32
         - name: host
           in: query
-          description: The Moodle host
+          description: Moodle site URL.
           required: true
           schema:
             type: string
             format: uri
         - name: username
           in: query
-          description: The user name
+          description: Moodle username.
           required: true
           schema:
             type: string
         - name: If-None-Match
           in: header
-          description: hash to check if has changes
+          description: Entity tag used to check whether the image has changed.
           required: false
           schema:
             type:
@@ -578,13 +560,13 @@ paths:
     get:
       tags:
         - Sites
-      summary: Get public site info
-      description: Get public site info
+      summary: Get public site information
+      description: Retrieves public information from the Moodle site without authentication.
       operationId: getPublicSiteInfo
       parameters:
         - name: host
           in: query
-          description: The Moodle host
+          description: Moodle site URL.
           required: true
           schema:
             type: string
@@ -602,11 +584,9 @@ paths:
     get:
       tags:
         - UserEnrollments
-      summary: Get user courses enrollments information
-      description: Synchronizes or retrieves the enrollments of the logged user's
-        courses information. This endpoint returns the latest enrollment data for
-        the courses the user is enrolled in and updates the local database accordingly
-        when applicable.
+      summary: Get the current user's enrollments
+      description: Retrieves the current user's course enrollments from the local
+        tenant database.
       operationId: getActualUserEnrollments
       responses:
         "200":
@@ -628,7 +608,7 @@ paths:
     get:
       tags:
         - CourseEnrollments
-      summary: Get course users has been enrolled information
+      summary: Get course enrollments
       description: "Retrieves the enrollment information for users enrolled in a specific\
         \ course. This endpoint provides details about the users enrolled in the course,\
         \ including their roles and enrollment status. It allows clients to access\
@@ -663,8 +643,8 @@ paths:
     get:
       tags:
         - CourseContent
-      summary: Get course users has been enrolled information
-      description: Get course Users Content sections and modules
+      summary: Get course content
+      description: Retrieves the sections and modules stored for a course.
       operationId: getCourseUsersContentInfo
       parameters:
         - name: courseId
@@ -1051,7 +1031,7 @@ components:
         column:
           $ref: "#/components/schemas/LogColumn"
       required:
-        - stats
+        - column
     CourseLogsResponseStatsDto:
       type: object
       properties:
@@ -1106,26 +1086,24 @@ components:
       type: object
       properties:
         id:
-          type:
-            - integer
-            - "null"
+          type: integer
           format: int32
         name:
-          type:
-            - string
-            - "null"
+          type: string
+      required:
+        - id
+        - name
     LogEventDto:
       type: object
       properties:
         id:
-          type:
-            - integer
-            - "null"
+          type: integer
           format: int32
         name:
-          type:
-            - string
-            - "null"
+          type: string
+      required:
+        - id
+        - name
     CourseLogsMetricsResponseDto:
       type: object
       properties:
@@ -1681,13 +1659,6 @@ components:
         includeTotal:
           type: boolean
           example: false
-    CourseLogsInfoResponseDto:
-      type: object
-      properties:
-        column:
-          $ref: "#/components/schemas/LogColumn"
-      required:
-        - column
     CourseEnrollmentsResponseDto:
       type: object
       properties:

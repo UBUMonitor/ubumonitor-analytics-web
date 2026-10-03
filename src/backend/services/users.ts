@@ -25,7 +25,7 @@ export const getGetUserImagesProfileUrl = (userId: number, params: GetUserImages
 }
 
 /**
- * Get user profile image
+ * Retrieves a user's Moodle profile image and supports conditional requests with an ETag.
  * @summary Get user profile image
  */
 export const getUserImagesProfile = async (

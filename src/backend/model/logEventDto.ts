@@ -7,8 +7,6 @@
  */
 
 export interface LogEventDto {
-  /** @nullable */
-  id?: number | null
-  /** @nullable */
-  name?: string | null
+  id: number
+  name: string
 }

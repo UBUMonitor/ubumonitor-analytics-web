@@ -13,8 +13,8 @@ export const getSyncCourseUsersEnrollmentsUrl = (courseId: number) => {
 }
 
 /**
- * Synchronizes the enrollments of the logged user courses information. This endpoint retrieves the latest enrollment data for the courses the user is enrolled in and updates the local database accordingly. It ensures that the user's course enrollments are up-to-date with the Moodle site.
- * @summary Synchronize course users has been enrolled information
+ * Retrieves the latest enrollment data for users in the specified course and updates the local tenant database.
+ * @summary Synchronize course enrollments
  */
 export const syncCourseUsersEnrollments = async (
   courseId: number,
@@ -32,7 +32,7 @@ export const getGetCourseUsersEnrollmentsInfoUrl = (courseId: number) => {
 
 /**
  * Retrieves the enrollment information for users enrolled in a specific course. This endpoint provides details about the users enrolled in the course, including their roles and enrollment status. It allows clients to access up-to-date enrollment information for a particular course on the Moodle site.
- * @summary Get course users has been enrolled information
+ * @summary Get course enrollments
  */
 export const getCourseUsersEnrollmentsInfo = async (
   courseId: number,

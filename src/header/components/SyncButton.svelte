@@ -16,8 +16,8 @@
         updateDashboard(
           syncCourseUsersEnrollments(courseStore.currentCourseId),
           syncCourseContent(courseStore.currentCourseId),
+          syncCourseLogs(courseStore.currentCourseId),
         ),
-        syncCourseLogs(courseStore.currentCourseId),
       ])
     } finally {
       sync = false
