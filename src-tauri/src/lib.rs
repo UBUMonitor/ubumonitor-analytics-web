@@ -1,15 +1,14 @@
-use log::{debug, error, info, warn};
-use std::path::PathBuf;
+use log::{debug, error, info};
+use std::path::{Path, PathBuf};
 use std::process::{Child, Command, Stdio};
 use std::sync::Mutex;
-use std::time::Duration;
 use tauri::WindowEvent;
 use tauri::{path::BaseDirectory, AppHandle, Manager};
+use tauri_plugin_log::TimezoneStrategy;
 
 mod commands;
 
 const JAR_RESOURCE_RELATIVE: &str = "app.jar";
-const SERVER_PORT: u16 = 9090;
 
 #[derive(Default)]
 struct BackendProcess(Mutex<Option<Child>>);
@@ -63,82 +62,7 @@ fn resolve_java_path(app: &AppHandle) -> Result<PathBuf, String> {
     Ok(path)
 }
 
-async fn is_server_healthy(port: u16) -> bool {
-    let url = format!("http://localhost:{}/actuator/health", port);
-
-    let client = match reqwest::Client::builder()
-        .timeout(Duration::from_millis(100))
-        .build()
-    {
-        Ok(c) => c,
-        Err(e) => {
-            error!("Failed to build HTTP client for health check: {}", e);
-            return false;
-        }
-    };
-
-    match client.get(&url).send().await {
-        Ok(resp) if resp.status().is_success() => match resp.json::<serde_json::Value>().await {
-            Ok(json) => {
-                let healthy = json.get("status").and_then(|s| s.as_str()) == Some("UP");
-                debug!("Health check response: {:?} (healthy = {})", json, healthy);
-                healthy
-            }
-            Err(e) => {
-                warn!("Health check response was not valid JSON: {}", e);
-                false
-            }
-        },
-        Ok(resp) => {
-            debug!(
-                "Health check returned non-success status: {}",
-                resp.status()
-            );
-            false
-        }
-        Err(e) => {
-            debug!(
-                "Health check request failed (server likely not up yet): {}",
-                e
-            );
-            false
-        }
-    }
-}
-
-async fn wait_for_server_healthy(port: u16, timeout_secs: u64) -> bool {
-    let start = std::time::Instant::now();
-    let timeout = Duration::from_secs(timeout_secs);
-
-    info!(
-        "Waiting for server on port {} to become healthy (timeout: {}s)",
-        port, timeout_secs
-    );
-
-    while start.elapsed() < timeout {
-        if is_server_healthy(port).await {
-            info!(
-                "Server on port {} became healthy after {:.1}s",
-                port,
-                start.elapsed().as_secs_f32()
-            );
-            return true;
-        }
-        tokio::time::sleep(Duration::from_millis(200)).await;
-    }
-
-    error!(
-        "Server on port {} did not become healthy within {}s",
-        port, timeout_secs
-    );
-    false
-}
-
-fn spawn_java_process(
-    java_path: &PathBuf,
-    jar_path: &PathBuf,
-    app: &AppHandle,
-) -> Result<Child, String> {
+fn spawn_java_process(java_path: &Path, jar_path: &Path, app: &AppHandle) -> Result<Child, String> {
     info!("Launching backend: {:?} -jar {:?}", java_path, jar_path);
 
     let app_local_data_dir = app
@@ -161,10 +85,14 @@ fn spawn_java_process(
         .arg("-jar")
         .arg(jar_path)
         .arg("--spring.main.lazy-initialization=true")
-        .arg("--spring.profiles.active=dev")
         .stdin(Stdio::null())
         .stdout(Stdio::null())
         .stderr(Stdio::null());
+
+    #[cfg(debug_assertions)]
+    {
+        cmd.arg("--spring.profiles.active=dev");
+    }
 
     let child = cmd
         .spawn()
@@ -172,6 +100,22 @@ fn spawn_java_process(
 
     info!("Java process spawned successfully (PID: {})", child.id());
     Ok(child)
+}
+
+fn start_backend(app: &AppHandle) -> Result<(), String> {
+    let jar_path = resolve_jar_path(app)?;
+    let java_path = resolve_java_path(app)?;
+
+    let child = spawn_java_process(&java_path, &jar_path, app)?;
+
+    let state = app.state::<BackendProcess>();
+    let mut guard = state
+        .0
+        .lock()
+        .map_err(|_| "Backend state lock poisoned".to_string())?;
+    *guard = Some(child);
+
+    Ok(())
 }
 
 fn kill_process(child: &mut Child) -> Result<(), String> {
@@ -186,57 +130,25 @@ fn kill_process(child: &mut Child) -> Result<(), String> {
     Ok(())
 }
 
-#[tauri::command]
-async fn ensure_backend_server(
-    app: AppHandle,
-    state: tauri::State<'_, BackendProcess>,
-) -> Result<(), String> {
-    info!("ensure_backend_server invoked");
-
-    if is_server_healthy(SERVER_PORT).await {
-        info!("Server on port {} is already running", SERVER_PORT);
-        return Ok(());
-    }
-
-    info!("Server not detected on port {}, starting it", SERVER_PORT);
-
-    let jar_path = resolve_jar_path(&app)?;
-    let java_path = resolve_java_path(&app)?;
-
-    let child = spawn_java_process(&java_path, &jar_path, &app)?;
-
-    // Store the Child handle so we can guarantee termination on app close.
-    {
-        let mut guard = state
-            .0
-            .lock()
-            .map_err(|_| "Backend state lock poisoned".to_string())?;
-        *guard = Some(child);
-    }
-
-    if wait_for_server_healthy(SERVER_PORT, 20).await {
-        Ok(())
-    } else {
-        Err("Server did not report healthy status within the timeout.".into())
-    }
-}
-
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     tauri::Builder::default()
         .plugin(tauri_plugin_single_instance::init(|_app, _args, _cwd| {}))
         .plugin(
             tauri_plugin_log::Builder::new()
+                .timezone_strategy(TimezoneStrategy::UseLocal)
                 .level(log::LevelFilter::Info)
                 .build(),
         )
         .plugin(tauri_plugin_updater::Builder::new().build())
         .manage(BackendProcess::default())
-        .invoke_handler(tauri::generate_handler![
-            ensure_backend_server,
-            commands::open_moodle_login
-        ])
+        .invoke_handler(tauri::generate_handler![commands::open_moodle_login])
         .setup(|app| {
+            // Launch the backend as soon as the app starts.
+            if let Err(e) = start_backend(app.handle()) {
+                error!("Backend failed to start: {}", e);
+            }
+
             let window = app
                 .get_webview_window("main")
                 .expect("Main window not found");
@@ -253,20 +165,16 @@ pub fn run() {
                     };
 
                     let Some(mut child) = child_opt else {
-                        // We never started a backend process (it was already
-                        // running before this app launched) — nothing to do.
-                        info!("No backend process owned by this app instance, closing normally");
+                        info!("No backend process owned by this app, closing normally");
                         return;
                     };
 
                     info!("Close requested: shutting down backend before exiting");
 
                     match kill_process(&mut child) {
-                        Ok(()) => {
-                            info!("Backend shut down successfully, closing app");
-                        }
+                        Ok(()) => info!("Backend shut down successfully, closing app"),
                         Err(err_msg) => {
-                            error!("Failed to guarantee backend shutdown: {}", err_msg);
+                            error!("Failed to guarantee backend shutdown: {}", err_msg)
                         }
                     }
                 }

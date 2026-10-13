@@ -20,7 +20,7 @@ export interface ModuleItem extends Item {
   modName?: string
 }
 
-export type Info = "section" | "module" | "component" | "event"
+export type Info = "component" | "event" | "section" | "module"
 
 export const dashboardStore = $state({
   userItems: [] as UserItem[],
@@ -30,7 +30,7 @@ export const dashboardStore = $state({
   eventItems: [] as Item[],
   roleItems: [] as Item[],
   groupItems: [] as Item[],
-  selectedInfo: "section" as Info,
+  selectedInfo: "component" as Info,
 })
 
 const _filteredUsers = $derived.by(() => {

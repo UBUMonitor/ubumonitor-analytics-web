@@ -1,10 +1,6 @@
 {
   "$schema": "https://inlang.com/schema/inlang-message-format",
-  "checking_updates_label": "Checking for updates",
-  "downloading_update_label": "Downloading update",
-  "installing_update_label": "Installing update",
-  "restarting_label": "Restarting",
-  "preparing_application_label": "Preparing the application",
+  "starting_application_label": "Starting application",
   "username_label": "Username",
   "password_label": "Password",
   "db_password_label": "Database password",

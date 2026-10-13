@@ -4,7 +4,7 @@
   import { m } from "@/shared/paraglide/messages"
 
   let selectedTab = $state("records")
-  let recordSelected = $state<Info>("section")
+  let recordSelected = $state<Info>("component")
 
   $effect(() => {
     if (selectedTab === "records") {

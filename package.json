@@ -52,6 +52,7 @@
     "@tauri-apps/plugin-process": "~2.4.0",
     "@tauri-apps/plugin-updater": "~2.13.0",
     "echarts": "^6.1.0",
+    "ky": "^2.1.0",
     "tailwindcss": "^4.3.0"
   },
   "lint-staged": {

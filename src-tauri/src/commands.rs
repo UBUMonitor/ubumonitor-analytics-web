@@ -68,8 +68,8 @@ pub async fn open_moodle_login(app: tauri::AppHandle, login_url: String) -> taur
                         cookies,
                     };
 
-                    app_handle.emit("moodle-token-received", payload).unwrap();
-                    win.close().unwrap();
+                    let _ = app_handle.emit("moodle-token-received", payload);
+                    let _ = win.close();
                 }
             });
 

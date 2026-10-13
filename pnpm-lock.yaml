@@ -35,6 +35,9 @@ importers:
       echarts:
         specifier: ^6.1.0
         version: 6.1.0
+      ky:
+        specifier: ^2.1.0
+        version: 2.1.0
       tailwindcss:
         specifier: ^4.3.0
         version: 4.3.0
@@ -1441,6 +1444,10 @@ packages:
 
   known-css-properties@0.37.0:
     resolution: {integrity: sha512-JCDrsP4Z1Sb9JwG0aJ8Eo2r7k4Ou5MwmThS/6lcIe1ICyb7UBJKGRIUUdqc2ASdE/42lgz6zFUnzAIhtXnBVrQ==}
+
+  ky@2.1.0:
+    resolution: {integrity: sha512-nIKwelw+7qVqKOlX4Eht6GXfEXlDHcdIjyLWV3s119kYt5s+70ayTnYS+0fRNmtgGRRAfqdeWQbh8YizqkS0ng==}
+    engines: {node: '>=22'}
 
   kysely@0.28.17:
     resolution: {integrity: sha512-nbD8lB9EB3wNdMhOCdx5Li8DxnLbvKByylRLcJ1h+4SkrowVeECAyZlyiKMThF7xFdRz0jSQ2MoJr+wXux2y0Q==}
@@ -3351,6 +3358,8 @@ snapshots:
       json-buffer: 3.0.1
 
   known-css-properties@0.37.0: {}
+
+  ky@2.1.0: {}
 
   kysely@0.28.17: {}
 

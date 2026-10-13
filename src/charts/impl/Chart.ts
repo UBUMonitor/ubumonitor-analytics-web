@@ -21,7 +21,7 @@ export interface Resolve {
 }
 
 export abstract class Chart {
-  protected selectedInfo: Info = "section"
+  protected selectedInfo: Info = "component"
 
   abstract getFields(): CourseLogsMetricsRequestDtoFieldsItem[]
   abstract getGroupBy(): CourseLogsMetricsRequestDtoGroupByItem[]
