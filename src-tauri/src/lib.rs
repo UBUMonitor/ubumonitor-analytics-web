@@ -15,7 +15,7 @@ struct BackendProcess(Mutex<Option<Child>>);
 
 fn java_executable_relative() -> &'static str {
     if cfg!(target_os = "windows") {
-        "jre/bin/java.exe"
+        "jre/bin/javaw.exe"
     } else {
         "jre/bin/java"
     }

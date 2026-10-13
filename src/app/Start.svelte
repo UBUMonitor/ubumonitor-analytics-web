@@ -13,7 +13,7 @@
     info("Starting application...")
     ky.get("http://localhost:9090/actuator/health", {
       retry: {
-        limit: 30,
+        limit: 100,
         delay: () => 250,
       },
     })
