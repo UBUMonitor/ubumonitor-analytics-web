@@ -3,14 +3,17 @@
 
   interface Props {
     items: Item[]
+    ariaLabel: string
   }
 
   const uid = $props.id()
-  let { items }: Props = $props()
+  let { items, ariaLabel }: Props = $props()
 </script>
 
 <button
   class="select w-24 select-sm"
+  aria-label={ariaLabel}
+  title={ariaLabel}
   popovertarget="popover-{uid}"
   style="anchor-name:--anchor-{uid}"
 >

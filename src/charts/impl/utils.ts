@@ -1,4 +1,5 @@
 import type { CourseLogsMetricsRequestDtoInterval } from "@/backend/model"
+import { getLocale } from "@/shared/paraglide/runtime"
 
 const MS_PER_HOUR = 3_600_000
 const MS_PER_DAY = 86_400_000
@@ -21,6 +22,51 @@ export function resolveInterval(
   endDateTime: string,
 ) {
   return INTERVALS.get(interval)!(startDateTime, endDateTime)
+}
+
+export function formatIntervalLabel(
+  value: string,
+  interval: CourseLogsMetricsRequestDtoInterval,
+): string {
+  const locale = getLocale()
+
+  if (interval === "DAY_OF_WEEK") {
+    return new Intl.DateTimeFormat(locale, {
+      weekday: "short",
+      timeZone: "UTC",
+    }).format(new Date(Date.UTC(2024, 0, Number(value))))
+  }
+
+  if (interval === "MONTHLY") {
+    return new Intl.DateTimeFormat(locale, {
+      year: "numeric",
+      month: "short",
+      timeZone: "UTC",
+    }).format(new Date(`${value}-01T00:00:00Z`))
+  }
+
+  if (interval === "WEEKLY") {
+    const match = /^(\d{4})-W(\d{2})$/.exec(value)
+    if (match) {
+      const year = Number(match[1])
+      const week = Number(match[2])
+      const januaryFourth = Date.UTC(year, 0, 4)
+      const mondayOffset = (new Date(januaryFourth).getUTCDay() + 6) % 7
+      const monday = januaryFourth - mondayOffset * MS_PER_DAY + (week - 1) * MS_PER_WEEK
+      return new Intl.DateTimeFormat(locale, {
+        dateStyle: "short",
+        timeZone: "UTC",
+      }).format(new Date(monday))
+    }
+  }
+
+  const date = new Date(interval === "HOURLY" ? `${value}Z` : `${value}T00:00:00Z`)
+  return new Intl.DateTimeFormat(locale, {
+    ...(interval === "HOURLY"
+      ? { dateStyle: "short", timeStyle: "short" }
+      : { dateStyle: "short" }),
+    timeZone: "UTC",
+  }).format(date)
 }
 
 function getHourRange(startDateTime: string, endDateTime: string): string[] {

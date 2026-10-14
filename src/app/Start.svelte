@@ -32,7 +32,7 @@
     <h1 class="card-title">{m.starting_application_label()}</h1>
     <div class="flex flex-col items-center gap-3">
       {#if hasError}
-        <p class="text-sm text-error">Error on startup (check logs)</p>
+        <p class="text-sm text-error">{m.startup_error_label()}</p>
       {:else}
         <span class="loading loading-lg loading-spinner"></span>
       {/if}

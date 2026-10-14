@@ -3,7 +3,8 @@ import type {
   CourseLogsMetricsRequestDtoGroupByItem,
 } from "@/backend/model"
 import { Chart, type Resolve } from "@/charts/impl/Chart"
-import { resolveInterval } from "@/charts/impl/utils"
+import { formatIntervalLabel, resolveInterval } from "@/charts/impl/utils"
+import { m } from "@/shared/paraglide/messages"
 import type { EChartsOption } from "echarts"
 
 export class RelativeCumulativeChart extends Chart {
@@ -75,7 +76,7 @@ export class RelativeCumulativeChart extends Chart {
     }))
 
     const referenceSeries = {
-      name: "Average",
+      name: m.average_label(),
       type: "line" as const,
       data: new Array(rangeLength).fill(0),
       lineStyle: {
@@ -103,6 +104,9 @@ export class RelativeCumulativeChart extends Chart {
         type: "category",
         boundaryGap: false,
         data: range,
+        axisLabel: {
+          formatter: (value: string) => formatIntervalLabel(value, interval),
+        },
       },
       yAxis: {
         type: "value",

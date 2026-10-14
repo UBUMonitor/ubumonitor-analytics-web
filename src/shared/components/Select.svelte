@@ -7,9 +7,10 @@
   interface Props {
     component: Component<T>
     items: T[]
+    ariaLabel: string
   }
 
-  let { items, component: ItemComponent }: Props = $props()
+  let { items, component: ItemComponent, ariaLabel }: Props = $props()
 
   const setAll = (checked: boolean) => {
     for (const item of items) item.checked = checked
@@ -38,6 +39,7 @@
   <div
     class="list overflow-y-auto scrollbar-thin"
     role="listbox"
+    aria-label={ariaLabel}
     tabindex="-1"
     onkeydown={handleKeydown}
   >

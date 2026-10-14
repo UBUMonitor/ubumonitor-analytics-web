@@ -29,7 +29,7 @@
       value={tab.value}
     />
     <div class="tab-content">
-      <Select component={RecordItem} items={tab.items()} />
+      <Select component={RecordItem} items={tab.items()} ariaLabel={tab.label()} />
     </div>
   {/each}
 </div>

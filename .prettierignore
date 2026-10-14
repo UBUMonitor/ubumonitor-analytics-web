@@ -3,6 +3,5 @@ node_modules
 src-tauri
 pnpm-lock.yaml
 
-src/model
-src/services
-src/paraglide
+src/backend
+src/shared/paraglide

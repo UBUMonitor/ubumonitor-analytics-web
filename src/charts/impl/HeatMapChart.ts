@@ -3,7 +3,7 @@ import type {
   CourseLogsMetricsRequestDtoGroupByItem,
 } from "@/backend/model"
 import { Chart, type Resolve } from "@/charts/impl/Chart"
-import { resolveInterval } from "@/charts/impl/utils"
+import { formatIntervalLabel, resolveInterval } from "@/charts/impl/utils"
 import type { EChartsOption } from "echarts"
 
 export class HeatMapChart extends Chart {
@@ -25,8 +25,8 @@ export class HeatMapChart extends Chart {
   }: Resolve): EChartsOption {
     const range = resolveInterval(interval, startDateTime, endDateTime)
 
-    // Índices precomputados: evita recorrer range/userItems por cada row (O(n) en vez de O(n*m))
-    // y permite descartar filas que no encajan en ningún eje, en vez de pintar -1 silenciosamente.
+    // Precomputed indices avoid scanning range/userItems for each row (O(n) instead of O(n*m))
+    // and let us discard rows that do not match either axis instead of silently plotting -1.
     const dateIndex = new Map(range.map((date, i) => [date, i]))
     const userIndex = new Map(userItems.map((user, i) => [user.id, i]))
 
@@ -53,6 +53,7 @@ export class HeatMapChart extends Chart {
         },
         axisLabel: {
           rotate: 45,
+          formatter: (value: string) => formatIntervalLabel(value, interval),
         },
       },
       yAxis: {

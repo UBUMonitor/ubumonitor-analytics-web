@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { m } from "@/shared/paraglide/messages"
   import { getLocale, type Locale, locales, setLocale } from "@/shared/paraglide/runtime.js"
   import type { ClassValue } from "svelte/elements"
 
@@ -16,6 +17,7 @@
 <select
   class={["select w-fit appearance-none select-sm", props.class]}
   name="lang"
+  aria-label={m.language_label()}
   onchange={(event) => setLocale(event.currentTarget.value as Locale)}
   value={getLocale()}
 >

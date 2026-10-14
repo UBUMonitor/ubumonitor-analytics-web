@@ -24,8 +24,9 @@
 
 {#if courseStore.courseItems.length > 0}
   <select
-    class="select w-lg select-sm"
+    class="select w-lg select-xs"
     name="course"
+    aria-label={m.select_course_label()}
     onchange={(e) => setCourse(Number(e.currentTarget.value))}
   >
     <option hidden> -- {m.select_course_label()} -- </option>

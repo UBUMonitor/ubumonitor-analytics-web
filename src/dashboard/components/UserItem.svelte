@@ -13,7 +13,7 @@
   <img class="m-1 rounded-box" src={imageUrl} alt={name} />
 
   <div class="flex min-w-0 flex-col">
-    <span class="truncate font-bold">{name ?? "N/A"}</span>
+    <span class="truncate font-bold">{name ?? m.not_available_label()}</span>
     <span class="truncate text-xs">
       {m.last_access_label()}:
       {lastAccessLabel}

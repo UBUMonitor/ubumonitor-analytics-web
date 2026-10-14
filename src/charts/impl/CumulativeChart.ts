@@ -3,7 +3,8 @@ import type {
   CourseLogsMetricsRequestDtoGroupByItem,
 } from "@/backend/model"
 import { Chart, type Resolve } from "@/charts/impl/Chart"
-import { resolveInterval } from "@/charts/impl/utils"
+import { formatIntervalLabel, resolveInterval } from "@/charts/impl/utils"
+import { m } from "@/shared/paraglide/messages"
 import type { EChartsOption } from "echarts"
 
 export class CumulativeChart extends Chart {
@@ -43,7 +44,7 @@ export class CumulativeChart extends Chart {
       matrix[userIdx * rangeLength + dateIdx] = row.value
     }
 
-    // Acumulado por usuario + suma de columna para la media, en un solo recorrido.
+    // Accumulate per user and sum each column for the average in a single pass.
     const averageData = new Array<number>(rangeLength)
     const runningTotals = new Float64Array(userCount)
 
@@ -67,7 +68,7 @@ export class CumulativeChart extends Chart {
     }))
 
     const averageSeries = {
-      name: "Average",
+      name: m.average_label(),
       type: "line" as const,
       data: averageData,
       lineStyle: {
@@ -92,6 +93,9 @@ export class CumulativeChart extends Chart {
         type: "category",
         boundaryGap: false,
         data: range,
+        axisLabel: {
+          formatter: (value: string) => formatIntervalLabel(value, interval),
+        },
       },
       yAxis: {
         type: "value",

@@ -4,6 +4,7 @@
   import { chartStore } from "@/charts/chart.svelte"
   import { dashboardStore, getSelectedUsers } from "@/dashboard/dashboard.svelte"
   import { courseStore } from "@/header/course.svelte"
+  import { m } from "@/shared/paraglide/messages"
   import { getLocale } from "@/shared/paraglide/runtime"
   import {
     createColumnHelper,
@@ -26,7 +27,7 @@
 
   const columns = columnHelper.columns([
     columnHelper.accessor("timeCreated", {
-      header: "Fecha y Hora",
+      header: m.table_date_time(),
       cell: (info) => {
         const value = info.getValue()
         if (!value) return ""
@@ -37,12 +38,12 @@
         }).format(date)
       },
     }),
-    columnHelper.accessor("userFullName", { header: "Nombre" }),
-    columnHelper.accessor("moduleName", { header: "Módulo" }),
-    columnHelper.accessor("component", { header: "Componente" }),
-    columnHelper.accessor("eventName", { header: "Evento" }),
-    columnHelper.accessor("originName", { header: "Origen" }),
-    columnHelper.accessor("ip", { header: "IP" }),
+    columnHelper.accessor("userFullName", { header: m.table_name() }),
+    columnHelper.accessor("moduleName", { header: m.table_module() }),
+    columnHelper.accessor("component", { header: m.table_component() }),
+    columnHelper.accessor("eventName", { header: m.table_event() }),
+    columnHelper.accessor("originName", { header: m.table_origin() }),
+    columnHelper.accessor("ip", { header: m.table_ip() }),
   ])
 
   let rows = $state<LogEntryDto[]>([])
@@ -93,8 +94,7 @@
         includeTotal: true,
       })
 
-      // Si mientras esperábamos la respuesta se disparó otro reset
-      // (cambio de filtros), esta respuesta ya es obsoleta: se descarta.
+      // Discard this response if a filter change triggered another reset while it was pending.
       if (currentRequest !== requestId) return
 
       rows = reset ? response.content : [...rows, ...response.content]
@@ -103,9 +103,8 @@
       hasMore = rows.length < totalElements && response.content.length > 0
 
       if (reset) {
-        // Si el contenido inicial no llena el contenedor, no habrá scroll
-        // que dispare la siguiente carga: lo comprobamos manualmente
-        // tras que el DOM se actualice con las nuevas filas.
+        // If the initial rows do not fill the container, no scroll event will load the next page.
+        // Check manually after the DOM updates with the new rows.
         queueMicrotask(() => fetchMoreOnBottomReached(tableContainerRef))
       }
     } catch (err) {
@@ -192,11 +191,16 @@
   </div>
 
   <div class="flex items-center justify-between px-2 py-1 text-sm text-base-content/60">
-    <span>{rows.length.toLocaleString()} de {totalElements.toLocaleString()} registros</span>
+    <span>
+      {m.table_row_count({
+        shown: rows.length.toLocaleString(getLocale()),
+        total: totalElements.toLocaleString(getLocale()),
+      })}
+    </span>
     {#if isLoading}
       <span class="flex items-center gap-1">
         <span class="loading loading-xs loading-spinner"></span>
-        Cargando...
+        {m.table_loading()}
       </span>
     {/if}
   </div>

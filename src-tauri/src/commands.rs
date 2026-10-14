@@ -22,7 +22,11 @@ struct MoodleLoginPayload {
 }
 
 #[tauri::command]
-pub async fn open_moodle_login(app: tauri::AppHandle, login_url: String) -> tauri::Result<()> {
+pub async fn open_moodle_login(
+    app: tauri::AppHandle,
+    login_url: String,
+    window_title: String,
+) -> tauri::Result<()> {
     let app_handle = app.clone();
     let token_received = Arc::new(AtomicBool::new(false));
     let token_received_nav = token_received.clone();
@@ -38,7 +42,7 @@ pub async fn open_moodle_login(app: tauri::AppHandle, login_url: String) -> taur
         WebviewUrl::External(login_url.parse().unwrap()),
     )
     .center()
-    .title("Login Moodle")
+    .title(window_title)
     .on_navigation(move |url| {
         if url.scheme() == "moodlemobile" {
             let full_url = url.as_str().to_string();

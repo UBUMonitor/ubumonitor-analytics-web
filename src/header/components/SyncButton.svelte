@@ -4,6 +4,7 @@
   import { syncCourseLogs } from "@/backend/services/course-logs"
   import { updateDashboard } from "@/dashboard"
   import { courseStore } from "@/header/course.svelte"
+  import { m } from "@/shared/paraglide/messages"
   import { RefreshCwIcon } from "@lucide/svelte"
 
   let sync = $state(false)
@@ -27,9 +28,11 @@
 
 <button
   class="group btn size-fit p-1"
+  class:invisible={!courseStore.currentCourseId}
   onclick={handleSync}
-  hidden={!courseStore.currentCourseId}
   disabled={sync}
+  aria-label={m.sync_label()}
+  title={m.sync_label()}
 >
   <RefreshCwIcon class="group-disabled:animate-spin" size={16} />
 </button>

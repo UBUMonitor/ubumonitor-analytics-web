@@ -2,6 +2,7 @@ import { authLogout, authSSO } from "@/backend/services/auth"
 import { authLogin } from "@/backend/services/auth"
 import { getPublicSiteInfo, syncSiteInfo } from "@/backend/services/sites"
 import { loginStore } from "@/login/login.svelte"
+import { m } from "@/shared/paraglide/messages"
 import { invoke } from "@tauri-apps/api/core"
 import { once, type UnlistenFn } from "@tauri-apps/api/event"
 
@@ -81,10 +82,13 @@ export async function loginWeb(host: string, dbPassword: string, launchUrl: stri
 
       unlistenCancelled = await once<void>("moodle-login-cancelled", () => {
         cleanup()
-        reject(new Error("Login cancelado por el usuario"))
+        reject(new Error(m.login_cancelled_error()))
       })
 
-      await invoke("open_moodle_login", { loginUrl: launchUrl })
+      await invoke("open_moodle_login", {
+        loginUrl: launchUrl,
+        windowTitle: m.login_window_title(),
+      })
     }
 
     setup().catch((err) => {

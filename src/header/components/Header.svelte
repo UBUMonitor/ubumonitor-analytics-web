@@ -5,7 +5,9 @@
 </script>
 
 <header class="navbar min-h-fit bg-primary">
-  <h1 class="navbar-start font-bold text-primary-content">UBUMonitor</h1>
+  <h1 class="navbar-start font-bold text-primary-content">
+    UBUMonitor<span class="ml-2 badge badge-xs badge-soft badge-neutral">v{__APP_VERSION__}</span>
+  </h1>
   <div class="navbar-center gap-2">
     <CourseSelector />
     <SyncButton />
