@@ -5,7 +5,6 @@ use log::{debug, error, info};
 use std::path::{Path, PathBuf};
 use std::process::{Child, Command, Stdio};
 use std::sync::Mutex;
-use tauri::WindowEvent;
 use tauri::{path::BaseDirectory, AppHandle, Manager};
 use tauri_plugin_log::TimezoneStrategy;
 
@@ -133,6 +132,28 @@ fn kill_process(child: &mut Child) -> Result<(), String> {
     Ok(())
 }
 
+fn shutdown_backend(app: &AppHandle) {
+    let child_opt = {
+        let state = app.state::<BackendProcess>();
+        let mut guard = match state.0.lock() {
+            Ok(g) => g,
+            Err(p) => p.into_inner(),
+        };
+        guard.take()
+    };
+
+    let Some(mut child) = child_opt else {
+        info!("No backend process owned by this app");
+        return;
+    };
+
+    info!("Shutting down backend");
+    match kill_process(&mut child) {
+        Ok(()) => info!("Backend shut down successfully"),
+        Err(e) => error!("Failed to guarantee backend shutdown: {}", e),
+    }
+}
+
 fn main() {
     tauri::Builder::default()
         .plugin(tauri_plugin_single_instance::init(|_app, _args, _cwd| {}))
@@ -146,44 +167,21 @@ fn main() {
         .manage(BackendProcess::default())
         .invoke_handler(tauri::generate_handler![commands::open_moodle_login])
         .setup(|app| {
-            // Launch the backend as soon as the app starts.
             if let Err(e) = start_backend(app.handle()) {
                 error!("Backend failed to start: {}", e);
             }
 
-            let window = app
-                .get_webview_window("main")
-                .expect("Main window not found");
-
-            let app_handle = app.handle().clone();
-
-            window.on_window_event(move |event| {
-                if let WindowEvent::CloseRequested { .. } = event {
-                    // Only take the child if we actually launched one.
-                    let child_opt = {
-                        let state = app_handle.state::<BackendProcess>();
-                        let mut guard = state.0.lock().unwrap();
-                        guard.take()
-                    };
-
-                    let Some(mut child) = child_opt else {
-                        info!("No backend process owned by this app, closing normally");
-                        return;
-                    };
-
-                    info!("Close requested: shutting down backend before exiting");
-
-                    match kill_process(&mut child) {
-                        Ok(()) => info!("Backend shut down successfully, closing app"),
-                        Err(err_msg) => {
-                            error!("Failed to guarantee backend shutdown: {}", err_msg)
-                        }
-                    }
-                }
-            });
+            // SIGINT / SIGTERM / Ctrl+C -> graceful shutdown
+            let handle = app.handle().clone();
+            let _ = ctrlc::set_handler(move || handle.exit(0));
 
             Ok(())
         })
-        .run(tauri::generate_context!())
-        .expect("error running tauri app");
+        .build(tauri::generate_context!())
+        .expect("error running tauri app")
+        .run(|app, event| {
+            if let tauri::RunEvent::Exit = event {
+                shutdown_backend(app);
+            }
+        });
 }
