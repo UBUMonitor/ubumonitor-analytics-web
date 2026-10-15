@@ -18,7 +18,7 @@
   ]
 </script>
 
-<div class="tabs tabs-border h-full">
+<div class="tabs tabs-border h-full tabs-sm">
   {#each tabs as tab (tab.value)}
     <input
       type="radio"

@@ -1,6 +1,6 @@
 <script lang="ts">
+  import echarts from "@/charts/impl/echarts"
   import type { EChartsOption } from "echarts"
-  import * as echarts from "echarts"
   import { onMount } from "svelte"
 
   interface Props {

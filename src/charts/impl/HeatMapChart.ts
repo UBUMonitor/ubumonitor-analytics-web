@@ -59,6 +59,7 @@ export class HeatMapChart extends Chart {
       yAxis: {
         type: "category",
         data: userItems.map(({ name }) => name),
+        inverse: true,
         splitArea: {
           show: true,
         },
