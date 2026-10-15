@@ -4,7 +4,9 @@
 use log::{debug, error, info};
 use std::path::{Path, PathBuf};
 use std::process::{Child, Command, Stdio};
+use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::Mutex;
+use tauri::webview::PageLoadEvent;
 use tauri::{path::BaseDirectory, AppHandle, Manager};
 use tauri_plugin_log::TimezoneStrategy;
 
@@ -13,7 +15,10 @@ mod commands;
 const JAR_RESOURCE_RELATIVE: &str = "app.jar";
 
 #[derive(Default)]
-struct BackendProcess(Mutex<Option<Child>>);
+struct BackendProcess {
+    child: Mutex<Option<Child>>,
+    shutting_down: AtomicBool,
+}
 
 fn java_executable_relative() -> &'static str {
     if cfg!(target_os = "windows") {
@@ -107,16 +112,22 @@ fn spawn_java_process(java_path: &Path, jar_path: &Path, app: &AppHandle) -> Res
 fn start_backend(app: &AppHandle) -> Result<(), String> {
     let jar_path = resolve_jar_path(app)?;
     let java_path = resolve_java_path(app)?;
-
     let child = spawn_java_process(&java_path, &jar_path, app)?;
 
     let state = app.state::<BackendProcess>();
     let mut guard = state
-        .0
+        .child
         .lock()
         .map_err(|_| "Backend state lock poisoned".to_string())?;
-    *guard = Some(child);
 
+    // Si el cierre ya se pidió mientras arrancábamos, matar el proceso al momento
+    if state.shutting_down.load(Ordering::SeqCst) {
+        let mut child = child;
+        let _ = kill_process(&mut child);
+        return Err("App is shutting down, backend start aborted".to_string());
+    }
+
+    *guard = Some(child);
     Ok(())
 }
 
@@ -133,9 +144,11 @@ fn kill_process(child: &mut Child) -> Result<(), String> {
 }
 
 fn shutdown_backend(app: &AppHandle) {
+    let state = app.state::<BackendProcess>();
+    state.shutting_down.store(true, Ordering::SeqCst);
+
     let child_opt = {
-        let state = app.state::<BackendProcess>();
-        let mut guard = match state.0.lock() {
+        let mut guard = match state.child.lock() {
             Ok(g) => g,
             Err(p) => p.into_inner(),
         };
@@ -167,15 +180,23 @@ fn main() {
         .manage(BackendProcess::default())
         .invoke_handler(tauri::generate_handler![commands::open_moodle_login])
         .setup(|app| {
-            if let Err(e) = start_backend(app.handle()) {
-                error!("Backend failed to start: {}", e);
-            }
+            let handle = app.handle().clone();
+            tauri::async_runtime::spawn_blocking(move || {
+                if let Err(e) = start_backend(&handle) {
+                    error!("Backend failed to start: {}", e);
+                }
+            });
 
             // SIGINT / SIGTERM / Ctrl+C -> graceful shutdown
             let handle = app.handle().clone();
             let _ = ctrlc::set_handler(move || handle.exit(0));
 
             Ok(())
+        })
+        .on_page_load(|webview, payload| {
+            if let PageLoadEvent::Finished = payload.event() {
+                let _ = webview.window().show();
+            }
         })
         .build(tauri::generate_context!())
         .expect("error running tauri app")

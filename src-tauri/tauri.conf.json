@@ -12,10 +12,10 @@
   "app": {
     "windows": [
       {
+        "label": "main",
         "title": "UBUMonitor Analylics",
         "maximized": true,
-        "resizable": true,
-        "fullscreen": false
+        "visible": false
       }
     ],
     "security": {
