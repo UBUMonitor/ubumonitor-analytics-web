@@ -20,16 +20,13 @@ jobs:
         include:
           - platform: "macos-latest" # Arm (M1+)
             args: "--target aarch64-apple-darwin"
-            temurin_asset: "OpenJDK25U-jre_aarch64_mac_hotspot"
-          - platform: "macos-latest" # Intel
+          - platform: "macos-latest" # Intel (el runner es ARM: se hace jlink cruzado con los jmods x64)
             args: "--target x86_64-apple-darwin"
-            temurin_asset: "OpenJDK25U-jre_x64_mac_hotspot"
+            cross_jdk_asset: "OpenJDK25U-jdk_x64_mac_hotspot"
           - platform: "ubuntu-22.04"
             args: ""
-            temurin_asset: "OpenJDK25U-jre_x64_linux_hotspot"
           - platform: "windows-latest"
             args: ""
-            temurin_asset: "OpenJDK25U-jre_x64_windows_hotspot"
 
     runs-on: ${{ matrix.platform }}
     steps:
@@ -60,53 +57,89 @@ jobs:
       - name: install frontend dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Download JRE (Temurin 25, Windows/macOS)
-        if: matrix.platform != 'ubuntu-22.04'
-        shell: bash
-        run: |
-          set -e
-          VERSION_TAG="jdk-$(echo "${{ env.TEMURIN_VERSION }}" | sed 's/+/%2B/')"
-          VERSION_FILE=$(echo "${{ env.TEMURIN_VERSION }}" | sed 's/+/_/')
-          EXT="tar.gz"
-          if [ "${{ matrix.platform }}" = "windows-latest" ]; then
-            EXT="zip"
-          fi
-          URL="https://github.com/adoptium/temurin25-binaries/releases/download/${VERSION_TAG}/${{ matrix.temurin_asset }}_${VERSION_FILE}.${EXT}"
-          echo "Downloading: $URL"
-          mkdir -p src-tauri/resources/jre
-          curl -L -o jre_archive.${EXT} "$URL"
-          if [ "$EXT" = "zip" ]; then
-            unzip -q jre_archive.zip -d jre_extracted
-          else
-            mkdir jre_extracted
-            tar -xzf jre_archive.tar.gz -C jre_extracted
-          fi
-          # el contenido queda dentro de una carpeta tipo jdk-25.0.3+9-jre; lo movemos a jre/
-          mv jre_extracted/*/* src-tauri/resources/jre/
-          rm -rf jre_extracted jre_archive.${EXT}
-
-      - name: Download JRE (Temurin 25, Linux)
-        if: matrix.platform == 'ubuntu-22.04'
-        shell: bash
-        run: |
-          set -e
-          VERSION_TAG="jdk-$(echo "${{ env.TEMURIN_VERSION }}" | sed 's/+/%2B/')"
-          VERSION_FILE=$(echo "${{ env.TEMURIN_VERSION }}" | sed 's/+/_/')
-          URL="https://github.com/adoptium/temurin25-binaries/releases/download/${VERSION_TAG}/${{ matrix.temurin_asset }}_${VERSION_FILE}.tar.gz"
-          echo "Downloading: $URL"
-          mkdir -p src-tauri/resources/jre
-          curl -L -o jre_archive.tar.gz "$URL"
-          mkdir jre_extracted
-          tar -xzf jre_archive.tar.gz -C jre_extracted
-          mv jre_extracted/*/* src-tauri/resources/jre/
-          rm -rf jre_extracted jre_archive.tar.gz
+      - name: Setup Temurin JDK 25 (para jdeps y jlink)
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: ${{ env.TEMURIN_VERSION }}
 
       - name: Download JAR
         shell: bash
         run: |
           set -e
           mkdir -p src-tauri/resources
-          curl -L -o src-tauri/resources/app.jar "${{ env.JAR_URL }}"
+          curl -L --fail -o src-tauri/resources/app.jar "${{ env.JAR_URL }}"
+
+      - name: Build runtime with jlink
+        shell: bash
+        env:
+          CROSS_JDK_ASSET: ${{ matrix.cross_jdk_asset }}
+        run: |
+          set -euo pipefail
+
+          WORK="jlink-work"
+          OUT="src-tauri/resources/jre"
+          rm -rf "$WORK" "$OUT"
+          mkdir -p "$WORK"
+          cp src-tauri/resources/app.jar "$WORK/app.jar"
+
+          # 1. Extraer el fat jar (app.jar + lib/*.jar)
+          java -Djarmode=tools -jar "$WORK/app.jar" extract --destination "$WORK/extracted"
+
+          # 2. Calcular módulos con jdeps
+          MODS=$(jdeps --ignore-missing-deps -q --recursive --multi-release 25 \
+            --print-module-deps \
+            --class-path "$WORK/extracted/lib/*" \
+            "$WORK/extracted/app.jar")
+          if [ -z "$MODS" ]; then
+            echo "jdeps no devolvió módulos"
+            exit 1
+          fi
+          echo "Módulos detectados por jdeps: $MODS"
+
+          # 3. Extras que jdeps no detecta (solo los que existan en este JDK)
+          AVAILABLE=$(java --list-modules)
+          EXTRAS=""
+          for m in java.naming java.sql java.management java.desktop java.instrument jdk.unsupported jdk.crypto.ec; do
+            if grep -q "^$m@" <<< "$AVAILABLE"; then
+              EXTRAS="$EXTRAS,$m"
+            fi
+          done
+          echo "Extras añadidos: $EXTRAS"
+
+          # 4. jlink (cruzado si el JDK del runner no es de la plataforma destino)
+          JLINK_ARGS=(
+            --add-modules "${MODS}${EXTRAS}"
+            --strip-debug
+            --no-header-files
+            --no-man-pages
+            --compress zip-6
+            --output "$OUT"
+          )
+
+          if [ -n "${CROSS_JDK_ASSET}" ]; then
+            VERSION_TAG="jdk-$(echo "${TEMURIN_VERSION}" | sed 's/+/%2B/')"
+            VERSION_FILE=$(echo "${TEMURIN_VERSION}" | sed 's/+/_/')
+            URL="https://github.com/adoptium/temurin25-binaries/releases/download/${VERSION_TAG}/${CROSS_JDK_ASSET}_${VERSION_FILE}.tar.gz"
+            echo "Descargando JDK destino: $URL"
+            mkdir -p "$WORK/target-jdk"
+            curl -L --fail -o "$WORK/target-jdk.tar.gz" "$URL"
+            tar -xzf "$WORK/target-jdk.tar.gz" -C "$WORK/target-jdk"
+            JMODS=$(find "$WORK/target-jdk" -type d -name jmods | head -n 1)
+            if [ -z "$JMODS" ]; then
+              echo "No se encontró la carpeta jmods en el JDK destino"
+              exit 1
+            fi
+            JLINK_ARGS+=(--module-path "$JMODS")
+          fi
+
+          jlink "${JLINK_ARGS[@]}"
+
+          # 5. Informe y limpieza
+          echo "Runtime generado:"
+          du -sh "$OUT"
+          "$OUT/bin/java" --list-modules || true   # puede fallar en el cruzado (otra arquitectura)
+          rm -rf "$WORK"
 
       - name: Set LD_LIBRARY_PATH for JRE (linuxdeploy dependency resolution)
         if: matrix.platform == 'ubuntu-22.04'
