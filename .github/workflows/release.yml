@@ -7,9 +7,7 @@ on:
   workflow_dispatch:
 
 env:
-  # Versión para las URLs de descarga de Temurin (cruce macOS Intel)
-  TEMURIN_VERSION: "25.0.3+9"
-  # Misma versión, con el formato que exige actions/setup-java (sufijo .0.LTS)
+  # Formato que exige actions/setup-java (sufijo .0.LTS)
   SETUP_JAVA_VERSION: "25.0.3+9.0.LTS"
   JAR_URL: "https://github.com/UBUMonitor/ubumonitor-analytics-api/releases/download/v0.0.4/ubumonitoranalytics-0.0.4.jar"
 
@@ -23,9 +21,8 @@ jobs:
         include:
           - platform: "macos-latest" # Arm (M1+)
             args: "--target aarch64-apple-darwin"
-          - platform: "macos-latest" # Intel (el runner es ARM: se hace jlink cruzado con los jmods x64)
+          - platform: "macos-15-intel" # Intel: runner x64 nativo, así jlink genera un runtime x64 sin cruzar
             args: "--target x86_64-apple-darwin"
-            cross_jdk_asset: "OpenJDK25U-jdk_x64_mac_hotspot"
           - platform: "ubuntu-22.04"
             args: ""
           - platform: "windows-latest"
@@ -49,7 +46,7 @@ jobs:
       - name: install Rust stable
         uses: dtolnay/rust-toolchain@stable
         with:
-          targets: ${{ matrix.platform == 'macos-latest' && 'aarch64-apple-darwin,x86_64-apple-darwin' || '' }}
+          targets: ${{ matrix.platform == 'macos-latest' && 'aarch64-apple-darwin' || matrix.platform == 'macos-15-intel' && 'x86_64-apple-darwin' || '' }}
 
       - name: install dependencies (ubuntu only)
         if: matrix.platform == 'ubuntu-22.04'
@@ -75,8 +72,6 @@ jobs:
 
       - name: Build runtime with jlink
         shell: bash
-        env:
-          CROSS_JDK_ASSET: ${{ matrix.cross_jdk_asset }}
         run: |
           set -euo pipefail
 
@@ -110,38 +105,19 @@ jobs:
           done
           echo "Extras añadidos: $EXTRAS"
 
-          # 4. jlink (cruzado si el JDK del runner no es de la plataforma destino)
-          JLINK_ARGS=(
-            --add-modules "${MODS}${EXTRAS}"
-            --strip-debug
-            --no-header-files
-            --no-man-pages
-            --compress zip-6
+          # 4. jlink (el JDK del runner es de la plataforma destino)
+          jlink \
+            --add-modules "${MODS}${EXTRAS}" \
+            --strip-debug \
+            --no-header-files \
+            --no-man-pages \
+            --compress zip-6 \
             --output "$OUT"
-          )
-
-          if [ -n "${CROSS_JDK_ASSET}" ]; then
-            VERSION_TAG="jdk-$(echo "${TEMURIN_VERSION}" | sed 's/+/%2B/')"
-            VERSION_FILE=$(echo "${TEMURIN_VERSION}" | sed 's/+/_/')
-            URL="https://github.com/adoptium/temurin25-binaries/releases/download/${VERSION_TAG}/${CROSS_JDK_ASSET}_${VERSION_FILE}.tar.gz"
-            echo "Descargando JDK destino: $URL"
-            mkdir -p "$WORK/target-jdk"
-            curl -L --fail -o "$WORK/target-jdk.tar.gz" "$URL"
-            tar -xzf "$WORK/target-jdk.tar.gz" -C "$WORK/target-jdk"
-            JMODS=$(find "$WORK/target-jdk" -type d -name jmods | head -n 1)
-            if [ -z "$JMODS" ]; then
-              echo "No se encontró la carpeta jmods en el JDK destino"
-              exit 1
-            fi
-            JLINK_ARGS+=(--module-path "$JMODS")
-          fi
-
-          jlink "${JLINK_ARGS[@]}"
 
           # 5. Informe y limpieza
           echo "Runtime generado:"
           du -sh "$OUT"
-          "$OUT/bin/java" --list-modules || true   # puede fallar en el cruzado (otra arquitectura)
+          "$OUT/bin/java" --list-modules
           rm -rf "$WORK"
 
       - name: Set LD_LIBRARY_PATH for JRE (linuxdeploy dependency resolution)
