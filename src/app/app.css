@@ -1,4 +1,11 @@
 @import "tailwindcss";
+
 @plugin "daisyui" {
   themes: corporate --default;
+}
+
+@layer components {
+  .tab-content {
+    border: 0 !important;
+  }
 }

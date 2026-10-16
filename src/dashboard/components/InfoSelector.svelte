@@ -13,7 +13,7 @@
   })
 </script>
 
-<div class="tabs tabs-border min-w-0 border-t">
+<div class="tabs tabs-border min-w-0">
   <input
     type="radio"
     name="main_tabs"
@@ -22,7 +22,7 @@
     bind:group={selectedTab}
     value="records"
   />
-  <div class="tab-content">
+  <div class="tab-content bg-base-300">
     <RecordsSelector bind:selected={recordSelected} />
   </div>
 
