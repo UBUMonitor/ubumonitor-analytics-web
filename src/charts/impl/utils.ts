@@ -146,3 +146,5 @@ function getMonthRange(startDateTime: string, endDateTime: string): string[] {
     return `${yyyy}-${mm}`
   })
 }
+
+export const round2 = (value: number): number => Math.round(value * 100) / 100

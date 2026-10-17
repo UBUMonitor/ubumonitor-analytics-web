@@ -3,7 +3,7 @@ import type {
   CourseLogsMetricsRequestDtoGroupByItem,
 } from "@/backend/model"
 import { Chart, type Resolve } from "@/charts/impl/Chart"
-import { formatIntervalLabel, resolveInterval } from "@/charts/impl/utils"
+import { formatIntervalLabel, resolveInterval, round2 } from "@/charts/impl/utils"
 import { m } from "@/shared/paraglide/messages"
 import type { EChartsOption } from "echarts"
 
@@ -57,7 +57,7 @@ export class RelativeCumulativeChart extends Chart {
         columnSum += runningTotals[u]
       }
 
-      columnAverage[t] = userCount > 0 ? columnSum / userCount : 0
+      columnAverage[t] = userCount > 0 ? round2(columnSum / userCount) : 0
     }
 
     for (let t = 0; t < rangeLength; t++) {
@@ -72,7 +72,7 @@ export class RelativeCumulativeChart extends Chart {
     const series = userItems.map((item, u) => ({
       name: item.name,
       type: "line" as const,
-      data: Array.from(matrix.subarray(u * rangeLength, (u + 1) * rangeLength)),
+      data: Array.from(matrix.subarray(u * rangeLength, (u + 1) * rangeLength), round2),
     }))
 
     const referenceSeries = {
