@@ -6,7 +6,7 @@
 </script>
 
 <div class="flex size-full gap-2">
-  <section class="flex flex-col gap-2 h-full w-xs max-w-xs min-w-xs">
+  <section class="flex h-full w-xs max-w-xs min-w-xs flex-col gap-2">
     <CourseSelector />
     <UserSelector />
     <InfoSelector />

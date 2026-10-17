@@ -70,7 +70,7 @@
     <p class="py-4">{m.update_prompt({ version: update.version })}</p>
 
     {#if errorMessage}
-      <div role="alert" class="alert alert-error mb-4">
+      <div role="alert" class="mb-4 alert alert-error">
         <span>{m.update_failed({ error: errorMessage })}</span>
       </div>
     {/if}

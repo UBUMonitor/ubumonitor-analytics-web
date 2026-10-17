@@ -1,7 +1,8 @@
 {
   "$schema": "https://inlang.com/schema/inlang-message-format",
-  "starting_application_label": "Starting application",
-  "startup_error_label": "Error starting the application (check the logs)",
+  "application_error_label": "Application Error",
+  "backend_error_label": "Error starting the backend (check the logs)",
+  "close_application_button": "Close app",
   "username_label": "Username",
   "password_label": "Password",
   "db_password_label": "Database password",

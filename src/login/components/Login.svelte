@@ -48,12 +48,12 @@
   })
 </script>
 
-<fieldset class="fieldset mx-auto mt-16 w-sm h-fit rounded-box shadow bg-base-100 p-4">
+<fieldset class="mx-auto mt-16 fieldset h-fit w-sm rounded-box bg-base-100 p-4 shadow">
   <LocaleSelector class="ml-auto" />
   <img class="m-auto size-52 object-contain" src="/logo.png" alt="UBUMonitor Logo" />
 
-  <form class="join w-full mb-2" onsubmit={submitHost}>
-    <label class="input w-full join-item">
+  <form class="join mb-2 w-full" onsubmit={submitHost}>
+    <label class="input join-item w-full">
       <LinkIcon />
       <input
         type="url"

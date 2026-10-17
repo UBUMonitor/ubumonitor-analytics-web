@@ -23,7 +23,7 @@
   })
 </script>
 
-<div class="flex gap-2 items-center">
+<div class="flex items-center gap-2">
   <select
     class="select select-sm"
     name="course"

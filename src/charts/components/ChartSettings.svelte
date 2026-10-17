@@ -10,7 +10,7 @@
   const { showScale = false, showGroup = false }: Props = $props()
 </script>
 
-<div class="justify-between px-24 card flex-row card-border p-2 bg-base-100 border-base-300 mt-2">
+<div class="card mt-2 flex-row justify-between border-base-300 bg-base-100 p-2 px-24 card-border">
   <div class="flex flex-col gap-2">
     {#if showScale}
       <label class="input input-sm">

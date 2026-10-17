@@ -94,7 +94,7 @@
   })
 </script>
 
-<main class="flex flex-col size-full">
+<main class="flex size-full flex-col">
   <div class="tabs tabs-box">
     {#each chartTypes as { name } (name)}
       <input
@@ -115,7 +115,7 @@
       bind:group={selectedChart}
     />
   </div>
-  <div class="card card-border p-1 bg-base-100 border-base-300 flex-1 min-h-0">
+  <div class="card min-h-0 flex-1 border-base-300 bg-base-100 p-1 card-border">
     {#if selectedChart === "table"}
       <TableComponent />
     {:else}

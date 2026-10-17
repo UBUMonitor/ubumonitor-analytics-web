@@ -37,7 +37,7 @@
     </button>
   </div>
   <div
-    class="list overflow-y-auto scrollbar-thin rounded-box"
+    class="list scrollbar-thin overflow-y-auto rounded-box"
     role="listbox"
     aria-label={ariaLabel}
     tabindex="-1"
