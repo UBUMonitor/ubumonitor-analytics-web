@@ -1,13 +1,13 @@
+import type { PublicSiteInfoResponseDto } from "@/backend/model"
 import { authLogout, authSSO } from "@/backend/services/auth"
-import { authLogin } from "@/backend/services/auth"
-import { getPublicSiteInfo, syncSiteInfo } from "@/backend/services/sites"
+import { syncSiteInfo } from "@/backend/services/sites"
 import { loginStore } from "@/login/login.svelte"
 import { m } from "@/shared/paraglide/messages"
 import { invoke } from "@tauri-apps/api/core"
 import { once, type UnlistenFn } from "@tauri-apps/api/event"
 
 export async function validateHost(host: string) {
-  const siteInfo = await getPublicSiteInfo({ host })
+  const siteInfo = await invoke<PublicSiteInfoResponseDto>("get_public_config", { host })
   return siteInfo.site
 }
 
@@ -17,7 +17,7 @@ export async function appLogin(
   dbPassword: string,
   host: string,
 ) {
-  const loginResponse = await authLogin({
+  const loginResponse = await invoke("auth_login", {
     username,
     password,
     dbPassword,

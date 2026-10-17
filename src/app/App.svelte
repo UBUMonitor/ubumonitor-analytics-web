@@ -1,5 +1,4 @@
 <script lang="ts">
-  import Start from "@/app/Start.svelte"
   import UpdateDialog from "@/app/UpdateDialog.svelte"
   import Dialog from "@/dialog/components/Dialog.svelte"
   import { openDialog } from "@/dialog/dialog.svelte"
@@ -10,8 +9,6 @@
   import { onMount } from "svelte"
 
   const dashboard = import("@/dashboard/components/Dashboard.svelte")
-
-  let done = $state(false)
 
   onMount(() => {
     check().then((update) => {
@@ -25,9 +22,7 @@
 <div class="flex h-screen max-h-screen w-screen max-w-screen flex-col overflow-hidden">
   <Header />
   <main class="flex flex-1 overflow-hidden">
-    {#if !done}
-      <Start bind:done />
-    {:else if !loginStore.userId}
+    {#if !loginStore.userId}
       <Login />
     {:else}
       {#await dashboard then { default: Dashboard }}
