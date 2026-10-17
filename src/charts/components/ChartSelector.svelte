@@ -94,8 +94,8 @@
   })
 </script>
 
-<main class="flex size-full flex-col">
-  <div class="tabs tabs-box rounded-none">
+<main class="flex flex-col size-full">
+  <div class="tabs tabs-box">
     {#each chartTypes as { name } (name)}
       <input
         type="radio"
@@ -115,10 +115,12 @@
       bind:group={selectedChart}
     />
   </div>
-  {#if selectedChart === "table"}
-    <TableComponent />
-  {:else}
-    <ChartComponent {option} />
-  {/if}
+  <div class="card card-border p-1 bg-base-100 border-base-300 flex-1 min-h-0">
+    {#if selectedChart === "table"}
+      <TableComponent />
+    {:else}
+      <ChartComponent {option} />
+    {/if}
+  </div>
   <ChartSettings {showScale} {showGroup} />
 </main>

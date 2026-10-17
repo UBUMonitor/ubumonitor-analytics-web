@@ -48,7 +48,7 @@
   })
 </script>
 
-<fieldset class="fieldset mx-auto mt-16 w-sm h-fit rounded-box shadow bg-base-300 p-4">
+<fieldset class="fieldset mx-auto mt-16 w-sm h-fit rounded-box shadow bg-base-100 p-4">
   <LocaleSelector class="ml-auto" />
   <img class="m-auto size-52 object-contain" src="/logo.png" alt="UBUMonitor Logo" />
 

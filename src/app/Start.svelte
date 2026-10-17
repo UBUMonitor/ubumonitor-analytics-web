@@ -27,7 +27,7 @@
   })
 </script>
 
-<div class="card w-96 bg-base-200 shadow card-lg m-auto">
+<div class="card w-96 bg-base-100 shadow card-lg m-auto">
   <div class="card-body">
     <h1 class="card-title">{m.starting_application_label()}</h1>
     <div class="flex flex-col items-center gap-3">

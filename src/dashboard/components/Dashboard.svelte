@@ -2,10 +2,12 @@
   import ChartSelector from "@/charts/components/ChartSelector.svelte"
   import InfoSelector from "@/dashboard/components/InfoSelector.svelte"
   import UserSelector from "@/dashboard/components/UserSelector.svelte"
+  import CourseSelector from "@/header/components/CourseSelector.svelte"
 </script>
 
-<div class="flex size-full">
-  <section class="grid h-full w-xs max-w-xs min-w-xs grid-rows-2 border-r bg-base-200">
+<div class="flex size-full gap-2">
+  <section class="flex flex-col gap-2 h-full w-xs max-w-xs min-w-xs">
+    <CourseSelector />
     <UserSelector />
     <InfoSelector />
   </section>

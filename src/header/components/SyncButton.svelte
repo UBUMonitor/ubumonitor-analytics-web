@@ -30,7 +30,7 @@
 </script>
 
 <button
-  class="group btn size-fit p-1"
+  class="group btn btn-primary size-fit p-1"
   class:invisible={!courseStore.currentCourseId}
   onclick={handleSync}
   disabled={sync}

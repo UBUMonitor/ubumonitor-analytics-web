@@ -1,4 +1,5 @@
 <script lang="ts">
+  import SyncButton from "./SyncButton.svelte"
   import { syncUserEnrollments } from "@/backend/services/user-enrollments"
   import { setCourse } from "@/header"
   import { courseStore } from "@/header/course.svelte"
@@ -22,9 +23,9 @@
   })
 </script>
 
-{#if courseStore.courseItems.length > 0}
+<div class="flex gap-2 items-center">
   <select
-    class="select w-lg select-xs"
+    class="select select-sm"
     name="course"
     aria-label={m.select_course_label()}
     onchange={(e) => setCourse(Number(e.currentTarget.value))}
@@ -36,4 +37,5 @@
       </option>
     {/each}
   </select>
-{/if}
+  <SyncButton />
+</div>

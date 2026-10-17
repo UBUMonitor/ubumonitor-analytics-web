@@ -13,18 +13,20 @@
   })
 </script>
 
-<div class="tabs tabs-border min-w-0">
-  <input
-    type="radio"
-    name="main_tabs"
-    class="tab"
-    aria-label={m.records_label()}
-    bind:group={selectedTab}
-    value="records"
-  />
-  <div class="tab-content bg-base-300">
-    <RecordsSelector bind:selected={recordSelected} />
-  </div>
+<div class="card card-border border-base-300 bg-base-100 p-1 min-h-0 flex-1">
+  <div class="tabs tabs-border h-full">
+    <input
+      type="radio"
+      name="main_tabs"
+      class="tab"
+      aria-label={m.records_label()}
+      bind:group={selectedTab}
+      value="records"
+    />
+    <div class="tab-content">
+      <RecordsSelector bind:selected={recordSelected} />
+    </div>
 
-  <!-- TODO -->
+    <!-- TODO -->
+  </div>
 </div>

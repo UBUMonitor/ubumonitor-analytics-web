@@ -4,6 +4,12 @@
   themes: corporate --default;
 }
 
+@plugin "daisyui/theme" {
+  name: "corporate";
+  default: true;
+  --radius-box: 0.5rem;
+}
+
 @layer components {
   .tab-content {
     border: 0 !important;

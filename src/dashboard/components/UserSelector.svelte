@@ -7,7 +7,7 @@
   import { GraduationCapIcon, UsersIcon } from "@lucide/svelte"
 </script>
 
-<div class="flex h-full flex-col">
+<div class="flex flex-col min-h-0 flex-1 card card-border border-base-300 bg-base-100 p-1">
   <div class="flex justify-end gap-2 p-0.5">
     <GraduationCapIcon class="h-full" />
     <MultiSelect items={dashboardStore.roleItems} ariaLabel={m.roles_label()} />
