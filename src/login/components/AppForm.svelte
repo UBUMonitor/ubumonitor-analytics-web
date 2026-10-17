@@ -11,16 +11,20 @@
   let { host }: Props = $props()
   let loading = $state(false)
 
+  let username = $derived(localStorage.getItem(`username:${host}`) ?? "")
+
   const handleSubmit: EventHandler<SubmitEvent, HTMLFormElement> = async (event) => {
     try {
       event.preventDefault()
       loading = true
 
-      const username = event.currentTarget.username.value as string
+      username = event.currentTarget.username.value as string
       const password = event.currentTarget.password.value as string
       const dbPassword = event.currentTarget.dbPassword.value as string
 
       await appLogin(username, password, dbPassword, host)
+
+      localStorage.setItem(`username:${host}`, username)
     } finally {
       loading = false
     }
@@ -30,7 +34,13 @@
 <form class="fieldset" onsubmit={handleSubmit}>
   <label class="input w-full">
     <UserIcon />
-    <input type="text" name="username" placeholder={m.username_label()} required />
+    <input
+      type="text"
+      name="username"
+      placeholder={m.username_label()}
+      required
+      bind:value={username}
+    />
   </label>
 
   <label class="input w-full">
