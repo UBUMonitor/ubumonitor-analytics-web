@@ -1,4 +1,4 @@
-import pkg from "./package.json"
+import pkg from "./package.json" with { type: "json" }
 import { paraglideVitePlugin } from "@inlang/paraglide-js"
 import { svelte } from "@sveltejs/vite-plugin-svelte"
 import tailwindcss from "@tailwindcss/vite"
@@ -21,7 +21,7 @@ export default defineConfig({
   },
   resolve: {
     alias: {
-      "@": path.resolve(__dirname, "./src"),
+      "@": path.resolve(import.meta.dirname, "./src"),
     },
   },
   server: {
