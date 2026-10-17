@@ -5,8 +5,8 @@
   "identifier": "es.ubu.ubumonitor",
   "build": {
     "frontendDist": "../dist",
-    "devUrl": "http://localhost:5173",
-    "beforeDevCommand": "pnpm dev",
+    "devUrl": "http://localhost:4173",
+    "beforeDevCommand": "pnpm preview",
     "beforeBuildCommand": "pnpm build"
   },
   "app": {
@@ -23,7 +23,7 @@
         "default-src": "'self'",
         "connect-src": "ipc: http://ipc.localhost http://localhost:9090",
         "img-src": "'self' data: http://localhost:9090",
-        "style-src": "'self'",
+        "style-src": "'self' 'unsafe-inline'",
         "font-src": "'self' data:"
       },
       "devCsp": {
