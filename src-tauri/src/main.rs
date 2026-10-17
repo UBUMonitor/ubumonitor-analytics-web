@@ -167,6 +167,11 @@ fn shutdown_backend(app: &AppHandle) {
     }
 }
 
+#[tauri::command]
+fn stop_backend(app: AppHandle) {
+    shutdown_backend(&app)
+}
+
 fn main() {
     tauri::Builder::default()
         .plugin(tauri_plugin_single_instance::init(|_app, _args, _cwd| {}))
@@ -178,7 +183,10 @@ fn main() {
         )
         .plugin(tauri_plugin_updater::Builder::new().build())
         .manage(BackendProcess::default())
-        .invoke_handler(tauri::generate_handler![commands::open_moodle_login])
+        .invoke_handler(tauri::generate_handler![
+            stop_backend,
+            commands::open_moodle_login
+        ])
         .setup(|app| {
             let handle = app.handle().clone();
             tauri::async_runtime::spawn_blocking(move || {

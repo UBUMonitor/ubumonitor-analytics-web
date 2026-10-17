@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { clear } from "@/dashboard/dashboard.svelte"
   import { logout } from "@/login"
   import { loginStore } from "@/login/login.svelte"
   import { m } from "@/shared/paraglide/messages"
@@ -6,6 +7,7 @@
 
   const handleLogout = () => {
     logout()
+    clear()
   }
 </script>
 

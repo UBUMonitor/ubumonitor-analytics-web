@@ -61,3 +61,13 @@ export function getFilteredUsers() {
 export function getSelectedUsers() {
   return _selectedUsers
 }
+
+export function clear() {
+  dashboardStore.userItems = []
+  dashboardStore.sectionItems = []
+  dashboardStore.moduleItems = []
+  dashboardStore.componentItems = []
+  dashboardStore.eventItems = []
+  dashboardStore.roleItems = []
+  dashboardStore.groupItems = []
+}

@@ -5,8 +5,8 @@
   "identifier": "es.ubu.ubumonitor",
   "build": {
     "frontendDist": "../dist",
-    "devUrl": "http://localhost:4173",
-    "beforeDevCommand": "pnpm preview",
+    "devUrl": "http://localhost:5173",
+    "beforeDevCommand": "pnpm dev",
     "beforeBuildCommand": "pnpm build"
   },
   "app": {
