@@ -5,15 +5,19 @@ import type {
 } from "@/backend/model"
 import { dashboardStore } from "@/dashboard/dashboard.svelte"
 import { dedupeBy } from "@/shared/lib/utils"
+import { getLocale } from "@/shared/paraglide/runtime"
 
 export function updateDashboard(
   enrollmentsResponse: Promise<CourseEnrollmentsResponseDto>,
   contentResponse: Promise<CourseContentResponseDto>,
   logsResponse: Promise<CourseLogsResponseDto>,
 ) {
+  const comparator = Intl.Collator(getLocale()).compare
+
   const usersPromise = enrollmentsResponse.then(({ users }) => {
-    dashboardStore.userItems = users.map(
-      ({ id, imageUrl, fullName, lastAccess, lastCourseAccess, roles, groups }) => ({
+    dashboardStore.userItems = users
+      .toSorted((x, y) => comparator(x.fullName, y.fullName))
+      .map(({ id, imageUrl, fullName, lastAccess, lastCourseAccess, roles, groups }) => ({
         id,
         checked: false,
         name: fullName,
@@ -23,8 +27,7 @@ export function updateDashboard(
         roles: roles.map(({ id }) => id),
         groups: groups.map(({ id }) => id),
         show: true,
-      }),
-    )
+      }))
 
     dashboardStore.roleItems = dedupeBy(
       users.flatMap(({ roles }) => roles),
