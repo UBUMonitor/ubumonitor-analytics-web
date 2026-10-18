@@ -8,5 +8,6 @@
 
 export interface LogComponentDto {
   id: number
+  code: string
   name: string
 }

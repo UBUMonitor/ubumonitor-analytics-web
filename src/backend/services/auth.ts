@@ -19,7 +19,7 @@ export const getAuthTokenUrl = () => {
 }
 
 /**
- * Receives a Moodle site URL, an existing Moodle web-service token, and the database encryption key. Returns an application JWT for subsequent authenticated requests.
+ * Receives a Moodle site URL, an existing Moodle web-service token, and the database encryption key. Returns an opaque Bearer session token for subsequent authenticated requests.
  * @summary Authenticate with a Moodle token
  */
 export const authToken = async (
@@ -58,7 +58,7 @@ export const getAuthSSOUrl = () => {
 }
 
 /**
- * Receives a Moodle site URL, an SSO launch credential, and the database encryption key. Returns an application JWT for subsequent authenticated requests.
+ * Receives a Moodle site URL, an SSO launch credential, and the database encryption key. Returns an opaque Bearer session token for subsequent authenticated requests.
  * @summary Authenticate with an SSO launch credential
  */
 export const authSSO = async (
@@ -97,7 +97,7 @@ export const getAuthOfflineUrl = () => {
 }
 
 /**
- * Receives the Moodle site URL, username, and database encryption key. Returns an application JWT for an offline session.
+ * Receives the Moodle site URL, username, and database encryption key. Returns an opaque Bearer session token for an offline session.
  * @summary Create an offline application session
  */
 export const authOffline = async (
@@ -136,7 +136,7 @@ export const getAuthLoginUrl = () => {
 }
 
 /**
- * Receives a Moodle site URL, username, password, and database encryption key. Returns an application JWT for subsequent authenticated requests.
+ * Receives a Moodle site URL, username, password, and database encryption key. Returns an opaque Bearer session token for subsequent authenticated requests.
  * @summary Authenticate with Moodle credentials
  */
 export const authLogin = async (

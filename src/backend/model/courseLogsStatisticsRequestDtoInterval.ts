@@ -10,11 +10,11 @@
  * Optional time aggregation interval for grouping logs by time buckets. If not provided, no time-based grouping is applied.
  * @nullable
  */
-export type CourseLogsMetricsRequestDtoInterval =
-  | (typeof CourseLogsMetricsRequestDtoInterval)[keyof typeof CourseLogsMetricsRequestDtoInterval]
+export type CourseLogsStatisticsRequestDtoInterval =
+  | (typeof CourseLogsStatisticsRequestDtoInterval)[keyof typeof CourseLogsStatisticsRequestDtoInterval]
   | null
 
-export const CourseLogsMetricsRequestDtoInterval = {
+export const CourseLogsStatisticsRequestDtoInterval = {
   HOURLY: "HOURLY",
   DAILY: "DAILY",
   WEEKLY: "WEEKLY",

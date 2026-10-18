@@ -9,9 +9,9 @@ import { orvalFetch } from "../../shared/lib/orvalFetch"
 import type {
   CourseLogsListRequestDto,
   CourseLogsListResponseDto,
-  CourseLogsMetricsRequestDto,
-  CourseLogsMetricsResponseDto,
   CourseLogsResponseDto,
+  CourseLogsStatisticsRequestDto,
+  CourseLogsStatisticsResponseDto,
   ImportCourseLogsBody,
 } from "../model"
 
@@ -32,19 +32,19 @@ export const syncCourseLogs = async (
   })
 }
 
-export const getGetCourseLogsMetricsUrl = (courseId: number) => {
-  return `http://localhost:9090/api/courses/${courseId}/logs/metrics`
+export const getGetCourseLogsStatisticsUrl = (courseId: number) => {
+  return `http://localhost:9090/api/courses/${courseId}/logs/statistics`
 }
 
 /**
- * Get course logs metrics
- * @summary Get course logs metrics
+ * Get aggregated course log statistics
+ * @summary Get course log statistics
  */
-export const getCourseLogsMetrics = async (
+export const getCourseLogsStatistics = async (
   courseId: number,
-  courseLogsMetricsRequestDto: CourseLogsMetricsRequestDto,
+  courseLogsStatisticsRequestDto: CourseLogsStatisticsRequestDto,
   options?: Parameters<typeof orvalFetch>[1],
-): Promise<CourseLogsMetricsResponseDto> => {
+): Promise<CourseLogsStatisticsResponseDto> => {
   const getHeaders = (
     h?: NonNullable<RequestInit["headers"]>,
   ): Record<string, string | readonly string[]> => {
@@ -64,11 +64,11 @@ export const getCourseLogsMetrics = async (
     }
     return headers
   }
-  return orvalFetch<CourseLogsMetricsResponseDto>(getGetCourseLogsMetricsUrl(courseId), {
+  return orvalFetch<CourseLogsStatisticsResponseDto>(getGetCourseLogsStatisticsUrl(courseId), {
     ...options,
     method: "POST",
     headers: { "Content-Type": "application/json", ...getHeaders(options?.headers) },
-    body: JSON.stringify(courseLogsMetricsRequestDto),
+    body: JSON.stringify(courseLogsStatisticsRequestDto),
   })
 }
 

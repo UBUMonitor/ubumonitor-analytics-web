@@ -8,5 +8,6 @@
 
 export interface LogEventDto {
   id: number
+  code: string
   name: string
 }

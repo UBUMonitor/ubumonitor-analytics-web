@@ -6,7 +6,7 @@
  * OpenAPI spec version: 1.0.0
  */
 
-export interface CourseLogsMetricsRequestFiltersDto {
+export interface CourseLogsStatisticsRequestFiltersDto {
   userIds?: number[]
   /** @nullable */
   moduleIds?: number[] | null

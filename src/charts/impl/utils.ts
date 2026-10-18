@@ -1,4 +1,4 @@
-import type { CourseLogsMetricsRequestDtoInterval } from "@/backend/model"
+import type { CourseLogsStatisticsRequestDtoInterval } from "@/backend/model"
 import { getLocale } from "@/shared/paraglide/runtime"
 
 const MS_PER_HOUR = 3_600_000
@@ -6,7 +6,7 @@ const MS_PER_DAY = 86_400_000
 const MS_PER_WEEK = MS_PER_DAY * 7
 
 const INTERVALS = new Map<
-  CourseLogsMetricsRequestDtoInterval,
+  CourseLogsStatisticsRequestDtoInterval,
   (startDateTime: string, endDateTime: string) => string[]
 >()
 
@@ -17,7 +17,7 @@ INTERVALS.set("MONTHLY", getMonthRange)
 INTERVALS.set("DAY_OF_WEEK", () => ["1", "2", "3", "4", "5", "6", "7"])
 
 export function resolveInterval(
-  interval: CourseLogsMetricsRequestDtoInterval,
+  interval: CourseLogsStatisticsRequestDtoInterval,
   startDateTime: string,
   endDateTime: string,
 ) {
@@ -26,7 +26,7 @@ export function resolveInterval(
 
 export function formatIntervalLabel(
   value: string,
-  interval: CourseLogsMetricsRequestDtoInterval,
+  interval: CourseLogsStatisticsRequestDtoInterval,
 ): string {
   const locale = getLocale()
 

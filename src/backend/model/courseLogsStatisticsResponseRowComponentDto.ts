@@ -6,7 +6,7 @@
  * OpenAPI spec version: 1.0.0
  */
 
-export interface CourseLogsMetricsResponseRowEventDto {
+export interface CourseLogsStatisticsResponseRowComponentDto {
   /** @nullable */
   id?: number | null
   /** @nullable */

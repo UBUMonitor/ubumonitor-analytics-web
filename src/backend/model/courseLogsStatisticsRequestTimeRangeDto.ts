@@ -6,7 +6,7 @@
  * OpenAPI spec version: 1.0.0
  */
 
-export interface CourseLogsMetricsRequestTimeRangeDto {
+export interface CourseLogsStatisticsRequestTimeRangeDto {
   /**
    * @nullable
    * @pattern ^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}(:\d{2})?$

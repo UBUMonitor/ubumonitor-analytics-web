@@ -17,6 +17,10 @@ tags:
     description: the Sites API
   - name: CourseContent
     description: the CourseContent API
+  - name: CourseGrades
+    description: the CourseGrades API
+  - name: Health
+    description: the Health API
   - name: Auth
     description: the Auth API
   - name: UserEnrollments
@@ -57,8 +61,8 @@ paths:
         - Auth
       summary: Authenticate with a Moodle token
       description: "Receives a Moodle site URL, an existing Moodle web-service token,\
-        \ and the database encryption key. Returns an application JWT for subsequent\
-        \ authenticated requests. "
+        \ and the database encryption key. Returns an opaque Bearer session token\
+        \ for subsequent authenticated requests. "
       operationId: authToken
       requestBody:
         content:
@@ -68,7 +72,7 @@ paths:
         required: true
       responses:
         "200":
-          description: JWT token retrieved successfully
+          description: Session token retrieved successfully
           content:
             application/json:
               schema:
@@ -85,8 +89,8 @@ paths:
         - Auth
       summary: Authenticate with an SSO launch credential
       description: "Receives a Moodle site URL, an SSO launch credential, and the\
-        \ database encryption key. Returns an application JWT for subsequent authenticated\
-        \ requests. "
+        \ database encryption key. Returns an opaque Bearer session token for subsequent\
+        \ authenticated requests. "
       operationId: authSSO
       requestBody:
         content:
@@ -96,7 +100,7 @@ paths:
         required: true
       responses:
         "200":
-          description: JWT token retrieved successfully
+          description: Session token retrieved successfully
           content:
             application/json:
               schema:
@@ -113,7 +117,7 @@ paths:
         - Auth
       summary: Create an offline application session
       description: "Receives the Moodle site URL, username, and database encryption\
-        \ key. Returns an application JWT for an offline session. "
+        \ key. Returns an opaque Bearer session token for an offline session. "
       operationId: authOffline
       requestBody:
         content:
@@ -123,7 +127,7 @@ paths:
         required: true
       responses:
         "200":
-          description: JWT token retrieved successfully
+          description: Session token retrieved successfully
           content:
             application/json:
               schema:
@@ -140,7 +144,8 @@ paths:
         - Auth
       summary: Authenticate with Moodle credentials
       description: "Receives a Moodle site URL, username, password, and database encryption\
-        \ key. Returns an application JWT for subsequent authenticated requests. "
+        \ key. Returns an opaque Bearer session token for subsequent authenticated\
+        \ requests. "
       operationId: authLogin
       requestBody:
         content:
@@ -150,7 +155,7 @@ paths:
         required: true
       responses:
         "200":
-          description: JWT token retrieved successfully
+          description: Session token retrieved successfully
           content:
             application/json:
               schema:
@@ -213,13 +218,13 @@ paths:
                 $ref: "#/components/schemas/ErrorResponse"
       security:
         - bearerAuth: []
-  /api/courses/{courseId}/logs/metrics:
+  /api/courses/{courseId}/logs/statistics:
     post:
       tags:
         - CourseLogs
-      summary: Get course logs metrics
-      description: Get course logs metrics
-      operationId: getCourseLogsMetrics
+      summary: Get course log statistics
+      description: Get aggregated course log statistics
+      operationId: getCourseLogsStatistics
       parameters:
         - name: courseId
           in: path
@@ -232,7 +237,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/CourseLogsMetricsRequestDto"
+              $ref: "#/components/schemas/CourseLogsStatisticsRequestDto"
         required: true
       responses:
         "200":
@@ -240,7 +245,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/CourseLogsMetricsResponseDto"
+                $ref: "#/components/schemas/CourseLogsStatisticsResponseDto"
         "401":
           description: Unauthorized - token missing or invalid
           content:
@@ -356,6 +361,39 @@ paths:
                 $ref: "#/components/schemas/ErrorResponse"
       security:
         - bearerAuth: []
+  /api/courses/{courseId}/grades/sync:
+    post:
+      tags:
+        - CourseGrades
+      summary: Synchronize course grades
+      description: Retrieves the latest enrollment data for users in the specified
+        course and updates the local tenant database.
+      operationId: syncCourseGrades
+      parameters:
+        - name: courseId
+          in: path
+          description: The unique identifier of the course for which to synchronize
+            grades.
+          required: true
+          schema:
+            type: integer
+            format: int32
+      responses:
+        "200":
+          description: Successful synchronization of grades. The response includes
+            the updated enrollment information for the user's courses.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CourseGradeItemsResponseDto"
+        "401":
+          description: Unauthorized - token missing or invalid
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+      security:
+        - bearerAuth: []
   /api/courses/{courseId}/enrollments/sync:
     post:
       tags:
@@ -436,6 +474,73 @@ paths:
         "401":
           description: Unauthorized - token missing or invalid
           content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+      security:
+        - bearerAuth: []
+  /api/users/images/document:
+    get:
+      tags:
+        - Users
+      summary: Get users Word document with enrollment images
+      description: Retrieves the enrollment images for users
+      operationId: getUsersEnrollmentImagesDocument
+      parameters:
+        - name: userIds
+          in: query
+          description: "List of user IDs to filter the results. If provided, only the\
+            \ specified users will have their grades included in the response."
+          required: true
+          schema:
+            type: array
+            items:
+              type: integer
+              format: int32
+            maxItems: 2147483647
+            minItems: 1
+        - name: defaultImagePath
+          in: query
+          description: The path to the default image file to use.
+          required: false
+          schema:
+            type:
+              - string
+              - "null"
+        - name: useDefaultPhoto
+          in: query
+          description: Whether to use the default photo.
+          required: false
+          schema:
+            type:
+              - boolean
+              - "null"
+        - name: headerText
+          in: query
+          description: The text to include in the header of the document.
+          required: false
+          schema:
+            type: string
+            default: UBUMonitor - Enrollment Images
+      responses:
+        "200":
+          description: Word document containing the enrollment images for users enrolled
+            in the specified course.
+          content:
+            application/vnd.openxmlformats-officedocument.wordprocessingml.document:
+              schema:
+                type: string
+                format: binary
+            application/json:
+              schema:
+                type: string
+                format: binary
+        "401":
+          description: Unauthorized - token missing or invalid
+          content:
+            application/vnd.openxmlformats-officedocument.wordprocessingml.document:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
@@ -580,6 +685,20 @@ paths:
                 $ref: "#/components/schemas/PublicSiteInfoResponseDto"
       security:
         - bearerAuth: []
+  /api/public/health:
+    get:
+      tags:
+        - Health
+      summary: Check service health
+      description: Checks the health status of the service.
+      operationId: checkHealth
+      responses:
+        "204":
+          description: The service is healthy and operational.
+        "503":
+          description: The backend is not yet ready.
+      security:
+        - bearerAuth: []
   /api/enrollments/info:
     get:
       tags:
@@ -596,6 +715,40 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/EnrollmentsResponseDto"
+        "401":
+          description: Unauthorized - token missing or invalid
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+      security:
+        - bearerAuth: []
+  /api/courses/{courseId}/grades/info:
+    get:
+      tags:
+        - CourseGrades
+      summary: Get course grades
+      description: "Retrieves the grade information for users enrolled in a specific\
+        \ course. This endpoint provides details about the users enrolled in the course,\
+        \ including their roles and grade status. It allows clients to access up-to-date\
+        \ grade information for a particular course on the Moodle site."
+      operationId: getCourseGradesInfo
+      parameters:
+        - name: courseId
+          in: path
+          description: The unique identifier of the course for which to retrieve grades.
+          required: true
+          schema:
+            type: integer
+            format: int32
+      responses:
+        "200":
+          description: Successful retrieval of grades. The response includes the grade
+            information for users grades in the specified course.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CourseGradeItemsResponseDto"
         "401":
           description: Unauthorized - token missing or invalid
           content:
@@ -1088,9 +1241,12 @@ components:
         id:
           type: integer
           format: int32
+        code:
+          type: string
         name:
           type: string
       required:
+        - code
         - id
         - name
     LogEventDto:
@@ -1099,21 +1255,24 @@ components:
         id:
           type: integer
           format: int32
+        code:
+          type: string
         name:
           type: string
       required:
+        - code
         - id
         - name
-    CourseLogsMetricsResponseDto:
+    CourseLogsStatisticsResponseDto:
       type: object
       properties:
         rows:
           type: array
           items:
-            $ref: "#/components/schemas/CourseLogsMetricsResponseRowDto"
+            $ref: "#/components/schemas/CourseLogsStatisticsResponseRowDto"
       required:
         - rows
-    CourseLogsMetricsResponseRowComponentDto:
+    CourseLogsStatisticsResponseRowComponentDto:
       type: object
       properties:
         id:
@@ -1127,7 +1286,7 @@ components:
             - string
             - "null"
           example: forum
-    CourseLogsMetricsResponseRowDto:
+    CourseLogsStatisticsResponseRowDto:
       type: object
       properties:
         timeBucket:
@@ -1136,15 +1295,15 @@ components:
             - "null"
           example: 2026-05-01
         user:
-          $ref: "#/components/schemas/CourseLogsMetricsResponseRowUserDto"
+          $ref: "#/components/schemas/CourseLogsStatisticsResponseRowUserDto"
         module:
-          $ref: "#/components/schemas/CourseLogsMetricsResponseRowModuleDto"
+          $ref: "#/components/schemas/CourseLogsStatisticsResponseRowModuleDto"
         component:
-          $ref: "#/components/schemas/CourseLogsMetricsResponseRowComponentDto"
+          $ref: "#/components/schemas/CourseLogsStatisticsResponseRowComponentDto"
         event:
-          $ref: "#/components/schemas/CourseLogsMetricsResponseRowEventDto"
+          $ref: "#/components/schemas/CourseLogsStatisticsResponseRowEventDto"
         origin:
-          $ref: "#/components/schemas/CourseLogsMetricsResponseRowOriginDto"
+          $ref: "#/components/schemas/CourseLogsStatisticsResponseRowOriginDto"
         ipAddress:
           type:
             - string
@@ -1173,7 +1332,7 @@ components:
           example: 42
       required:
         - value
-    CourseLogsMetricsResponseRowEventDto:
+    CourseLogsStatisticsResponseRowEventDto:
       type: object
       properties:
         id:
@@ -1187,7 +1346,7 @@ components:
             - string
             - "null"
           example: discussion_created
-    CourseLogsMetricsResponseRowModuleDto:
+    CourseLogsStatisticsResponseRowModuleDto:
       type: object
       properties:
         id:
@@ -1201,7 +1360,7 @@ components:
             - string
             - "null"
           example: Foro de dudas generales
-    CourseLogsMetricsResponseRowOriginDto:
+    CourseLogsStatisticsResponseRowOriginDto:
       type: object
       properties:
         id:
@@ -1215,7 +1374,7 @@ components:
             - string
             - "null"
           example: web
-    CourseLogsMetricsResponseRowUserDto:
+    CourseLogsStatisticsResponseRowUserDto:
       type: object
       properties:
         id:
@@ -1228,7 +1387,7 @@ components:
       required:
         - fullName
         - id
-    CourseLogsMetricsRequestDto:
+    CourseLogsStatisticsRequestDto:
       type: object
       properties:
         fields:
@@ -1252,7 +1411,7 @@ components:
               - SECTION_ID
               - SECTION_NAME
         timeRange:
-          $ref: "#/components/schemas/CourseLogsMetricsRequestTimeRangeDto"
+          $ref: "#/components/schemas/CourseLogsStatisticsRequestTimeRangeDto"
         groupBy:
           type: array
           items:
@@ -1278,6 +1437,13 @@ components:
             - MONTHLY
             - DAY_OF_WEEK
           example: DAILY
+        weekStartsOn:
+          type: integer
+          format: int32
+          description: "ISO day number used as the first day when interval is DAY_OF_WEEK\
+            \ (1=Monday, 7=Sunday). Defaults to Monday. "
+          maximum: 7
+          minimum: 1
         fillGapsStrategy:
           type:
             - string
@@ -1288,10 +1454,10 @@ components:
         sortBy:
           type: array
           items:
-            $ref: "#/components/schemas/CourseLogsMetricsRequestSortByItemDto"
+            $ref: "#/components/schemas/CourseLogsStatisticsRequestSortByItemDto"
         filters:
-          $ref: "#/components/schemas/CourseLogsMetricsRequestFiltersDto"
-    CourseLogsMetricsRequestFiltersDto:
+          $ref: "#/components/schemas/CourseLogsStatisticsRequestFiltersDto"
+    CourseLogsStatisticsRequestFiltersDto:
       type: object
       properties:
         userIds:
@@ -1340,7 +1506,7 @@ components:
           items:
             type: integer
             format: int32
-    CourseLogsMetricsRequestSortByItemDto:
+    CourseLogsStatisticsRequestSortByItemDto:
       type: object
       properties:
         field:
@@ -1359,7 +1525,7 @@ components:
           example: ASC
       required:
         - field
-    CourseLogsMetricsRequestTimeRangeDto:
+    CourseLogsStatisticsRequestTimeRangeDto:
       type: object
       properties:
         from:
@@ -1659,6 +1825,40 @@ components:
         includeTotal:
           type: boolean
           example: false
+    CourseGradeItemsResponseDto:
+      type: object
+      properties:
+        gradeItems:
+          type: array
+          items:
+            $ref: "#/components/schemas/CourseGradeItemsResponseGradeItemsInnerDto"
+      required:
+        - gradeItems
+    CourseGradeItemsResponseGradeItemsInnerDto:
+      type: object
+      properties:
+        gradeItemId:
+          type: integer
+          format: int32
+          description: Unique identifier for the grade item
+        parentGradeItemId:
+          type:
+            - integer
+            - "null"
+          format: int32
+          description: "Unique identifier for the parent grade item, if applicable"
+        gradeMin:
+          type: number
+          format: double
+          description: Minimum grade value for the grade item
+        gradeMax:
+          type: number
+          format: double
+          description: Maximum grade value for the grade item
+      required:
+        - gradeItemId
+        - gradeMax
+        - gradeMin
     CourseEnrollmentsResponseDto:
       type: object
       properties:
@@ -1845,4 +2045,4 @@ components:
     bearerAuth:
       type: http
       scheme: bearer
-      bearerFormat: JWT
+      bearerFormat: Opaque session token

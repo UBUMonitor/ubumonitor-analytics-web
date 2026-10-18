@@ -6,7 +6,48 @@
  * OpenAPI spec version: 1.0.0
  */
 import { orvalFetch } from "../../shared/lib/orvalFetch"
-import type { GetUserImagesProfileParams } from "../model"
+import type { GetUserImagesProfileParams, GetUsersEnrollmentImagesDocumentParams } from "../model"
+
+export const getGetUsersEnrollmentImagesDocumentUrl = (
+  params: GetUsersEnrollmentImagesDocumentParams,
+) => {
+  const normalizedParams = new URLSearchParams()
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+    const explodeParameters = ["userIds"]
+
+    if (Array.isArray(value) && explodeParameters.includes(key)) {
+      value.forEach((v) => {
+        normalizedParams.append(key, v === null ? "null" : String(v))
+      })
+      return
+    }
+
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? "null" : String(value))
+    }
+  })
+
+  const stringifiedParams = normalizedParams.toString()
+
+  return stringifiedParams.length > 0
+    ? `http://localhost:9090/api/users/images/document?${stringifiedParams}`
+    : `http://localhost:9090/api/users/images/document`
+}
+
+/**
+ * Retrieves the enrollment images for users
+ * @summary Get users Word document with enrollment images
+ */
+export const getUsersEnrollmentImagesDocument = async (
+  params: GetUsersEnrollmentImagesDocumentParams,
+  options?: Parameters<typeof orvalFetch>[1],
+): Promise<Blob> => {
+  return orvalFetch<Blob>(getGetUsersEnrollmentImagesDocumentUrl(params), {
+    ...options,
+    method: "GET",
+  })
+}
 
 export const getGetUserImagesProfileUrl = (userId: number, params: GetUserImagesProfileParams) => {
   const normalizedParams = new URLSearchParams()

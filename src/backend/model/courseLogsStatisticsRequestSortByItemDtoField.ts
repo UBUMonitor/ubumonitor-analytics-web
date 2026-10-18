@@ -6,10 +6,10 @@
  * OpenAPI spec version: 1.0.0
  */
 
-export type CourseLogsMetricsRequestSortByItemDtoField =
-  (typeof CourseLogsMetricsRequestSortByItemDtoField)[keyof typeof CourseLogsMetricsRequestSortByItemDtoField]
+export type CourseLogsStatisticsRequestSortByItemDtoField =
+  (typeof CourseLogsStatisticsRequestSortByItemDtoField)[keyof typeof CourseLogsStatisticsRequestSortByItemDtoField]
 
-export const CourseLogsMetricsRequestSortByItemDtoField = {
+export const CourseLogsStatisticsRequestSortByItemDtoField = {
   VALUE: "VALUE",
   USER_ID: "USER_ID",
   MODULE_ID: "MODULE_ID",

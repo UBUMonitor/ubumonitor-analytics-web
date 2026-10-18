@@ -5,7 +5,7 @@
   import LocaleSelector from "@/login/components/LocaleSelector.svelte"
   import WebForm from "@/login/components/WebForm.svelte"
   import { m } from "@/shared/paraglide/messages.js"
-  import { ArrowRightIcon, LinkIcon, SquarePenIcon } from "@lucide/svelte"
+  import { ArrowRightIcon, CircleXIcon, LinkIcon, SquarePenIcon } from "@lucide/svelte"
   import { onMount } from "svelte"
 
   const storedHost = localStorage.getItem("host") ?? ""
@@ -13,6 +13,7 @@
   let host = $state(storedHost)
   let hostDisabled = $state(storedHost !== "")
   let checkingHost = $state(false)
+  let errorHost = $state<string | null>()
 
   let typeOfLogin = $state<SiteInfoTypeOfLogin | null>(null)
   let launchUrl = $state<string | null | undefined>(null)
@@ -20,11 +21,28 @@
   const checkHost = async (host: string) => {
     try {
       checkingHost = true
+      errorHost = null
+
       const result = await validateHost(host)
+
+      if (!result.enableMobileWebService || !result.enableWebServices) {
+        errorHost = m.host_unsupported_error()
+        return
+      }
+
+      if (result.maintenanceEnabled) {
+        errorHost = result.maintenanceMessage || m.host_maintenance_error()
+        return
+      }
+
       typeOfLogin = result.typeOfLogin
       launchUrl = result.launchUrl
+
       localStorage.setItem("host", host)
+
       hostDisabled = true
+    } catch {
+      errorHost = m.host_invalid_error_label()
     } finally {
       checkingHost = false
     }
@@ -75,6 +93,13 @@
       {/if}
     </button>
   </form>
+
+  {#if errorHost}
+    <div role="alert" class="alert alert-error">
+      <CircleXIcon />
+      <span>{errorHost}</span>
+    </div>
+  {/if}
 
   {#if typeOfLogin === SiteInfoTypeOfLogin.APP}
     <AppForm {host} />

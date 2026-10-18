@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { getCourseLogsMetrics } from "@/backend/services/course-logs"
+  import { getCourseLogsStatistics } from "@/backend/services/course-logs"
   import { chartStore } from "@/charts/chart.svelte"
   import ChartComponent from "@/charts/components/ChartComponent.svelte"
   import ChartSettings from "@/charts/components/ChartSettings.svelte"
@@ -62,7 +62,7 @@
       return
     }
 
-    getCourseLogsMetrics(courseStore.currentCourseId, {
+    getCourseLogsStatistics(courseStore.currentCourseId, {
       fields: currentChart.getFields(),
       timeRange: { from: chartStore.from, to: chartStore.to },
       groupBy: currentChart.getGroupBy(),

@@ -6,10 +6,10 @@
  * OpenAPI spec version: 1.0.0
  */
 
-export type CourseLogsMetricsRequestDtoFieldsItem =
-  (typeof CourseLogsMetricsRequestDtoFieldsItem)[keyof typeof CourseLogsMetricsRequestDtoFieldsItem]
+export type CourseLogsStatisticsRequestDtoFieldsItem =
+  (typeof CourseLogsStatisticsRequestDtoFieldsItem)[keyof typeof CourseLogsStatisticsRequestDtoFieldsItem]
 
-export const CourseLogsMetricsRequestDtoFieldsItem = {
+export const CourseLogsStatisticsRequestDtoFieldsItem = {
   COURSE_ID: "COURSE_ID",
   USER_ID: "USER_ID",
   MODULE_ID: "MODULE_ID",

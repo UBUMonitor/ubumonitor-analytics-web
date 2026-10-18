@@ -6,7 +6,9 @@
  * OpenAPI spec version: 1.0.0
  */
 
-export interface CourseLogsMetricsResponseRowUserDto {
-  id: number
-  fullName: string
+export interface CourseLogsStatisticsResponseRowOriginDto {
+  /** @nullable */
+  id?: number | null
+  /** @nullable */
+  name?: string | null
 }

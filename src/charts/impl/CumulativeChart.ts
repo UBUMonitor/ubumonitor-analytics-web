@@ -1,6 +1,6 @@
 import type {
-  CourseLogsMetricsRequestDtoFieldsItem,
-  CourseLogsMetricsRequestDtoGroupByItem,
+  CourseLogsStatisticsRequestDtoFieldsItem,
+  CourseLogsStatisticsRequestDtoGroupByItem,
 } from "@/backend/model"
 import { Chart, type Resolve } from "@/charts/impl/Chart"
 import { formatIntervalLabel, resolveInterval, round2 } from "@/charts/impl/utils"
@@ -8,11 +8,11 @@ import { m } from "@/shared/paraglide/messages"
 import type { EChartsOption } from "echarts"
 
 export class CumulativeChart extends Chart {
-  getFields(): CourseLogsMetricsRequestDtoFieldsItem[] {
+  getFields(): CourseLogsStatisticsRequestDtoFieldsItem[] {
     return ["USER_ID"]
   }
 
-  getGroupBy(): CourseLogsMetricsRequestDtoGroupByItem[] {
+  getGroupBy(): CourseLogsStatisticsRequestDtoGroupByItem[] {
     return ["USER_ID"]
   }
 
@@ -64,7 +64,7 @@ export class CumulativeChart extends Chart {
     const series = userItems.map((item, u) => ({
       name: item.name,
       type: "line" as const,
-      data: Array.from(matrix.subarray(u * rangeLength, (u + 1) * rangeLength), round2),
+      data: Array.from(matrix.subarray(u * rangeLength, (u + 1) * rangeLength)),
     }))
 
     const averageSeries = {

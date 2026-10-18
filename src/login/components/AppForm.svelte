@@ -1,7 +1,8 @@
 <script lang="ts">
   import { appLogin } from "@/login"
+  import { getErrorMessage } from "@/shared/error/errorMessage"
   import { m } from "@/shared/paraglide/messages"
-  import { DatabaseIcon, KeyRoundIcon, UserIcon } from "@lucide/svelte"
+  import { CircleXIcon, DatabaseIcon, KeyRoundIcon, UserIcon } from "@lucide/svelte"
   import type { EventHandler } from "svelte/elements"
 
   interface Props {
@@ -10,6 +11,7 @@
 
   let { host }: Props = $props()
   let loading = $state(false)
+  let errorLogin = $state<string | null>()
 
   let username = $derived(localStorage.getItem(`username:${host}`) ?? "")
 
@@ -25,6 +27,8 @@
       await appLogin(username, password, dbPassword, host)
 
       localStorage.setItem(`username:${host}`, username)
+    } catch (e) {
+      errorLogin = getErrorMessage(e)
     } finally {
       loading = false
     }
@@ -60,4 +64,11 @@
       {m.login_button()}
     {/if}
   </button>
+
+  {#if errorLogin}
+    <div role="alert" class="alert alert-error">
+      <CircleXIcon />
+      <span>{errorLogin}</span>
+    </div>
+  {/if}
 </form>

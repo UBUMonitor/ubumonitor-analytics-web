@@ -1,7 +1,7 @@
 import {
-  CourseLogsMetricsRequestDtoFieldsItem,
-  type CourseLogsMetricsRequestDtoGroupByItem,
-  type CourseLogsMetricsResponseRowDto,
+  CourseLogsStatisticsRequestDtoFieldsItem,
+  type CourseLogsStatisticsRequestDtoGroupByItem,
+  type CourseLogsStatisticsResponseRowDto,
 } from "@/backend/model"
 import { Chart, type Resolve } from "@/charts/impl/Chart"
 import type { Info, Item } from "@/dashboard/dashboard.svelte"
@@ -12,7 +12,7 @@ const FIELDS = {
   module: "MODULE_ID",
   component: "COMPONENT_ID",
   event: "EVENT_ID",
-} as const satisfies Record<Info, CourseLogsMetricsRequestDtoFieldsItem>
+} as const satisfies Record<Info, CourseLogsStatisticsRequestDtoFieldsItem>
 
 const ITEMS_KEY = {
   section: "sectionItems",
@@ -22,18 +22,18 @@ const ITEMS_KEY = {
 } as const satisfies Record<Info, keyof Resolve>
 
 const ROW_MATCHER = {
-  section: (row: CourseLogsMetricsResponseRowDto, id: number) => row.sectionId === id,
-  module: (row: CourseLogsMetricsResponseRowDto, id: number) => row.module?.id === id,
-  component: (row: CourseLogsMetricsResponseRowDto, id: number) => row.component?.id === id,
-  event: (row: CourseLogsMetricsResponseRowDto, id: number) => row.event?.id === id,
-} as const satisfies Record<Info, (row: CourseLogsMetricsResponseRowDto, id: number) => boolean>
+  section: (row: CourseLogsStatisticsResponseRowDto, id: number) => row.sectionId === id,
+  module: (row: CourseLogsStatisticsResponseRowDto, id: number) => row.module?.id === id,
+  component: (row: CourseLogsStatisticsResponseRowDto, id: number) => row.component?.id === id,
+  event: (row: CourseLogsStatisticsResponseRowDto, id: number) => row.event?.id === id,
+} as const satisfies Record<Info, (row: CourseLogsStatisticsResponseRowDto, id: number) => boolean>
 
 export class TotalChart extends Chart {
-  getFields(): CourseLogsMetricsRequestDtoFieldsItem[] {
+  getFields(): CourseLogsStatisticsRequestDtoFieldsItem[] {
     return [FIELDS[this.selectedInfo]]
   }
 
-  getGroupBy(): CourseLogsMetricsRequestDtoGroupByItem[] {
+  getGroupBy(): CourseLogsStatisticsRequestDtoGroupByItem[] {
     return [FIELDS[this.selectedInfo]]
   }
 

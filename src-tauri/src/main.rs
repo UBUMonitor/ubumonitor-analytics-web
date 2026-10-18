@@ -185,7 +185,8 @@ fn main() {
         .manage(BackendProcess::default())
         .invoke_handler(tauri::generate_handler![
             stop_backend,
-            commands::open_moodle_login
+            commands::open_moodle_login,
+            commands::get_public_moodle_config
         ])
         .setup(|app| {
             let handle = app.handle().clone();

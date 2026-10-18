@@ -1,6 +1,4 @@
 <script lang="ts">
-  import { healthCheck } from "."
-  import BackendErrorDialog from "@/app/BackendErrorDialog.svelte"
   import UpdateDialog from "@/app/UpdateDialog.svelte"
   import Dialog from "@/dialog/components/Dialog.svelte"
   import { openDialog } from "@/dialog/dialog.svelte"
@@ -13,7 +11,6 @@
 
   onMount(() => {
     check().then((update) => update && openDialog(UpdateDialog, { update }))
-    healthCheck().catch(() => openDialog(BackendErrorDialog))
   })
 </script>
 

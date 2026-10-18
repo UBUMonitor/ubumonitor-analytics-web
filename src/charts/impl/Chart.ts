@@ -1,8 +1,8 @@
 import type {
-  CourseLogsMetricsRequestDtoFieldsItem,
-  CourseLogsMetricsRequestDtoGroupByItem,
-  CourseLogsMetricsRequestDtoInterval,
-  CourseLogsMetricsResponseRowDto,
+  CourseLogsStatisticsRequestDtoFieldsItem,
+  CourseLogsStatisticsRequestDtoGroupByItem,
+  CourseLogsStatisticsRequestDtoInterval,
+  CourseLogsStatisticsResponseRowDto,
 } from "@/backend/model"
 import type { Info, Item, ModuleItem, SectionItem, UserItem } from "@/dashboard/dashboard.svelte"
 import type { EChartsOption } from "echarts"
@@ -15,16 +15,16 @@ export interface Resolve {
   eventItems: Item[]
   startDateTime: string
   endDateTime: string
-  interval: CourseLogsMetricsRequestDtoInterval
+  interval: CourseLogsStatisticsRequestDtoInterval
   scale: number
-  rows: CourseLogsMetricsResponseRowDto[]
+  rows: CourseLogsStatisticsResponseRowDto[]
 }
 
 export abstract class Chart {
   protected selectedInfo: Info = "component"
 
-  abstract getFields(): CourseLogsMetricsRequestDtoFieldsItem[]
-  abstract getGroupBy(): CourseLogsMetricsRequestDtoGroupByItem[]
+  abstract getFields(): CourseLogsStatisticsRequestDtoFieldsItem[]
+  abstract getGroupBy(): CourseLogsStatisticsRequestDtoGroupByItem[]
   abstract resolveOptions(resolve: Resolve): EChartsOption
 
   setSelectedInfo(info: Info) {

@@ -6,10 +6,10 @@
  * OpenAPI spec version: 1.0.0
  */
 
-export type CourseLogsMetricsRequestDtoGroupByItem =
-  (typeof CourseLogsMetricsRequestDtoGroupByItem)[keyof typeof CourseLogsMetricsRequestDtoGroupByItem]
+export type CourseLogsStatisticsRequestDtoGroupByItem =
+  (typeof CourseLogsStatisticsRequestDtoGroupByItem)[keyof typeof CourseLogsStatisticsRequestDtoGroupByItem]
 
-export const CourseLogsMetricsRequestDtoGroupByItem = {
+export const CourseLogsStatisticsRequestDtoGroupByItem = {
   USER_ID: "USER_ID",
   MODULE_ID: "MODULE_ID",
   COMPONENT_ID: "COMPONENT_ID",
