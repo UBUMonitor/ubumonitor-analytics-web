@@ -2,7 +2,7 @@ import type {
   CourseLogsStatisticsRequestDtoFieldsItem,
   CourseLogsStatisticsRequestDtoGroupByItem,
 } from "@/backend/model"
-import { Chart, type Resolve } from "@/charts/impl/Chart"
+import { CHART_GRID, Chart, type Resolve } from "@/charts/impl/Chart"
 import { formatIntervalLabel, resolveInterval, round2 } from "@/charts/impl/utils"
 import { m } from "@/shared/paraglide/messages"
 import type { EChartsOption } from "echarts"
@@ -112,12 +112,7 @@ export class RelativeCumulativeChart extends Chart {
         type: "value",
       },
       series: [...series, referenceSeries],
-      grid: {
-        right: 16,
-        bottom: 16,
-        left: 16,
-        containLabel: true,
-      },
+      grid: CHART_GRID,
     }
   }
 

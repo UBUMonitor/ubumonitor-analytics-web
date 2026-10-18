@@ -7,6 +7,13 @@ import type {
 import type { Info, Item, ModuleItem, SectionItem, UserItem } from "@/dashboard/dashboard.svelte"
 import type { EChartsOption } from "echarts"
 
+export const CHART_GRID = {
+  right: 16,
+  bottom: 16,
+  left: 16,
+  outerBoundsMode: "same",
+} as const
+
 export interface Resolve {
   userItems: UserItem[]
   sectionItems: SectionItem[]

@@ -2,7 +2,7 @@ import type {
   CourseLogsStatisticsRequestDtoFieldsItem,
   CourseLogsStatisticsRequestDtoGroupByItem,
 } from "@/backend/model"
-import { Chart, type Resolve } from "@/charts/impl/Chart"
+import { CHART_GRID, Chart, type Resolve } from "@/charts/impl/Chart"
 import { formatIntervalLabel, resolveInterval } from "@/charts/impl/utils"
 import type { EChartsOption } from "echarts"
 
@@ -87,12 +87,7 @@ export class HeatMapChart extends Chart {
           },
         },
       ],
-      grid: {
-        right: 16,
-        bottom: 16,
-        left: 16,
-        containLabel: true,
-      },
+      grid: CHART_GRID,
     }
   }
 

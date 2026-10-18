@@ -3,7 +3,7 @@ import {
   type CourseLogsStatisticsRequestDtoGroupByItem,
   type CourseLogsStatisticsResponseRowDto,
 } from "@/backend/model"
-import { Chart, type Resolve } from "@/charts/impl/Chart"
+import { CHART_GRID, Chart, type Resolve } from "@/charts/impl/Chart"
 import type { Info, Item } from "@/dashboard/dashboard.svelte"
 import type { EChartsOption } from "echarts"
 
@@ -63,12 +63,7 @@ export class TotalChart extends Chart {
       tooltip: {
         trigger: "item",
       },
-      grid: {
-        right: 16,
-        bottom: 16,
-        left: 16,
-        containLabel: true,
-      },
+      grid: CHART_GRID,
     }
   }
 }
