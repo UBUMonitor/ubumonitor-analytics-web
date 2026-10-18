@@ -2,6 +2,7 @@
   import RecordItem from "@/dashboard/components/RecordItem.svelte"
   import { dashboardStore } from "@/dashboard/dashboard.svelte"
   import Select from "@/shared/components/Select.svelte"
+  import SelectButtons from "@/shared/components/SelectButtons.svelte"
   import { m } from "@/shared/paraglide/messages"
 
   interface Props {
@@ -29,6 +30,7 @@
       value={tab.value}
     />
     <div class="tab-content">
+      <SelectButtons class="p-1" items={tab.items()} />
       <Select component={RecordItem} items={tab.items()} ariaLabel={tab.label()} />
     </div>
   {/each}

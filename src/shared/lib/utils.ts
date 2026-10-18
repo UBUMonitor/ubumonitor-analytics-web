@@ -34,3 +34,52 @@ export function formatRelativeTime(dateString?: string) {
   if (absDiff < 30 * 86_400_000) return rtf.format(weeks, "week") // < 1 month
   return rtf.format(months, "month") // 1 month+
 }
+
+const DAY_IN_MS = 1000 * 60 * 60 * 24
+
+export function isDateRangeMore(date: string, days: number): boolean {
+  const timestamp = new Date(date).getTime()
+
+  if (Number.isNaN(timestamp)) return false
+
+  const elapsedDays = Math.floor((Date.now() - timestamp) / DAY_IN_MS)
+
+  return elapsedDays > days
+}
+
+export function isDateRangeBetween(date: string, minDays: number, maxDays: number): boolean {
+  const timestamp = new Date(date).getTime()
+
+  if (Number.isNaN(timestamp)) return false
+
+  const elapsedDays = Math.floor((Date.now() - timestamp) / DAY_IN_MS)
+
+  return elapsedDays >= minDays && elapsedDays <= maxDays
+}
+
+export function isDateRangeLess(date: string, days: number): boolean {
+  const timestamp = new Date(date).getTime()
+
+  if (Number.isNaN(timestamp)) return false
+
+  const elapsedDays = Math.floor((Date.now() - timestamp) / DAY_IN_MS)
+
+  return elapsedDays < days
+}
+
+export function includeIntl(text: string, search: string) {
+  if (!search) return true
+
+  const collator = new Intl.Collator(getLocale(), {
+    usage: "search",
+    sensitivity: "base",
+  })
+
+  for (let i = 0; i <= text.length - search.length; i++) {
+    if (collator.compare(text.slice(i, i + search.length), search) === 0) {
+      return true
+    }
+  }
+
+  return false
+}

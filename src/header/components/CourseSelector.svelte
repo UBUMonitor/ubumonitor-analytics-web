@@ -35,13 +35,11 @@
 
       clear()
 
-      await Promise.all([
-        updateDashboard(
-          syncCourseUsersEnrollments(courseStore.currentCourseId),
-          syncCourseContent(courseStore.currentCourseId),
-          syncCourseLogs(courseStore.currentCourseId),
-        ),
-      ])
+      await updateDashboard(
+        syncCourseUsersEnrollments(courseStore.currentCourseId),
+        syncCourseContent(courseStore.currentCourseId),
+        syncCourseLogs(courseStore.currentCourseId),
+      )
     } finally {
       sync = false
     }

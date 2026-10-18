@@ -11,7 +11,7 @@
 </script>
 
 <button
-  class="select w-24 select-sm"
+  class="select w-20 select-sm"
   aria-label={ariaLabel}
   title={ariaLabel}
   popovertarget="popover-{uid}"
