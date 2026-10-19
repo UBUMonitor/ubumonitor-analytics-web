@@ -8,10 +8,9 @@ export function updateChart(startDate?: string, endDate?: string) {
     chartStore.from = new Date(Date.now() - 180 * 24 * 60 * 60 * 1000).toISOString().slice(0, 16)
   }
 
-  if (endDate) {
-    chartStore.to = endDate.slice(0, 16)
-  } else {
-    // Default to current date if no end date is available
-    chartStore.to = new Date().toISOString().slice(0, 16)
-  }
+  const now = new Date()
+  const tomorrowUTC = Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate() + 1)
+  const endTime = endDate ? new Date(endDate).getTime() : tomorrowUTC
+
+  chartStore.to = new Date(Math.min(endTime, tomorrowUTC)).toISOString().slice(0, 16)
 }
