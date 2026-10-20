@@ -83,6 +83,7 @@ export class CumulativeChart extends Chart {
     return {
       tooltip: {
         trigger: "axis",
+        confine: true,
       },
       legend: {
         type: "scroll",

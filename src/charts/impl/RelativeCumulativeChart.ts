@@ -94,6 +94,7 @@ export class RelativeCumulativeChart extends Chart {
     return {
       tooltip: {
         trigger: "axis",
+        confine: true,
       },
       legend: {
         type: "scroll",
