@@ -1,5 +1,6 @@
 <script lang="ts">
   import { appLogin } from "@/login"
+  import PasswordInput from "@/shared/components/PasswordInput.svelte"
   import { getErrorMessage } from "@/shared/error/errorMessage"
   import { m } from "@/shared/paraglide/messages"
   import { CircleXIcon, DatabaseIcon, KeyRoundIcon, UserIcon } from "@lucide/svelte"
@@ -60,21 +61,24 @@
     />
   </label>
 
-  <label class="input w-full">
+  <PasswordInput
+    bind:inputElement={passwordInput}
+    name="password"
+    placeholder={m.password_label()}
+    showLabel={m.show_password_button()}
+    hideLabel={m.hide_password_button()}
+  >
     <KeyRoundIcon />
-    <input
-      bind:this={passwordInput}
-      type="password"
-      name="password"
-      placeholder={m.password_label()}
-      required
-    />
-  </label>
+  </PasswordInput>
 
-  <label class="input w-full">
+  <PasswordInput
+    name="dbPassword"
+    placeholder={m.db_password_label()}
+    showLabel={m.show_database_password_button()}
+    hideLabel={m.hide_database_password_button()}
+  >
     <DatabaseIcon />
-    <input type="password" name="dbPassword" placeholder={m.db_password_label()} required />
-  </label>
+  </PasswordInput>
 
   <button class="btn mt-2 btn-primary" disabled={loading}>
     {#if loading}
