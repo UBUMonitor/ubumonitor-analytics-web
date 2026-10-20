@@ -7,11 +7,17 @@
 @plugin "daisyui/theme" {
   name: "corporate";
   default: true;
+  --radius-selector: 0.5rem;
+  --radius-field: 0.5rem;
   --radius-box: 0.5rem;
 }
 
 @layer components {
   .tab-content {
     border: 0 !important;
+  }
+  .tab:checked + .tab-content {
+    display: flex !important;
+    flex-direction: column !important;
   }
 }

@@ -24,19 +24,17 @@
   }
 </script>
 
-<div class="flex h-full min-h-0 flex-col bg-base-100">
-  <div
-    class="list scrollbar-thin overflow-y-auto rounded-box"
-    role="listbox"
-    aria-label={ariaLabel}
-    tabindex="-1"
-    onkeydown={handleKeydown}
-  >
-    {#each items as item (item.id)}
-      <label class="cursor-pointer select-none has-checked:bg-accent">
-        <input class="hidden" type="checkbox" bind:checked={item.checked} id={item.id.toString()} />
-        <ItemComponent {...item} />
-      </label>
-    {/each}
-  </div>
+<div
+  class="list scrollbar-thin overflow-y-auto rounded-box"
+  role="listbox"
+  aria-label={ariaLabel}
+  tabindex="-1"
+  onkeydown={handleKeydown}
+>
+  {#each items as item (item.id)}
+    <label class="cursor-pointer select-none has-checked:bg-accent">
+      <input class="hidden" type="checkbox" bind:checked={item.checked} id={item.id.toString()} />
+      <ItemComponent {...item} />
+    </label>
+  {/each}
 </div>
