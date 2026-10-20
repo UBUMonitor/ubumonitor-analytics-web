@@ -21,25 +21,25 @@
 
 <div class="card flex min-h-0 flex-1 flex-col border-base-300 bg-base-100 p-1 card-border">
   <div
-    class="grid grid-flow-col grid-rows-3 grid-cols-[1fr_fit-content(100%)] gap-1 p-1 border-b border-base-200"
+    class="grid grid-flow-col grid-cols-[1fr_fit-content(100%)] grid-rows-3 gap-1 border-b border-base-200 p-1"
   >
     <div class="flex gap-1 self-center">
-      <div class="badge badge-sm badge-soft font-bold px-1">
+      <div class="badge badge-soft px-1 badge-sm font-bold">
         <FunnelIcon class="size-full p-0.5" />
         {getFilteredUsers().length}
       </div>
-      <div class="badge badge-sm badge-soft font-bold px-1">
+      <div class="badge badge-soft px-1 badge-sm font-bold">
         <UsersIcon class="size-full p-0.5" />
         {dashboardStore.userItems.length}
       </div>
-      <div class="badge badge-sm badge-soft badge-success font-bold px-1">
+      <div class="badge badge-soft px-1 badge-sm font-bold badge-success">
         <UserCheckIcon class="size-full p-0.5" />
         {getSelectedUsers().length}
       </div>
     </div>
 
     <input
-      class="input input-sm w-40"
+      class="input w-40 input-sm"
       name="filter"
       type="text"
       placeholder={m.filter_label()}
