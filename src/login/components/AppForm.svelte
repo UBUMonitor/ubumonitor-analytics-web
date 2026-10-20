@@ -3,6 +3,7 @@
   import { getErrorMessage } from "@/shared/error/errorMessage"
   import { m } from "@/shared/paraglide/messages"
   import { CircleXIcon, DatabaseIcon, KeyRoundIcon, UserIcon } from "@lucide/svelte"
+  import { onMount } from "svelte"
   import type { EventHandler } from "svelte/elements"
 
   interface Props {
@@ -14,6 +15,9 @@
   let errorLogin = $state<string | null>()
 
   let username = $derived(localStorage.getItem(`username:${host}`) ?? "")
+
+  let usernameInput = $state<HTMLInputElement>()
+  let passwordInput = $state<HTMLInputElement>()
 
   const handleSubmit: EventHandler<SubmitEvent, HTMLFormElement> = async (event) => {
     try {
@@ -33,23 +37,38 @@
       loading = false
     }
   }
+
+  onMount(() => {
+    if (username) {
+      passwordInput?.focus()
+    } else {
+      usernameInput?.focus()
+    }
+  })
 </script>
 
 <form class="fieldset" onsubmit={handleSubmit}>
   <label class="input w-full">
     <UserIcon />
     <input
+      bind:this={usernameInput}
+      bind:value={username}
       type="text"
       name="username"
       placeholder={m.username_label()}
       required
-      bind:value={username}
     />
   </label>
 
   <label class="input w-full">
     <KeyRoundIcon />
-    <input type="password" name="password" placeholder={m.password_label()} required />
+    <input
+      bind:this={passwordInput}
+      type="password"
+      name="password"
+      placeholder={m.password_label()}
+      required
+    />
   </label>
 
   <label class="input w-full">

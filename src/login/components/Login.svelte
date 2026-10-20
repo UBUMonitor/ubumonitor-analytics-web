@@ -18,6 +18,8 @@
   let typeOfLogin = $state<SiteInfoTypeOfLogin | null>(null)
   let launchUrl = $state<string | null | undefined>(null)
 
+  let hostInput = $state<HTMLInputElement>()
+
   const checkHost = async (host: string) => {
     try {
       checkingHost = true
@@ -63,6 +65,7 @@
 
   onMount(() => {
     if (host) checkHost(host)
+    hostInput?.focus()
   })
 </script>
 
@@ -74,6 +77,7 @@
     <label class="input join-item w-full">
       <LinkIcon />
       <input
+        bind:this={hostInput}
         type="url"
         name="host"
         placeholder={m.host_label()}
