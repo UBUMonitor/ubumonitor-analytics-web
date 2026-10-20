@@ -1,7 +1,7 @@
 $ErrorActionPreference = "Stop"
 
 $TemurinVersion = "25.0.3+9"
-$JarUrl = "https://github.com/UBUMonitor/ubumonitor-analytics-api/releases/download/v0.0.5/ubumonitoranalytics-0.0.5.jar"
+$JarUrl = "https://github.com/UBUMonitor/ubumonitor-analytics-api/releases/download/v0.0.6/ubumonitoranalytics-0.0.6.jar"
 $ResourcesDir = "src-tauri/resources"
 
 New-Item -ItemType Directory -Force -Path $ResourcesDir | Out-Null
