@@ -1,6 +1,7 @@
 <script lang="ts">
   import { chartStore } from "@/charts/chart.svelte"
   import { m } from "@/shared/paraglide/messages"
+  import { DateTime } from "luxon"
 
   interface Props {
     showScale?: boolean
@@ -36,11 +37,13 @@
       <span class="label flex-1">{m.initial_reference_date_label()}</span>
       <input
         type="datetime-local"
-        class="w-auto shrink-0"
+        class="w-auto flex-1"
         value={chartStore.from}
         onchange={(e) => (chartStore.from = e.currentTarget.value)}
         required
         step="1"
+        min={DateTime.now().minus({ years: 5 }).startOf("day").toFormat("yyyy-MM-dd'T'HH:mm")}
+        max={DateTime.now().plus({ days: 1 }).startOf("day").toFormat("yyyy-MM-dd'T'HH:mm")}
       />
     </label>
 
@@ -48,11 +51,13 @@
       <span class="label flex-1">{m.final_reference_date_label()}</span>
       <input
         type="datetime-local"
-        class="w-auto shrink-0"
+        class="w-auto flex-1"
         value={chartStore.to}
         onchange={(e) => (chartStore.to = e.currentTarget.value)}
         required
         step="1"
+        min={DateTime.now().minus({ years: 5 }).startOf("day").toFormat("yyyy-MM-dd'T'HH:mm")}
+        max={DateTime.now().plus({ days: 1 }).startOf("day").toFormat("yyyy-MM-dd'T'HH:mm")}
       />
     </label>
   </div>

@@ -3,9 +3,11 @@ import type {
   CourseLogsStatisticsRequestDtoGroupByItem,
 } from "@/backend/model"
 import { CHART_GRID, Chart, type Resolve } from "@/charts/impl/Chart"
-import { formatIntervalLabel, resolveInterval, round2 } from "@/charts/impl/utils"
+import { formatSlot, intervalSlots } from "@/charts/impl/dateUtils"
+import { formatTooltip, round2 } from "@/charts/impl/utils"
 import { m } from "@/shared/paraglide/messages"
 import type { EChartsOption } from "echarts"
+import type { CallbackDataParams } from "echarts/types/dist/shared"
 
 export class RelativeCumulativeChart extends Chart {
   getFields(): CourseLogsStatisticsRequestDtoFieldsItem[] {
@@ -23,7 +25,7 @@ export class RelativeCumulativeChart extends Chart {
     interval,
     rows,
   }: Resolve): EChartsOption {
-    const range = resolveInterval(interval, startDateTime, endDateTime)
+    const range = intervalSlots(interval, startDateTime, endDateTime)
     const rangeLength = range.length
     const userCount = userItems.length
 
@@ -72,7 +74,9 @@ export class RelativeCumulativeChart extends Chart {
     const series = userItems.map((item, u) => ({
       name: item.name,
       type: "line" as const,
-      data: Array.from(matrix.subarray(u * rangeLength, (u + 1) * rangeLength), round2),
+      data: Array.from(matrix.subarray(u * rangeLength, (u + 1) * rangeLength), round2).map(
+        (value) => ({ value, fullName: item.name, img: item.imageUrl }),
+      ),
     }))
 
     const referenceSeries = {
@@ -89,12 +93,14 @@ export class RelativeCumulativeChart extends Chart {
       },
       symbol: "none" as const,
       z: 10,
+      tooltip: {
+        show: false,
+      },
     }
 
     return {
       tooltip: {
-        trigger: "axis",
-        confine: true,
+        formatter: (param) => formatTooltip(interval, param as CallbackDataParams),
       },
       legend: {
         type: "scroll",
@@ -106,7 +112,7 @@ export class RelativeCumulativeChart extends Chart {
         boundaryGap: false,
         data: range,
         axisLabel: {
-          formatter: (value: string) => formatIntervalLabel(value, interval),
+          formatter: (value: string) => formatSlot(interval, value),
         },
       },
       yAxis: {

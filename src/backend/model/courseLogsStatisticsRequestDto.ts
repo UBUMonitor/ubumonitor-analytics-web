@@ -8,7 +8,6 @@
 import type { CourseLogsStatisticsRequestDtoFieldsItem } from "./courseLogsStatisticsRequestDtoFieldsItem"
 import type { CourseLogsStatisticsRequestDtoFillGapsStrategy } from "./courseLogsStatisticsRequestDtoFillGapsStrategy"
 import type { CourseLogsStatisticsRequestDtoGroupByItem } from "./courseLogsStatisticsRequestDtoGroupByItem"
-import type { CourseLogsStatisticsRequestDtoInterval } from "./courseLogsStatisticsRequestDtoInterval"
 import type { CourseLogsStatisticsRequestFiltersDto } from "./courseLogsStatisticsRequestFiltersDto"
 import type { CourseLogsStatisticsRequestSortByItemDto } from "./courseLogsStatisticsRequestSortByItemDto"
 import type { CourseLogsStatisticsRequestTimeRangeDto } from "./courseLogsStatisticsRequestTimeRangeDto"
@@ -18,11 +17,8 @@ export interface CourseLogsStatisticsRequestDto {
   fields?: CourseLogsStatisticsRequestDtoFieldsItem[]
   timeRange?: CourseLogsStatisticsRequestTimeRangeDto
   groupBy?: CourseLogsStatisticsRequestDtoGroupByItem[]
-  /**
-   * Optional time aggregation interval for grouping logs by time buckets. If not provided, no time-based grouping is applied.
-   * @nullable
-   */
-  interval?: CourseLogsStatisticsRequestDtoInterval
+  /** Optional time aggregation interval for grouping logs by time buckets. If not provided, no time-based grouping is applied.  */
+  interval?: "HOURLY" | "DAILY" | "WEEKLY" | "MONTHLY" | "DAY_OF_WEEK"
   /**
    * ISO day number used as the first day when interval is DAY_OF_WEEK (1=Monday, 7=Sunday). Defaults to Monday.
    * @minimum 1

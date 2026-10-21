@@ -1427,7 +1427,6 @@ components:
         interval:
           type:
             - string
-            - "null"
           description: "Optional time aggregation interval for grouping logs by time\
             \ buckets. If not provided, no time-based grouping is applied. "
           enum:

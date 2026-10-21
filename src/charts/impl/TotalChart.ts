@@ -60,9 +60,7 @@ export class TotalChart extends Chart {
           data,
         },
       ],
-      tooltip: {
-        trigger: "item",
-      },
+      tooltip: {},
       grid: CHART_GRID,
     }
   }
