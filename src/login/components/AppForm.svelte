@@ -24,6 +24,7 @@
     try {
       event.preventDefault()
       loading = true
+      errorLogin = null
 
       username = event.currentTarget.username.value as string
       const password = event.currentTarget.password.value as string

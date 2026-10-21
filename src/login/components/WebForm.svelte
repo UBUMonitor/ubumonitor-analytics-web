@@ -22,6 +22,7 @@
     try {
       event.preventDefault()
       loading = true
+      errorLogin = null
 
       const dbPassword = event.currentTarget.dbPassword.value as string
 
