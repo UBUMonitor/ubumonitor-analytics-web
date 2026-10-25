@@ -1,3 +1,4 @@
+import { getLocale } from "@/shared/paraglide/runtime"
 import { tableFeatures } from "@tanstack/svelte-table"
 import { DateTime } from "luxon"
 
@@ -23,5 +24,6 @@ export function renderValue(value: unknown, dataType?: DataType) {
   if (dataType === "date")
     return (value as DateTime).toLocaleString(DateTime.DATETIME_SHORT_WITH_SECONDS)
   if (dataType === "boolean") return (value as boolean) ? "✅" : "❌"
+  if (dataType === "number") return Intl.NumberFormat(getLocale()).format(value as number)
   return String(value)
 }

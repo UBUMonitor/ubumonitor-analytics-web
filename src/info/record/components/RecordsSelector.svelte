@@ -74,8 +74,7 @@
         selectedItems,
       })
       .then((option) => {
-        displayStore.displayType = option.type
-        displayStore.displayOption = option.option
+        displayStore.config = option
       })
   })
 </script>

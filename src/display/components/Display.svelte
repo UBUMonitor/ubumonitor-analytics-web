@@ -19,10 +19,10 @@
     {/each}
   </div>
   <div class="card min-h-0 flex-1 border-base-300 bg-base-100 p-1 card-border">
-    {#if displayStore.displayType === "chart"}
-      <ChartComponent />
-    {:else if displayStore.displayType === "table"}
-      <TableComponent />
+    {#if displayStore.config.type === "chart"}
+      <ChartComponent option={displayStore.config.option} />
+    {:else if displayStore.config.type === "table"}
+      <TableComponent option={displayStore.config.option} />
     {/if}
   </div>
   <DisplaySettings />

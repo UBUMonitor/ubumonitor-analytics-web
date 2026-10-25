@@ -1,15 +1,18 @@
 <script lang="ts">
-  import { displayStore } from "@/display/display.svelte"
   import { renderValue, type DynamicRow, features, type TableOption } from "@/display/impl/table"
   import { createTable, FlexRender, type ColumnDef } from "@tanstack/svelte-table"
 
-  const chartOption = $derived(displayStore.displayOption as TableOption)
-  const data = $derived(chartOption.data)
+  interface Props {
+    option: TableOption
+  }
 
+  let { option }: Props = $props()
+
+  const data = $derived(option.data)
   const columns = $derived.by<Array<ColumnDef<typeof features, DynamicRow>>>(() => {
-    if (chartOption.columns.length === 0) return []
+    if (option.columns.length === 0) return []
 
-    return chartOption.columns.map((column): ColumnDef<typeof features, DynamicRow> => {
+    return option.columns.map((column): ColumnDef<typeof features, DynamicRow> => {
       const dataType = column.type
 
       return {

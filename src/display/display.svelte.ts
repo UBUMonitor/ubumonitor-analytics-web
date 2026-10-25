@@ -3,25 +3,11 @@ import type { TableOption } from "@/display/impl/table"
 import type { StatsInterval } from "@/shared/lib/datetime"
 import { DateTime } from "luxon"
 
-export type DisplayType = "chart" | "table"
-
-export type DisplayOptions = {
-  chart: ECOption
-  table: TableOption
-}
-
-export type DisplayOption = DisplayOptions[DisplayType]
-
-export type DisplayConfig = {
-  [K in DisplayType]: {
-    type: K
-    option: DisplayOptions[K]
-  }
-}[DisplayType]
+export type DisplayConfig =
+  { type: "chart"; option: ECOption } | { type: "table"; option: TableOption }
 
 export const displayStore = $state({
-  displayType: "chart" as DisplayType,
-  displayOption: {} as DisplayOption,
+  config: { type: "chart", option: {} } as DisplayConfig,
   display: [] as string[],
   selectedDisplay: "",
   from: DateTime.now().startOf("year"),

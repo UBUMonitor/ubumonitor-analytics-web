@@ -3,9 +3,9 @@ import type { DateTime } from "luxon"
 export interface CourseItem {
   id: number
   name: string
-  startDate?: DateTime
-  endDate?: DateTime
-  lastSync?: DateTime
+  startDate?: DateTime<true>
+  endDate?: DateTime<true>
+  lastSync?: DateTime<true>
 }
 
 export const courseStore = $state({

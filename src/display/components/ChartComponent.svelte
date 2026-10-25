@@ -1,7 +1,12 @@
 <script lang="ts">
-  import { displayStore } from "@/display/display.svelte"
   import echarts, { type ECOption } from "@/display/impl/echarts"
   import { onMount } from "svelte"
+
+  interface Props {
+    option: ECOption
+  }
+
+  let { option }: Props = $props()
 
   const CHART_GRID = {
     right: 16,
@@ -26,10 +31,7 @@
   })
 
   $effect(() => {
-    instance?.setOption(
-      { ...(displayStore.displayOption as ECOption), grid: CHART_GRID },
-      { notMerge: true },
-    )
+    instance?.setOption({ ...option, grid: CHART_GRID }, { notMerge: true })
   })
 </script>
 

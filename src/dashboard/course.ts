@@ -17,9 +17,11 @@ export async function updateCourses(enrollments: Promise<EnrollmentsResponseDto>
   courseStore.courseItems = courses.map((course) => ({
     id: course.id,
     name: course.fullName,
-    startDate: course.startDate ? DateTime.fromISO(course.startDate) : undefined,
-    endDate: course.endDate ? DateTime.fromISO(course.endDate) : undefined,
-    lastSync: course.lastSync ? DateTime.fromISO(course.lastSync) : undefined,
+    startDate: course.startDate
+      ? (DateTime.fromISO(course.startDate) as DateTime<true>)
+      : undefined,
+    endDate: course.endDate ? (DateTime.fromISO(course.endDate) as DateTime<true>) : undefined,
+    lastSync: course.lastSync ? (DateTime.fromISO(course.lastSync) as DateTime<true>) : undefined,
   }))
 }
 

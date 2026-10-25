@@ -69,7 +69,7 @@ export function toDateTimeInput(dateTime: DateTime) {
 }
 
 export function fromDateTimeInput(dateTime: string) {
-  return DateTime.fromISO(dateTime)
+  return DateTime.fromISO(dateTime) as DateTime<true>
 }
 
 /**
