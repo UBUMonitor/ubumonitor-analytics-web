@@ -8,12 +8,14 @@
 
 export interface CourseGradeItemsResponseGradeItemsInnerDto {
   /** Unique identifier for the grade item */
-  gradeItemId: number
+  id: number
+  /** Unique identifier for the parent grade item, if applicable */
+  parentId?: number
   /**
-   * Unique identifier for the parent grade item, if applicable
+   * Name of the grade item
    * @nullable
    */
-  parentGradeItemId?: number | null
+  name?: string | null
   /** Minimum grade value for the grade item */
   gradeMin: number
   /** Maximum grade value for the grade item */

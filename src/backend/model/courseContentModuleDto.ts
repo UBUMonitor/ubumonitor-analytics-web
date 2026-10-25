@@ -5,6 +5,7 @@
  * API documentation for UBUMonitor Analytics
  * OpenAPI spec version: 1.0.0
  */
+import type { CourseContentModuleDtoTracking } from "./courseContentModuleDtoTracking"
 
 export interface CourseContentModuleDto {
   /** Module ID */
@@ -19,4 +20,8 @@ export interface CourseContentModuleDto {
   description: string
   /** Is module visible */
   visible: boolean
+  /** Module tracking type */
+  tracking?: CourseContentModuleDtoTracking
+  /** Indicates if the module value is used for tracking another module. This is relevant for modules that are used as prerequisites for other modules, such as quizzes or assignments. If the module is not used for tracking another module, this value will be false. */
+  valueUsed?: boolean
 }

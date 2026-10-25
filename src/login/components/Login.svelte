@@ -1,6 +1,5 @@
 <script lang="ts">
-  import { SiteInfoTypeOfLogin } from "@/backend/model"
-  import { validateHost } from "@/login"
+  import { validateHost, type TypeOfLogin } from "@/login"
   import AppForm from "@/login/components/AppForm.svelte"
   import LocaleSelector from "@/login/components/LocaleSelector.svelte"
   import WebForm from "@/login/components/WebForm.svelte"
@@ -15,7 +14,7 @@
   let checkingHost = $state(false)
   let errorHost = $state<string | null>()
 
-  let typeOfLogin = $state<SiteInfoTypeOfLogin | null>(null)
+  let typeOfLogin = $state<TypeOfLogin | null>(null)
   let launchUrl = $state<string | null | undefined>(null)
 
   let hostInput = $state<HTMLInputElement>()
@@ -105,9 +104,9 @@
     </div>
   {/if}
 
-  {#if typeOfLogin === SiteInfoTypeOfLogin.APP}
+  {#if typeOfLogin === "APP"}
     <AppForm {host} />
-  {:else if typeOfLogin != null && launchUrl}
+  {:else if launchUrl}
     <WebForm {host} {launchUrl} />
   {/if}
 </fieldset>

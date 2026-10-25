@@ -14,7 +14,7 @@
   })
 </script>
 
-{#if !loginStore.userId}
+{#if !loginStore.token}
   <Login />
 {:else}
   {#await dashboard then { default: Dashboard }}

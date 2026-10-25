@@ -12,20 +12,15 @@ import type { CourseLogsStatisticsResponseRowOriginDto } from "./courseLogsStati
 import type { CourseLogsStatisticsResponseRowUserDto } from "./courseLogsStatisticsResponseRowUserDto"
 
 export interface CourseLogsStatisticsResponseRowDto {
-  /** @nullable */
-  timeBucket?: string | null
+  timeBucket?: string
   user?: CourseLogsStatisticsResponseRowUserDto
   module?: CourseLogsStatisticsResponseRowModuleDto
   component?: CourseLogsStatisticsResponseRowComponentDto
   event?: CourseLogsStatisticsResponseRowEventDto
   origin?: CourseLogsStatisticsResponseRowOriginDto
-  /** @nullable */
-  ipAddress?: string | null
-  /** @nullable */
-  courseId?: number | null
-  /** @nullable */
-  sectionId?: number | null
-  /** @nullable */
-  sectionName?: string | null
+  ipAddress?: string
+  courseId?: number
+  sectionId?: number
+  sectionName?: string
   value: number
 }

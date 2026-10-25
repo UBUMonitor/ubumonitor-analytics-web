@@ -21,4 +21,6 @@ export interface CourseInformationDto {
   endDate: string
   /** The date and time when the enrollment information was last modified. */
   timeModified: string
+  /** The date and time when the enrollment information was last synchronized. */
+  lastSync?: string
 }

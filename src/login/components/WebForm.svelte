@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { loginWeb } from "@/login"
+  import { login, loginWeb } from "@/login"
   import PasswordInput from "@/shared/components/PasswordInput.svelte"
   import { getErrorMessage } from "@/shared/error/errorMessage"
   import { m } from "@/shared/paraglide/messages"
@@ -26,7 +26,7 @@
 
       const dbPassword = event.currentTarget.dbPassword.value as string
 
-      await loginWeb(host, dbPassword, launchUrl)
+      await login(loginWeb(host, dbPassword, launchUrl))
     } catch (e) {
       errorLogin = getErrorMessage(e)
     } finally {

@@ -20,4 +20,6 @@ export interface UserInfo {
   firstName: string
   /** The last name of the user. */
   lastName: string
+  /** The timezone of the user. */
+  timeZone: string
 }

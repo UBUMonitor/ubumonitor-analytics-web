@@ -1,5 +1,5 @@
 import type { ErrorResponse } from "@/backend/model"
-import { getCheckHealthUrl } from "@/backend/services/health"
+import { getCheckHealthUrl } from "@/backend/services/system"
 import { loginStore } from "@/login/login.svelte"
 import ky from "ky"
 

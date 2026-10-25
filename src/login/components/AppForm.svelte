@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { appLogin } from "@/login"
+  import { appLogin, login } from "@/login"
   import PasswordInput from "@/shared/components/PasswordInput.svelte"
   import { getErrorMessage } from "@/shared/error/errorMessage"
   import { m } from "@/shared/paraglide/messages"
@@ -30,7 +30,7 @@
       const password = event.currentTarget.password.value as string
       const dbPassword = event.currentTarget.dbPassword.value as string
 
-      await appLogin(username, password, dbPassword, host)
+      await login(appLogin(username, password, dbPassword, host))
 
       localStorage.setItem(`username:${host}`, username)
     } catch (e) {

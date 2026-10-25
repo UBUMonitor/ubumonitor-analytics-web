@@ -1,5 +1,5 @@
-<script lang="ts" generics="T extends Item">
-  import { type Item } from "@/dashboard/dashboard.svelte"
+<script lang="ts" generics="T extends SelectableItem">
+  import type { SelectableItem } from "@/shared/types/selectable-item"
   import type { Component } from "svelte"
 
   interface Props {

@@ -5,7 +5,6 @@
  * API documentation for UBUMonitor Analytics
  * OpenAPI spec version: 1.0.0
  */
-import type { SiteInfoTypeOfLogin } from "./siteInfoTypeOfLogin"
 
 /**
  * Basic information about the Moodle site.
@@ -17,31 +16,4 @@ export interface SiteInfo {
   siteVersion: string
   /** The URL of the Moodle site. */
   siteUrl: string
-  /** The type of login method used by the Moodle site. */
-  typeOfLogin: SiteInfoTypeOfLogin
-  /**
-   * The SSO login launch URL for the Moodle site, if applicable.
-   * @nullable
-   */
-  launchUrl?: string | null
-  /**
-   * Indicates if the mobile web service is enabled for the Moodle site.
-   * @nullable
-   */
-  enableMobileWebService?: boolean | null
-  /**
-   * Indicates if web services are enabled for the Moodle site.
-   * @nullable
-   */
-  enableWebServices?: boolean | null
-  /**
-   * Indicates if maintenance mode is enabled for the Moodle site.
-   * @nullable
-   */
-  maintenanceEnabled?: boolean | null
-  /**
-   * The maintenance message for the Moodle site, if applicable.
-   * @nullable
-   */
-  maintenanceMessage?: string | null
 }

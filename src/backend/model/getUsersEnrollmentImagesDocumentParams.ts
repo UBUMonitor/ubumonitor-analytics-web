@@ -15,16 +15,18 @@ export type GetUsersEnrollmentImagesDocumentParams = {
   userIds: number[]
   /**
    * The path to the default image file to use.
-   * @nullable
    */
-  defaultImagePath?: string | null
+  defaultImageUri?: string
   /**
    * Whether to use the default photo.
-   * @nullable
    */
-  useDefaultPhoto?: boolean | null
+  useDefaultPhoto?: boolean
   /**
    * The text to include in the header of the document.
    */
   headerText?: string
+  /**
+   * The name of the file to be generated.
+   */
+  fileName?: string
 }

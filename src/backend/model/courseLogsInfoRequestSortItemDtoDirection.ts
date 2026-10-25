@@ -6,12 +6,8 @@
  * OpenAPI spec version: 1.0.0
  */
 
-/**
- * @nullable
- */
 export type CourseLogsInfoRequestSortItemDtoDirection =
-  | (typeof CourseLogsInfoRequestSortItemDtoDirection)[keyof typeof CourseLogsInfoRequestSortItemDtoDirection]
-  | null
+  (typeof CourseLogsInfoRequestSortItemDtoDirection)[keyof typeof CourseLogsInfoRequestSortItemDtoDirection]
 
 export const CourseLogsInfoRequestSortItemDtoDirection = {
   ASC: "ASC",

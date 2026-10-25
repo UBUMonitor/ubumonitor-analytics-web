@@ -1,12 +1,12 @@
 <script lang="ts">
-  import { m } from "../paraglide/messages"
-  import type { Item } from "@/dashboard/dashboard.svelte"
+  import { m } from "@/shared/paraglide/messages"
+  import type { SelectableItem } from "@/shared/types/selectable-item"
   import { ListChecksIcon, ListIcon } from "@lucide/svelte"
   import type { ClassValue } from "svelte/elements"
 
   interface Props {
     class?: ClassValue
-    items: Item[]
+    items: SelectableItem[]
   }
 
   let { items, class: className }: Props = $props()

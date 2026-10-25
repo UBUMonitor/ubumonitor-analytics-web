@@ -7,6 +7,7 @@
  */
 import { orvalFetch } from "../../shared/lib/orvalFetch"
 import type {
+  DatabasesInfoResponseDto,
   GetPublicSiteInfoParams,
   PublicSiteInfoResponseDto,
   SiteInfoResponseDto,
@@ -71,6 +72,23 @@ export const getPublicSiteInfo = async (
   options?: Parameters<typeof orvalFetch>[1],
 ): Promise<PublicSiteInfoResponseDto> => {
   return orvalFetch<PublicSiteInfoResponseDto>(getGetPublicSiteInfoUrl(params), {
+    ...options,
+    method: "GET",
+  })
+}
+
+export const getListDatabasesUrl = () => {
+  return `http://localhost:9090/api/public/sites/databases/info`
+}
+
+/**
+ * Retrieves a list of all available databases.
+ * @summary List all databases
+ */
+export const listDatabases = async (
+  options?: Parameters<typeof orvalFetch>[1],
+): Promise<DatabasesInfoResponseDto> => {
+  return orvalFetch<DatabasesInfoResponseDto>(getListDatabasesUrl(), {
     ...options,
     method: "GET",
   })

@@ -1,4 +1,4 @@
-import { BackendError } from "../lib/orvalFetch"
+import { BackendError } from "@/shared/lib/orvalFetch"
 import { m } from "@/shared/paraglide/messages"
 
 export function getErrorMessage(error: unknown) {

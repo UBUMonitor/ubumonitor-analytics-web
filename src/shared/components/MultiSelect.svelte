@@ -1,8 +1,8 @@
 <script lang="ts">
-  import type { Item } from "@/dashboard/dashboard.svelte"
+  import type { SelectableItem } from "@/shared/types/selectable-item"
 
   interface Props {
-    items: Item[]
+    items: SelectableItem[]
     ariaLabel: string
   }
 
@@ -22,7 +22,7 @@
 
 {#if items.length > 0}
   <ul
-    class="menu dropdown dropdown-end z-1 rounded-box bg-base-100 p-2 shadow-sm"
+    class="menu dropdown dropdown-end rounded-box bg-base-100 p-1 shadow-sm"
     popover
     id="popover-{uid}"
     style="position-anchor:--anchor-{uid}"

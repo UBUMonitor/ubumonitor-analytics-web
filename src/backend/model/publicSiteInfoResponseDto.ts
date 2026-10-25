@@ -5,8 +5,8 @@
  * API documentation for UBUMonitor Analytics
  * OpenAPI spec version: 1.0.0
  */
-import type { SiteInfo } from "./siteInfo"
+import type { PublicSiteInfoResponseSiteConfig } from "./publicSiteInfoResponseSiteConfig"
 
 export interface PublicSiteInfoResponseDto {
-  site: SiteInfo
+  siteConfig?: PublicSiteInfoResponseSiteConfig
 }

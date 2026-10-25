@@ -1,8 +1,8 @@
 <script lang="ts">
-  import ChartSelector from "@/charts/components/ChartSelector.svelte"
-  import InfoSelector from "@/dashboard/components/InfoSelector.svelte"
-  import UserSelector from "@/dashboard/components/UserSelector.svelte"
-  import CourseSelector from "@/header/components/CourseSelector.svelte"
+  import CourseSelector from "@/dashboard/components/CourseSelector.svelte"
+  import Display from "@/display/components/Display.svelte"
+  import InfoSelector from "@/info/components/InfoSelector.svelte"
+  import UserSelector from "@/user/components/UserSelector.svelte"
 </script>
 
 <div class="flex size-full gap-2">
@@ -11,5 +11,5 @@
     <UserSelector />
     <InfoSelector />
   </section>
-  <ChartSelector />
+  <Display />
 </div>

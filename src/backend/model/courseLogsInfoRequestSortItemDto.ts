@@ -8,8 +8,6 @@
 import type { CourseLogsInfoRequestSortItemDtoDirection } from "./courseLogsInfoRequestSortItemDtoDirection"
 
 export interface CourseLogsInfoRequestSortItemDto {
-  /** @nullable */
-  field?: string | null
-  /** @nullable */
+  field?: string
   direction?: CourseLogsInfoRequestSortItemDtoDirection
 }

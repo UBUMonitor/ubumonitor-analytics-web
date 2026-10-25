@@ -1,29 +1,49 @@
 import BackendErrorDialog from "@/app/BackendErrorDialog.svelte"
-import type { SiteInfo } from "@/backend/model"
 import { authLogout, authSSO } from "@/backend/services/auth"
 import { authLogin } from "@/backend/services/auth"
-import { syncSiteInfo } from "@/backend/services/sites"
+import { syncUserEnrollments } from "@/backend/services/user-enrollments"
+import { updateCourses } from "@/dashboard/course"
 import { openDialog } from "@/dialog/dialog.svelte"
 import { loginStore } from "@/login/login.svelte"
 import { healthCheck } from "@/shared/lib/orvalFetch"
 import { m } from "@/shared/paraglide/messages"
 import { invoke } from "@tauri-apps/api/core"
 import { once, type UnlistenFn } from "@tauri-apps/api/event"
+import { info } from "@tauri-apps/plugin-log"
+
+export interface SiteInfo {
+  siteName: string
+  siteVersion?: string
+  siteUrl: string
+  typeOfLogin: TypeOfLogin
+  launchUrl?: string
+  enableMobileWebService?: boolean
+  enableWebServices?: boolean
+  maintenanceEnabled?: boolean
+  maintenanceMessage?: string
+}
+
+export type TypeOfLogin = "APP" | "BROWSER" | "EMBEDDED" | "UNKNOWN"
 
 export async function validateHost(host: string) {
   return invoke<SiteInfo>("get_public_moodle_config", { host })
 }
 
-let backendUp = false
+const backendUp = healthCheck()
+  .then(() => {
+    info("Backend up")
+  })
+  .catch(() => {
+    openDialog(BackendErrorDialog)
+    throw Error("Backend failed")
+  })
 
-async function checkBackend() {
-  if (backendUp) return Promise.resolve()
+export async function login(token: Promise<string>) {
+  await backendUp
 
-  return healthCheck()
-    .catch(() => openDialog(BackendErrorDialog))
-    .then(() => {
-      backendUp = true
-    })
+  loginStore.token = await token
+
+  updateCourses(syncUserEnrollments())
 }
 
 export async function appLogin(
@@ -32,8 +52,6 @@ export async function appLogin(
   dbPassword: string,
   host: string,
 ) {
-  await checkBackend()
-
   const loginResponse = await authLogin({
     username,
     password,
@@ -41,11 +59,7 @@ export async function appLogin(
     host,
   })
 
-  loginStore.token = loginResponse.accessToken
-
-  const siteInfoResponse = await syncSiteInfo()
-
-  loginStore.userId = siteInfoResponse.user.id
+  return loginResponse.accessToken
 }
 
 export interface CookieInfo {
@@ -63,9 +77,7 @@ export interface MoodleLoginPayload {
 }
 
 export async function loginWeb(host: string, dbPassword: string, launchUrl: string) {
-  await checkBackend()
-
-  return new Promise<void>((resolve, reject) => {
+  return new Promise<string>((resolve, reject) => {
     let unlistenToken: UnlistenFn
     let unlistenCancelled: UnlistenFn
 
@@ -84,11 +96,7 @@ export async function loginWeb(host: string, dbPassword: string, launchUrl: stri
           cookies: moodle.cookies.map(({ name, value }) => ({ name, value })),
         })
 
-        loginStore.token = response.accessToken
-        const siteInfoResponse = await syncSiteInfo()
-        loginStore.userId = siteInfoResponse.user.id
-
-        resolve()
+        resolve(response.accessToken)
       } catch (err) {
         reject(err)
       }
@@ -119,5 +127,4 @@ export async function loginWeb(host: string, dbPassword: string, launchUrl: stri
 export async function logout() {
   await authLogout()
   loginStore.token = null
-  loginStore.userId = null
 }

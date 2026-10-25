@@ -11,24 +11,12 @@ export interface AuthTokenRequestCookiesInnerDto {
   name: string
   /** Cookie value. */
   value: string
-  /**
-   * Cookie domain.
-   * @nullable
-   */
-  domain?: string | null
-  /**
-   * Cookie path.
-   * @nullable
-   */
-  path?: string | null
-  /**
-   * Whether the cookie is only sent over HTTPS.
-   * @nullable
-   */
-  secure?: boolean | null
-  /**
-   * Whether the cookie is inaccessible to client-side scripts.
-   * @nullable
-   */
-  httpOnly?: boolean | null
+  /** Cookie domain. */
+  domain?: string
+  /** Cookie path. */
+  path?: string
+  /** Whether the cookie is only sent over HTTPS. */
+  secure?: boolean
+  /** Whether the cookie is inaccessible to client-side scripts. */
+  httpOnly?: boolean
 }

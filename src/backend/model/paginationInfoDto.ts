@@ -15,19 +15,10 @@ export interface PaginationInfoDto {
   totalElements: number
   /** Total number of pages */
   totalPages: number
-  /**
-   * Whether this is the first page
-   * @nullable
-   */
-  first?: boolean | null
-  /**
-   * Whether this is the last page
-   * @nullable
-   */
-  last?: boolean | null
-  /**
-   * Whether the page has no content
-   * @nullable
-   */
-  empty?: boolean | null
+  /** Whether this is the first page */
+  first?: boolean
+  /** Whether this is the last page */
+  last?: boolean
+  /** Whether the page has no content */
+  empty?: boolean
 }

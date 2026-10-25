@@ -17,11 +17,8 @@ export interface ErrorResponse {
   message: string
   /** The date and time when the error occurred. */
   timestamp: string
-  /**
-   * A unique identifier for the request trace, useful for debugging.
-   * @nullable
-   */
-  traceId?: string | null
+  /** A unique identifier for the request trace, useful for debugging. */
+  traceId?: string
   /** List of specific validation errors, if applicable. */
   errors?: ErrorDetail[]
 }
