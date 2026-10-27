@@ -2,6 +2,7 @@
 
 @plugin "daisyui" {
   themes: corporate --default;
+  logs: false;
 }
 
 @plugin "daisyui/theme" {
@@ -14,11 +15,10 @@
 
 @layer components {
   .tab-content {
-    border: 0 !important;
+    @apply border-0;
   }
   .tab:checked + .tab-content {
-    display: flex !important;
-    flex-direction: column !important;
+    @apply flex! flex-col!;
   }
 }
 

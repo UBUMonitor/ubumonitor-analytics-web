@@ -7,17 +7,15 @@
   import { ArrowRightIcon, CircleXIcon, LinkIcon, SquarePenIcon } from "@lucide/svelte"
   import { onMount } from "svelte"
 
-  const storedHost = localStorage.getItem("host") ?? ""
-
-  let host = $state(storedHost)
-  let hostDisabled = $state(storedHost !== "")
+  let host = $state(localStorage.getItem("host") ?? "")
+  let hostDisabled = $state(false)
   let checkingHost = $state(false)
-  let errorHost = $state<string | null>()
+  let errorHost = $state<string | null>(null)
 
   let typeOfLogin = $state<TypeOfLogin | null>(null)
   let launchUrl = $state<string | null | undefined>(null)
 
-  let hostInput = $state<HTMLInputElement>()
+  let hostInput: HTMLInputElement
 
   const checkHost = async (host: string) => {
     try {
@@ -79,14 +77,19 @@
         bind:this={hostInput}
         type="url"
         name="host"
+        aria-label={m.host_label()}
         placeholder={m.host_label()}
         required
         bind:value={host}
-        disabled={hostDisabled}
+        disabled={hostDisabled || checkingHost}
       />
     </label>
 
-    <button class="btn join-item btn-neutral" disabled={checkingHost}>
+    <button
+      class="btn join-item btn-neutral"
+      aria-label={hostDisabled ? m.edit_host_button() : m.check_host_button()}
+      disabled={checkingHost}
+    >
       {#if checkingHost}
         <span class="loading loading-spinner"></span>
       {:else if hostDisabled}

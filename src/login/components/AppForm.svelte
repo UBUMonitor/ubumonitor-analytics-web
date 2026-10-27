@@ -13,11 +13,11 @@
 
   let { host }: Props = $props()
   let loading = $state(false)
-  let errorLogin = $state<string | null>()
+  let errorLogin = $state<string | null>(null)
 
   let username = $derived(localStorage.getItem(`username:${host}`) ?? "")
 
-  let usernameInput = $state<HTMLInputElement>()
+  let usernameInput: HTMLInputElement
   let passwordInput = $state<HTMLInputElement>()
 
   const handleSubmit: EventHandler<SubmitEvent, HTMLFormElement> = async (event) => {
