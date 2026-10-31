@@ -21,14 +21,14 @@ export interface LastAccessItem extends SelectableItem {
 const lastAccessItems: Array<LastAccessItem> = [
   {
     id: 0,
-    name: m.date_range_last_label({ days: 2 }),
+    name: m.date_range_within_days({ days: 2 }),
     checked: false,
     is: (now, lastCourseAccess) =>
       lastCourseAccess != null && isMoreRecentThan(lastCourseAccess, 2, now),
   },
   {
     id: 1,
-    name: m.date_range_between_label({
+    name: m.date_range_between_days_ago({
       minDays: 3,
       maxDays: 6,
     }),
@@ -38,7 +38,7 @@ const lastAccessItems: Array<LastAccessItem> = [
   },
   {
     id: 2,
-    name: m.date_range_between_label({
+    name: m.date_range_between_days_ago({
       minDays: 7,
       maxDays: 12,
     }),
@@ -48,7 +48,7 @@ const lastAccessItems: Array<LastAccessItem> = [
   },
   {
     id: 3,
-    name: m.date_range_over_label({
+    name: m.date_range_older_than({
       days: 13,
     }),
     checked: false,

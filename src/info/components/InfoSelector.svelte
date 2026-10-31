@@ -12,7 +12,7 @@
       type="radio"
       name="main_tabs"
       class="tab"
-      aria-label={m.records_label()}
+      aria-label={m.records()}
       bind:group={selectedTab}
       value="records"
     />
@@ -24,7 +24,7 @@
       type="radio"
       name="main_tabs"
       class="tab"
-      aria-label={m.grades_label()}
+      aria-label={m.grades()}
       bind:group={selectedTab}
       value="grades"
     />

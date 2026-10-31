@@ -7,4 +7,4 @@
 </script>
 
 <SelectButtons class="border-b border-base-200 p-1" items={gradeStore.items} />
-<Select component={GradeItem} items={gradeStore.items} ariaLabel={m.grade_items_label()} />
+<Select component={GradeItem} items={gradeStore.items} ariaLabel={m.grade_items()} />

@@ -12,18 +12,18 @@
   <div class="flex flex-col gap-2">
     {#if displayStore.showScale}
       <label class="input input-sm">
-        <span class="label">{m.max_scale_label()}</span>
+        <span class="label">{m.suggested_max_scale()}</span>
         <input type="number" bind:value={displayStore.scale} step="10" min="10" />
       </label>
     {/if}
     {#if displayStore.showGroup}
       <label class="select select-sm">
-        <span class="label">{m.group_by_label()}</span>
+        <span class="label">{m.group_by()}</span>
         <select bind:value={displayStore.group}>
-          <option value="HOURLY">{m.hourly()}</option>
-          <option value="DAILY">{m.daily()}</option>
-          <option value="WEEKLY">{m.weekly()}</option>
-          <option value="MONTHLY">{m.monthly()}</option>
+          <option value="HOURLY">{m.hour()}</option>
+          <option value="DAILY">{m.day()}</option>
+          <option value="WEEKLY">{m.week()}</option>
+          <option value="MONTHLY">{m.month()}</option>
           <option value="DAY_OF_WEEK">{m.day_of_week()}</option>
         </select>
       </label>
@@ -31,7 +31,7 @@
   </div>
   <div class="flex flex-col gap-2">
     <label class="input w-sm input-sm">
-      <span class="label flex-1">{m.initial_reference_date_label()}</span>
+      <span class="label flex-1">{m.start_datetime()}</span>
       <input
         type="datetime-local"
         class="w-auto flex-1"
@@ -45,7 +45,7 @@
     </label>
 
     <label class="input w-sm input-sm">
-      <span class="label flex-1">{m.final_reference_date_label()}</span>
+      <span class="label flex-1">{m.end_datetime()}</span>
       <input
         type="datetime-local"
         class="w-auto flex-1"

@@ -23,10 +23,10 @@
   let selected = $state<RecordType>("component")
 
   const tabs = [
-    { value: "component", label: m.components_label, items: () => recordStore.componentItems },
-    { value: "event", label: m.events_label, items: () => recordStore.eventItems },
-    { value: "section", label: m.section_label, items: () => recordStore.sectionItems },
-    { value: "module", label: m.modules_label, items: () => recordStore.moduleItems },
+    { value: "component", label: m.components, items: () => recordStore.componentItems },
+    { value: "event", label: m.events, items: () => recordStore.eventItems },
+    { value: "section", label: m.section, items: () => recordStore.sectionItems },
+    { value: "module", label: m.modules, items: () => recordStore.moduleItems },
   ]
 
   const displayOptions = [

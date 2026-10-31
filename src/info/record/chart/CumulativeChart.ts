@@ -80,7 +80,7 @@ export class CumulativeChart extends RecordChart {
     }))
 
     const averageSeries = {
-      name: m.average_label(),
+      name: m.average(),
       type: "line" as const,
       data: averageData,
       lineStyle: {

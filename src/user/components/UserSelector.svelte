@@ -38,7 +38,7 @@
       name="filter"
       type="search"
       autocomplete="off"
-      placeholder={m.filter_label()}
+      placeholder={m.filter()}
       bind:value={userStore.nameFilter}
     />
 
@@ -46,23 +46,23 @@
 
     <div class="flex gap-1">
       <GraduationCapIcon class="h-full" />
-      <MultiSelect items={userStore.roleItems} ariaLabel={m.roles_label()} />
+      <MultiSelect items={userStore.roleItems} ariaLabel={m.roles()} />
     </div>
 
     <div class="flex gap-1">
       <UsersIcon class="h-full" />
-      <MultiSelect items={userStore.groupItems} ariaLabel={m.groups_label()} />
+      <MultiSelect items={userStore.groupItems} ariaLabel={m.groups()} />
     </div>
 
     <div class="flex gap-1">
       <ClockIcon class="h-full" />
-      <MultiSelect items={userStore.lastAccessItems} ariaLabel={m.last_access_label()} />
+      <MultiSelect items={userStore.lastAccessItems} ariaLabel={m.last_access()} />
     </div>
   </div>
   {#if userStore.isLoading}
     {@render skeleton()}
   {:else}
-    <Select component={UserItem} items={getFilteredUsers()} ariaLabel={m.users_label()} />
+    <Select component={UserItem} items={getFilteredUsers()} ariaLabel={m.users()} />
   {/if}
 </div>
 

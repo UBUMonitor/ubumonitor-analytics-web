@@ -44,9 +44,9 @@
   <PasswordInput
     bind:inputElement={dbPasswordInput}
     name="dbPassword"
-    placeholder={m.db_password_label()}
-    showLabel={m.show_database_password_button()}
-    hideLabel={m.hide_database_password_button()}
+    placeholder={m.database_password()}
+    showLabel={m.show_database_password()}
+    hideLabel={m.hide_database_password()}
   >
     <DatabaseIcon />
   </PasswordInput>
@@ -55,7 +55,7 @@
     {#if loading}
       <span class="loading loading-spinner"></span>
     {:else}
-      {m.login_sso_button()}
+      {m.login_sso()}
     {/if}
   </button>
 

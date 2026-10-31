@@ -31,11 +31,11 @@
     class="select select-sm"
     name="course"
     disabled={isSyncing || courseStore.courseItems.length === 0}
-    aria-label={m.select_course_label()}
+    aria-label={m.select_course()}
     value={courseStore.currentCourse?.id}
     onchange={handleOnChange}
   >
-    <option value="" hidden>-- {m.select_course_label()} --</option>
+    <option value="" hidden>-- {m.select_course()} --</option>
     {#each courseStore.courseItems as course (course.id)}
       <option value={course.id}>{course.id} - {course.name}</option>
     {/each}
@@ -45,8 +45,8 @@
     class:invisible={!courseStore.currentCourse?.id}
     onclick={handleSync}
     disabled={isSyncing}
-    aria-label={m.sync_label()}
-    title={m.sync_label()}
+    aria-label={m.sync_course_data()}
+    title={m.sync_course_data()}
   >
     <RefreshCwIcon class="group-disabled:animate-spin" />
   </button>

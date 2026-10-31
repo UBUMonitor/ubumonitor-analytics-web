@@ -101,8 +101,7 @@
                         value={(header.column.getFilterValue() ?? "") as string}
                         onchange={(value) => header.column.setFilterValue(value)}
                         debounce={500}
-                        placeholder="{m.filter_label()} ({header.column.getFacetedUniqueValues()
-                          .size})"
+                        placeholder="{m.filter()} ({header.column.getFacetedUniqueValues().size})"
                         list="{header.column.id}List"
                       />
                     </div>

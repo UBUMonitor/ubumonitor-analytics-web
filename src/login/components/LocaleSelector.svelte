@@ -17,7 +17,7 @@
 <select
   class={["select w-fit appearance-none select-sm", props.class]}
   name="lang"
-  aria-label={m.language_label()}
+  aria-label={m.language()}
   onchange={(event) => setLocale(event.currentTarget.value as Locale)}
   value={getLocale()}
 >

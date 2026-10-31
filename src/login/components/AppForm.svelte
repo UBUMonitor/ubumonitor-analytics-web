@@ -57,7 +57,7 @@
       bind:value={username}
       type="text"
       name="username"
-      placeholder={m.username_label()}
+      placeholder={m.username()}
       required
     />
   </label>
@@ -65,18 +65,18 @@
   <PasswordInput
     bind:inputElement={passwordInput}
     name="password"
-    placeholder={m.password_label()}
-    showLabel={m.show_password_button()}
-    hideLabel={m.hide_password_button()}
+    placeholder={m.password()}
+    showLabel={m.show_password()}
+    hideLabel={m.hide_password()}
   >
     <KeyRoundIcon />
   </PasswordInput>
 
   <PasswordInput
     name="dbPassword"
-    placeholder={m.db_password_label()}
-    showLabel={m.show_database_password_button()}
-    hideLabel={m.hide_database_password_button()}
+    placeholder={m.database_password()}
+    showLabel={m.show_database_password()}
+    hideLabel={m.hide_database_password()}
   >
     <DatabaseIcon />
   </PasswordInput>
@@ -85,7 +85,7 @@
     {#if loading}
       <span class="loading loading-spinner"></span>
     {:else}
-      {m.login_button()}
+      {m.login()}
     {/if}
   </button>
 

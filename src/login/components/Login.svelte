@@ -41,7 +41,7 @@
 
       hostDisabled = true
     } catch {
-      errorHost = m.host_invalid_error_label()
+      errorHost = m.host_invalid_error()
     } finally {
       checkingHost = false
     }
@@ -77,8 +77,8 @@
         bind:this={hostInput}
         type="url"
         name="host"
-        aria-label={m.host_label()}
-        placeholder={m.host_label()}
+        aria-label={m.host()}
+        placeholder={m.host()}
         required
         bind:value={host}
         disabled={hostDisabled || checkingHost}
@@ -87,7 +87,7 @@
 
     <button
       class="btn join-item btn-neutral"
-      aria-label={hostDisabled ? m.edit_host_button() : m.check_host_button()}
+      aria-label={hostDisabled ? m.edit_host() : m.check_host()}
       disabled={checkingHost}
     >
       {#if checkingHost}
