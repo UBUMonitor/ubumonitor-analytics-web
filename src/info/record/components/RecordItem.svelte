@@ -7,7 +7,7 @@
   const { name, modName }: Props = $props()
 </script>
 
-<div class="flex h-8 items-center gap-1 p-1">
+<div class="flex h-8 items-center gap-1 p-0.5">
   {#if modName}
     <img class="h-full" src="/icons/{modName}.svg" alt={modName} />
   {/if}
