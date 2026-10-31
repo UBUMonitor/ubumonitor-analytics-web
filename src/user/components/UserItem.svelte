@@ -9,7 +9,7 @@
 </script>
 
 <div class="flex h-14 gap-2">
-  <img class="m-1 rounded-box aspect-square" src={imageUrl} alt={name} />
+  <img class="m-1 aspect-square rounded-box" src={imageUrl} alt={name} />
   <div class="flex flex-col">
     <span class="truncate font-bold">{name}</span>
     <span class="truncate text-xs">

@@ -35,7 +35,7 @@
   <button
     type="button"
     tabindex="-1"
-    class="btn btn-ghost btn-circle btn-xs"
+    class="btn btn-circle btn-ghost btn-xs"
     aria-label={showPassword ? hideLabel : showLabel}
     onclick={() => (showPassword = !showPassword)}
   >

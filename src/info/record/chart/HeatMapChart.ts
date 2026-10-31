@@ -1,7 +1,4 @@
-import type {
-  CourseLogsStatisticsRequestDtoFieldsItem,
-  CourseLogsStatisticsRequestDtoGroupByItem,
-} from "@/backend/model"
+import type { CourseLogsStatisticsRequestDtoFieldsItem } from "@/backend/model"
 import type { ECOption } from "@/display/impl/echarts"
 import { formatTooltip } from "@/display/impl/utils"
 import type { Resolve } from "@/info/record/RecordDisplay"
@@ -17,10 +14,6 @@ type HeatMapDatum = {
 
 export class HeatMapChart extends RecordChart {
   getFields(): CourseLogsStatisticsRequestDtoFieldsItem[] {
-    return ["USER_ID"]
-  }
-
-  getGroupBy(): CourseLogsStatisticsRequestDtoGroupByItem[] {
     return ["USER_ID"]
   }
 

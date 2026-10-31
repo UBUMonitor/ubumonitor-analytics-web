@@ -10,7 +10,7 @@ export async function updateGrades(response: Promise<CourseGradeItemsResponseDto
     gradeStore.items = gradeItems.map(({ id, name }) => ({
       id,
       checked: false,
-      name: name ?? courseStore.currentCourse?.id,
+      name: name ?? courseStore.currentCourse!.name,
     }))
   } finally {
     gradeStore.isLoading = false

@@ -69,7 +69,7 @@
 
 <div class="flex size-full flex-col overflow-hidden">
   <div bind:this={scrollElement} class="w-full overflow-auto">
-    <table class="table table-sm table-pin-rows table-zebra table-fixed">
+    <table class="table table-pin-rows table-fixed table-zebra table-sm">
       <thead>
         {#each table.getHeaderGroups() as headerGroup (headerGroup.id)}
           <tr>
@@ -95,7 +95,7 @@
                         {/each}
                       </datalist>
                       <DebouncedInput
-                        class="input input-xs mt-1"
+                        class="input mt-1 input-xs"
                         name="filter-{header.column.id}"
                         type="text"
                         value={(header.column.getFilterValue() ?? "") as string}

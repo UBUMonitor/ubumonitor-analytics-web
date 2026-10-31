@@ -67,14 +67,14 @@
 </div>
 
 {#snippet skeleton()}
-  <div class="flex flex-col animate-pulse overflow-hidden">
+  <div class="flex animate-pulse flex-col overflow-hidden">
     {#each { length: 10 }, i (i)}
       <div class="flex h-14 gap-2">
-        <div class="skeleton m-1 rounded-box aspect-square h-12 shrink-0"></div>
-        <div class="flex flex-col gap-1 justify-center">
-          <div class="skeleton h-4 w-20"></div>
-          <div class="skeleton h-3 w-36"></div>
-          <div class="skeleton h-3 w-36"></div>
+        <div class="m-1 aspect-square h-12 shrink-0 skeleton rounded-box"></div>
+        <div class="flex flex-col justify-center gap-1">
+          <div class="h-4 w-20 skeleton"></div>
+          <div class="h-3 w-36 skeleton"></div>
+          <div class="h-3 w-36 skeleton"></div>
         </div>
       </div>
     {/each}

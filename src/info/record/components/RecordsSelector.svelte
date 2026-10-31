@@ -110,11 +110,11 @@
 </div>
 
 {#snippet skeleton()}
-  <div class="flex flex-col animate-pulse overflow-hidden">
+  <div class="flex animate-pulse flex-col overflow-hidden">
     {#each { length: 5 }, i (i)}
-      <div class="skeleton h-6 w-48 shrink-0 m-1"></div>
-      <div class="skeleton h-6 w-40 shrink-0 m-1"></div>
-      <div class="skeleton h-6 w-56 shrink-0 m-1"></div>
+      <div class="m-1 h-6 w-48 shrink-0 skeleton"></div>
+      <div class="m-1 h-6 w-40 shrink-0 skeleton"></div>
+      <div class="m-1 h-6 w-56 shrink-0 skeleton"></div>
     {/each}
   </div>
 {/snippet}

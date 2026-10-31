@@ -41,7 +41,7 @@
     {/each}
   </select>
   <button
-    class="group btn btn-sm btn-square btn-primary p-1"
+    class="group btn btn-square p-1 btn-primary btn-sm"
     class:invisible={!courseStore.currentCourse?.id}
     onclick={handleSync}
     disabled={isSyncing}

@@ -25,7 +25,7 @@
 </script>
 
 <div
-  class="list scrollbar-thin overflow-y-auto rounded-b-box h-full"
+  class="list h-full scrollbar-thin overflow-y-auto rounded-b-box"
   role="listbox"
   aria-label={ariaLabel}
   tabindex="-1"
