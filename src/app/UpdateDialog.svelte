@@ -1,7 +1,6 @@
 <script lang="ts">
   import { closeDialog } from "@/dialog/dialog.svelte"
   import { m } from "@/shared/paraglide/messages"
-  import { invoke } from "@tauri-apps/api/core"
   import { error, info } from "@tauri-apps/plugin-log"
   import { relaunch } from "@tauri-apps/plugin-process"
   import type { Update } from "@tauri-apps/plugin-updater"
@@ -22,7 +21,7 @@
   const handleUpdate = async () => {
     try {
       updateInProgress = true
-      await update.download((event) => {
+      await update.downloadAndInstall((event) => {
         switch (event.event) {
           case "Started":
             contentLength = event.data.contentLength || NaN
@@ -36,11 +35,6 @@
             break
         }
       })
-
-      await invoke<void>("stop_backend")
-
-      await update.install()
-
       info("update installed")
       await relaunch()
     } catch (e) {

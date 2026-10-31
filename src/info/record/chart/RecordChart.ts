@@ -1,6 +1,5 @@
 import type {
   CourseLogsStatisticsRequestDtoFieldsItem,
-  CourseLogsStatisticsRequestDtoGroupByItem,
   CourseLogsStatisticsResponseRowDto,
 } from "@/backend/model"
 import { getCourseLogsStatistics } from "@/backend/services/course-logs"
@@ -15,7 +14,6 @@ import type { DateTime } from "luxon"
 
 export abstract class RecordChart extends RecordDisplay {
   abstract getFields(selectedInfo: RecordType): CourseLogsStatisticsRequestDtoFieldsItem[]
-  abstract getGroupBy(selectedInfo: RecordType): CourseLogsStatisticsRequestDtoGroupByItem[]
   abstract resolveOptions(resolve: Resolve): Promise<ECOption>
 
   async resolveConfig(resolve: Resolve): Promise<DisplayConfig> {
@@ -23,22 +21,22 @@ export abstract class RecordChart extends RecordDisplay {
   }
 
   protected async requestLogsStatistics(
-    courseId: number,
     from: DateTime<true>,
     to: DateTime<true>,
     interval: StatsInterval,
     userItems: UserItem[],
     selectedInfo: RecordType,
     selectedItems: SelectableItem[],
+    courseId?: number,
   ): Promise<CourseLogsStatisticsResponseRowDto[]> {
-    if (userItems.length === 0 || selectedItems.length === 0) return Promise.resolve([])
+    if (courseId == null || userItems.length === 0 || selectedItems.length === 0)
+      return Promise.resolve([])
 
     const selectedItemsIds = selectedItems.map(({ id }) => id)
 
     return getCourseLogsStatistics(courseId, {
       fields: this.getFields(selectedInfo),
-      groupBy: this.getGroupBy(selectedInfo),
-      timeRange: { from: from.toUTC().toISO().slice(0, -5), to: to.toUTC().toISO().slice(0, -5) },
+      timeRange: { from: from.toSeconds(), to: to.toSeconds() },
       interval: this.hasGroup() ? interval : undefined,
       filters: {
         userIds: userItems.map(({ id }) => id),

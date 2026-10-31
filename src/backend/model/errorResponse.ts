@@ -15,8 +15,8 @@ export interface ErrorResponse {
   code: string
   /** A human-readable explanation specific to this occurrence of the problem. */
   message: string
-  /** The date and time when the error occurred. */
-  timestamp: string
+  /** The Unix timestamp in seconds when the error occurred. */
+  timestamp: number
   /** A unique identifier for the request trace, useful for debugging. */
   traceId?: string
   /** List of specific validation errors, if applicable. */

@@ -7,14 +7,13 @@
  */
 import { orvalFetch } from "../../shared/lib/orvalFetch"
 import type {
-  DatabasesInfoResponseDto,
   GetPublicSiteInfoParams,
   PublicSiteInfoResponseDto,
   SiteInfoResponseDto,
 } from "../model"
 
 export const getSyncSiteInfoUrl = () => {
-  return `http://localhost:9090/api/sites/sync`
+  return `http://127.0.0.1:9090/api/sites/sync`
 }
 
 /**
@@ -31,7 +30,7 @@ export const syncSiteInfo = async (
 }
 
 export const getGetSiteInfoUrl = () => {
-  return `http://localhost:9090/api/sites/info`
+  return `http://127.0.0.1:9090/api/sites/info`
 }
 
 /**
@@ -59,8 +58,8 @@ export const getGetPublicSiteInfoUrl = (params: GetPublicSiteInfoParams) => {
   const stringifiedParams = normalizedParams.toString()
 
   return stringifiedParams.length > 0
-    ? `http://localhost:9090/api/public/sites/info?${stringifiedParams}`
-    : `http://localhost:9090/api/public/sites/info`
+    ? `http://127.0.0.1:9090/api/public/sites/info?${stringifiedParams}`
+    : `http://127.0.0.1:9090/api/public/sites/info`
 }
 
 /**
@@ -72,23 +71,6 @@ export const getPublicSiteInfo = async (
   options?: Parameters<typeof orvalFetch>[1],
 ): Promise<PublicSiteInfoResponseDto> => {
   return orvalFetch<PublicSiteInfoResponseDto>(getGetPublicSiteInfoUrl(params), {
-    ...options,
-    method: "GET",
-  })
-}
-
-export const getListDatabasesUrl = () => {
-  return `http://localhost:9090/api/public/sites/databases/info`
-}
-
-/**
- * Retrieves a list of all available databases.
- * @summary List all databases
- */
-export const listDatabases = async (
-  options?: Parameters<typeof orvalFetch>[1],
-): Promise<DatabasesInfoResponseDto> => {
-  return orvalFetch<DatabasesInfoResponseDto>(getListDatabasesUrl(), {
     ...options,
     method: "GET",
   })

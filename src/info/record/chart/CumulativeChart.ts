@@ -1,7 +1,4 @@
-import type {
-  CourseLogsStatisticsRequestDtoFieldsItem,
-  CourseLogsStatisticsRequestDtoGroupByItem,
-} from "@/backend/model"
+import type { CourseLogsStatisticsRequestDtoFieldsItem } from "@/backend/model"
 import type { ECOption } from "@/display/impl/echarts"
 import { formatTooltip, round2 } from "@/display/impl/utils"
 import type { Resolve } from "@/info/record/RecordDisplay"
@@ -15,10 +12,6 @@ export class CumulativeChart extends RecordChart {
     return ["USER_ID"]
   }
 
-  getGroupBy(): CourseLogsStatisticsRequestDtoGroupByItem[] {
-    return ["USER_ID"]
-  }
-
   async resolveOptions({
     courseId,
     from,
@@ -29,13 +22,13 @@ export class CumulativeChart extends RecordChart {
     selectedItems,
   }: Resolve): Promise<ECOption> {
     const rows = await this.requestLogsStatistics(
-      courseId,
       from,
       to,
       interval,
       userItems,
       selectedInfo,
       selectedItems,
+      courseId,
     )
 
     const range = intervalSlots(interval, from, to)
@@ -121,8 +114,10 @@ export class CumulativeChart extends RecordChart {
       },
       yAxis: {
         type: "value",
+        min: 0,
+        max: rows.length > 0 ? undefined : 10,
       },
-      series: [...series, averageSeries],
+      series: userCount > 1 ? [...series, averageSeries] : series,
     }
   }
 

@@ -32,7 +32,7 @@
     name="course"
     disabled={isSyncing || courseStore.courseItems.length === 0}
     aria-label={m.select_course_label()}
-    value={courseStore.currentCourseId || ""}
+    value={courseStore.currentCourse?.id}
     onchange={handleOnChange}
   >
     <option value="" hidden>-- {m.select_course_label()} --</option>
@@ -42,7 +42,7 @@
   </select>
   <button
     class="group btn btn-sm btn-square btn-primary p-1"
-    class:invisible={!courseStore.currentCourseId}
+    class:invisible={!courseStore.currentCourse?.id}
     onclick={handleSync}
     disabled={isSyncing}
     aria-label={m.sync_label()}

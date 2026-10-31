@@ -5,8 +5,8 @@
  * API documentation for UBUMonitor Analytics
  * OpenAPI spec version: 1.0.0
  */
-import type { CourseGradeItemsResponseGradeItemsInnerDto } from "./courseGradeItemsResponseGradeItemsInnerDto"
+import type { GradeItemDto } from "./gradeItemDto"
 
 export interface CourseGradeItemsResponseDto {
-  gradeItems: CourseGradeItemsResponseGradeItemsInnerDto[]
+  gradeItems: GradeItemDto[]
 }

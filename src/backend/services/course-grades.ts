@@ -6,10 +6,14 @@
  * OpenAPI spec version: 1.0.0
  */
 import { orvalFetch } from "../../shared/lib/orvalFetch"
-import type { CourseGradeItemsResponseDto } from "../model"
+import type {
+  CourseGradeItemsResponseDto,
+  CourseGradesValuesResponseDto,
+  GetCourseGradesValuesParams,
+} from "../model"
 
 export const getSyncCourseGradesUrl = (courseId: number) => {
-  return `http://localhost:9090/api/courses/${courseId}/grades/sync`
+  return `http://127.0.0.1:9090/api/courses/${courseId}/grades/sync`
 }
 
 /**
@@ -26,8 +30,47 @@ export const syncCourseGrades = async (
   })
 }
 
+export const getGetCourseGradesValuesUrl = (
+  courseId: number,
+  params: GetCourseGradesValuesParams,
+) => {
+  const normalizedParams = new URLSearchParams()
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+    const explodeParameters = ["gradeItemsIds", "userIds"]
+
+    if (Array.isArray(value) && explodeParameters.includes(key)) {
+      value.forEach((v) => {
+        normalizedParams.append(key, v === null ? "null" : String(v))
+      })
+      return
+    }
+  })
+
+  const stringifiedParams = normalizedParams.toString()
+
+  return stringifiedParams.length > 0
+    ? `http://127.0.0.1:9090/api/courses/${courseId}/grades/values?${stringifiedParams}`
+    : `http://127.0.0.1:9090/api/courses/${courseId}/grades/values`
+}
+
+/**
+ * Get course grade values
+ * @summary Get course grade values
+ */
+export const getCourseGradesValues = async (
+  courseId: number,
+  params: GetCourseGradesValuesParams,
+  options?: Parameters<typeof orvalFetch>[1],
+): Promise<CourseGradesValuesResponseDto> => {
+  return orvalFetch<CourseGradesValuesResponseDto>(getGetCourseGradesValuesUrl(courseId, params), {
+    ...options,
+    method: "GET",
+  })
+}
+
 export const getGetCourseGradesInfoUrl = (courseId: number) => {
-  return `http://localhost:9090/api/courses/${courseId}/grades/info`
+  return `http://127.0.0.1:9090/api/courses/${courseId}/grades/info`
 }
 
 /**

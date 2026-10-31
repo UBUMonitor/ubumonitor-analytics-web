@@ -11,50 +11,10 @@ import type {
   AuthOfflineRequestDto,
   AuthResponseDto,
   AuthSSORequestDto,
-  AuthTokenRequestDto,
 } from "../model"
 
-export const getAuthTokenUrl = () => {
-  return `http://localhost:9090/api/public/auth/token`
-}
-
-/**
- * Receives a Moodle site URL, an existing Moodle web-service token, and the database encryption key. Returns an opaque Bearer session token for subsequent authenticated requests.
- * @summary Authenticate with a Moodle token
- */
-export const authToken = async (
-  authTokenRequestDto: AuthTokenRequestDto,
-  options?: Parameters<typeof orvalFetch>[1],
-): Promise<AuthResponseDto> => {
-  const getHeaders = (
-    h?: NonNullable<RequestInit["headers"]>,
-  ): Record<string, string | readonly string[]> => {
-    if (!h) return {}
-    if (h instanceof Headers) return Object.fromEntries(h.entries())
-    if (Symbol.iterator in h) {
-      return Object.fromEntries(
-        Array.from(
-          h as Iterable<Iterable<string>>,
-          (entry) => Array.from(entry) as [string, string],
-        ),
-      )
-    }
-    const headers: Record<string, string | readonly string[]> = {}
-    for (const [name, value] of Object.entries<string | readonly string[] | undefined>(h)) {
-      if (value !== undefined) headers[name] = value
-    }
-    return headers
-  }
-  return orvalFetch<AuthResponseDto>(getAuthTokenUrl(), {
-    ...options,
-    method: "POST",
-    headers: { "Content-Type": "application/json", ...getHeaders(options?.headers) },
-    body: JSON.stringify(authTokenRequestDto),
-  })
-}
-
 export const getAuthSSOUrl = () => {
-  return `http://localhost:9090/api/public/auth/sso`
+  return `http://127.0.0.1:9090/api/public/auth/sso`
 }
 
 /**
@@ -93,7 +53,7 @@ export const authSSO = async (
 }
 
 export const getAuthOfflineUrl = () => {
-  return `http://localhost:9090/api/public/auth/offline`
+  return `http://127.0.0.1:9090/api/public/auth/offline`
 }
 
 /**
@@ -132,7 +92,7 @@ export const authOffline = async (
 }
 
 export const getAuthLoginUrl = () => {
-  return `http://localhost:9090/api/public/auth/credentials`
+  return `http://127.0.0.1:9090/api/public/auth/credentials`
 }
 
 /**
@@ -171,7 +131,7 @@ export const authLogin = async (
 }
 
 export const getAuthLogoutUrl = () => {
-  return `http://localhost:9090/api/auth/logout`
+  return `http://127.0.0.1:9090/api/auth/logout`
 }
 
 /**

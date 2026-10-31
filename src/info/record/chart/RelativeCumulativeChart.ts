@@ -1,21 +1,13 @@
-import type {
-  CourseLogsStatisticsRequestDtoFieldsItem,
-  CourseLogsStatisticsRequestDtoGroupByItem,
-} from "@/backend/model"
+import type { CourseLogsStatisticsRequestDtoFieldsItem } from "@/backend/model"
 import type { ECOption } from "@/display/impl/echarts"
 import { formatTooltip, round2 } from "@/display/impl/utils"
 import type { Resolve } from "@/info/record/RecordDisplay"
 import { RecordChart } from "@/info/record/chart/RecordChart"
 import { formatSlot, intervalSlots } from "@/shared/lib/datetime"
-import { m } from "@/shared/paraglide/messages"
 import type { CallbackDataParams } from "echarts/types/dist/shared"
 
 export class RelativeCumulativeChart extends RecordChart {
   getFields(): CourseLogsStatisticsRequestDtoFieldsItem[] {
-    return ["USER_ID"]
-  }
-
-  getGroupBy(): CourseLogsStatisticsRequestDtoGroupByItem[] {
     return ["USER_ID"]
   }
 
@@ -29,13 +21,13 @@ export class RelativeCumulativeChart extends RecordChart {
     selectedItems,
   }: Resolve): Promise<ECOption> {
     const rows = await this.requestLogsStatistics(
-      courseId,
       from,
       to,
       interval,
       userItems,
       selectedInfo,
       selectedItems,
+      courseId,
     )
     const range = intervalSlots(interval, from, to)
     const rangeLength = range.length
@@ -91,25 +83,6 @@ export class RelativeCumulativeChart extends RecordChart {
       ),
     }))
 
-    const referenceSeries = {
-      name: m.average_label(),
-      type: "line" as const,
-      data: new Array(rangeLength).fill(0),
-      lineStyle: {
-        type: "dashed" as const,
-        width: 2,
-        color: "#000000",
-      },
-      itemStyle: {
-        color: "#000000",
-      },
-      symbol: "none" as const,
-      z: 10,
-      tooltip: {
-        show: false,
-      },
-    }
-
     return {
       tooltip: {
         formatter: (param) => formatTooltip(interval, param as CallbackDataParams),
@@ -129,8 +102,10 @@ export class RelativeCumulativeChart extends RecordChart {
       },
       yAxis: {
         type: "value",
+        min: rows.length > 0 ? undefined : -10,
+        max: rows.length > 0 ? undefined : 10,
       },
-      series: [...series, referenceSeries],
+      series: [...series],
     }
   }
 

@@ -4,7 +4,6 @@
   import SelectButtons from "@/shared/components/SelectButtons.svelte"
   import { m } from "@/shared/paraglide/messages"
   import UserItem from "@/user/components/UserItem.svelte"
-  import UserItemSkeleton from "@/user/components/UserItemSkeleton.svelte"
   import { getFilteredUsers, getSelectedUsers, userStore } from "@/user/user.svelte"
   import {
     ClockIcon,
@@ -61,8 +60,23 @@
     </div>
   </div>
   {#if userStore.isLoading}
-    <UserItemSkeleton />
+    {@render skeleton()}
   {:else}
     <Select component={UserItem} items={getFilteredUsers()} ariaLabel={m.users_label()} />
   {/if}
 </div>
+
+{#snippet skeleton()}
+  <div class="flex flex-col animate-pulse overflow-hidden">
+    {#each { length: 10 }, i (i)}
+      <div class="flex h-14 gap-2">
+        <div class="skeleton m-1 rounded-box aspect-square h-12 shrink-0"></div>
+        <div class="flex flex-col gap-1 justify-center">
+          <div class="skeleton h-4 w-20"></div>
+          <div class="skeleton h-3 w-36"></div>
+          <div class="skeleton h-3 w-36"></div>
+        </div>
+      </div>
+    {/each}
+  </div>
+{/snippet}

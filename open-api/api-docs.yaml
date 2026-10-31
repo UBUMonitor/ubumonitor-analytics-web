@@ -19,16 +19,18 @@ tags:
     description: the CourseContent API
   - name: CourseGrades
     description: the CourseGrades API
+  - name: Databases
+    description: the Databases API
   - name: System
     description: the System API
   - name: Health
     description: the Health API
   - name: Auth
     description: the Auth API
-  - name: UserEnrollments
-    description: the UserEnrollments API
   - name: CourseActivityCompletion
     description: the CourseActivityCompletion API
+  - name: UserEnrollments
+    description: the UserEnrollments API
   - name: Users
     description: the Users API
 paths:
@@ -73,34 +75,6 @@ paths:
           description: The backend is not yet ready.
       security:
         - bearerAuth: []
-  /api/public/auth/token:
-    post:
-      tags:
-        - Auth
-      summary: Authenticate with a Moodle token
-      description: "Receives a Moodle site URL, an existing Moodle web-service token,\
-        \ and the database encryption key. Returns an opaque Bearer session token\
-        \ for subsequent authenticated requests. "
-      operationId: authToken
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/AuthTokenRequestDto"
-        required: true
-      responses:
-        "200":
-          description: Session token retrieved successfully
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/AuthResponseDto"
-        "401":
-          description: Unauthorized - token missing or invalid
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ErrorResponse"
   /api/public/auth/sso:
     post:
       tags:
@@ -531,6 +505,28 @@ paths:
                 $ref: "#/components/schemas/ErrorResponse"
       security:
         - bearerAuth: []
+  /api/users/me/info:
+    get:
+      tags:
+        - Users
+      summary: Get site and current-user information
+      description: Retrieves the authenticated user's information.
+      operationId: getCurrentUserInfo
+      responses:
+        "200":
+          description: User information
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CurrentUserInfoResponseDto"
+        "401":
+          description: Unauthorized - token missing or invalid
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+      security:
+        - bearerAuth: []
   /api/users/images/document:
     get:
       tags:
@@ -718,7 +714,7 @@ paths:
   /api/public/system/health:
     get:
       tags:
-        - System
+        - Health
       summary: Check service health
       description: Checks the health status of the service.
       operationId: checkHealth
@@ -727,6 +723,22 @@ paths:
           description: The service is healthy and operational.
         "503":
           description: The backend is not yet ready.
+      security:
+        - bearerAuth: []
+  /api/public/system/databases/info:
+    get:
+      tags:
+        - Databases
+      summary: List all databases
+      description: Retrieves a list of all available databases.
+      operationId: listDatabases
+      responses:
+        "200":
+          description: All available databases.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DatabasesInfoResponseDto"
       security:
         - bearerAuth: []
   /api/public/sites/info:
@@ -753,22 +765,6 @@ paths:
                 $ref: "#/components/schemas/PublicSiteInfoResponseDto"
       security:
         - bearerAuth: []
-  /api/public/sites/databases/info:
-    get:
-      tags:
-        - Sites
-      summary: List all databases
-      description: Retrieves a list of all available databases.
-      operationId: listDatabases
-      responses:
-        "200":
-          description: All available databases.
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/DatabasesInfoResponseDto"
-      security:
-        - bearerAuth: []
   /api/enrollments/info:
     get:
       tags:
@@ -785,6 +781,60 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/EnrollmentsResponseDto"
+        "401":
+          description: Unauthorized - token missing or invalid
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+      security:
+        - bearerAuth: []
+  /api/courses/{courseId}/grades/values:
+    get:
+      tags:
+        - CourseGrades
+      summary: Get course grade values
+      description: Get course grade values
+      operationId: getCourseGradesValues
+      parameters:
+        - name: courseId
+          in: path
+          description: Course identifier
+          required: true
+          schema:
+            type: integer
+            format: int64
+        - name: gradeItemsIds
+          in: query
+          description: List of grade item identifiers to include in the grade value
+            lookup.
+          required: true
+          schema:
+            type: array
+            items:
+              type: integer
+              format: int64
+            maxItems: 2147483647
+            minItems: 0
+        - name: userIds
+          in: query
+          description: "List of user IDs to filter the results. If provided, only the\
+            \ specified users will have their grades included in the response."
+          required: true
+          schema:
+            type: array
+            items:
+              type: integer
+              format: int64
+            maxItems: 2147483647
+            minItems: 0
+      responses:
+        "200":
+          description: Grades retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CourseGradesValuesResponseDto"
         "401":
           description: Unauthorized - token missing or invalid
           content:
@@ -892,66 +942,124 @@ paths:
                 $ref: "#/components/schemas/ErrorResponse"
       security:
         - bearerAuth: []
+  /api/courses/{courseId}/activitycompletion/values:
+    get:
+      tags:
+        - CourseActivityCompletion
+      summary: Get course activity completion information with filter
+      description: Retrieves the activity completion information for a course.
+      operationId: getCourseActivityCompletionValues
+      parameters:
+        - name: courseId
+          in: path
+          description: The unique identifier of the course for which to retrieve activity
+            completion information.
+          required: true
+          schema:
+            type: integer
+            format: int64
+        - name: moduleIds
+          in: query
+          description: Course modules ids.
+          required: true
+          schema:
+            type: array
+            items:
+              type: integer
+              format: int64
+            maxItems: 2147483647
+            minItems: 0
+        - name: userIds
+          in: query
+          description: Course user ids.
+          required: true
+          schema:
+            type: array
+            items:
+              type: integer
+              format: int64
+            maxItems: 2147483647
+            minItems: 0
+      responses:
+        "200":
+          description: Get course activity completion information
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CourseActivityCompletionResponse"
+        "401":
+          description: Unauthorized - token missing or invalid
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+      security:
+        - bearerAuth: []
+  /api/courses/{courseId}/activitycompletion/info:
+    get:
+      tags:
+        - CourseActivityCompletion
+      summary: Get course activity completion information
+      description: Retrieves the activity completion information for a course.
+      operationId: getCourseActivityCompletionInfo
+      parameters:
+        - name: courseId
+          in: path
+          description: The unique identifier of the course for which to retrieve activity
+            completion information.
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        "200":
+          description: Get course activity completion information
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CourseActivityCompletionResponse"
+        "401":
+          description: Unauthorized - token missing or invalid
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+      security:
+        - bearerAuth: []
 components:
   schemas:
     SiteInfo:
       type: object
       description: Basic information about the Moodle site.
       properties:
-        siteName:
+        id:
+          type: string
+          description: Site id
+        name:
           type: string
           description: The name of the Moodle site.
-        siteVersion:
+        number:
           type: string
           description: The version of the Moodle site.
-        siteUrl:
+        release:
+          type: string
+          description: Moodle release number
+        version:
+          type: string
+          description: Moodle version number
+        url:
           type: string
           format: uri
           description: The URL of the Moodle site.
       required:
-        - siteName
-        - siteUrl
-        - siteVersion
+        - name
     SiteInfoResponseDto:
       type: object
       properties:
         site:
           $ref: "#/components/schemas/SiteInfo"
-        user:
-          $ref: "#/components/schemas/UserInfo"
       required:
         - site
-        - user
-    UserInfo:
-      type: object
-      description: Information about the authenticated user.
-      properties:
-        id:
-          type: integer
-          format: int64
-          description: The unique identifier of the user.
-        username:
-          type: string
-          description: The username of the user.
-        fullName:
-          type: string
-          description: The full name of the user.
-        firstName:
-          type: string
-          description: The first name of the user.
-        lastName:
-          type: string
-          description: The last name of the user.
-        timeZone:
-          type: string
-          description: The timezone of the user.
-      required:
-        - firstName
-        - fullName
-        - id
-        - lastName
-        - timeZone
-        - username
     ErrorDetail:
       type: object
       description: Details about a specific field validation failure.
@@ -982,10 +1090,10 @@ components:
             the problem.
           example: The requested resource was not found on the server.
         timestamp:
-          type: string
-          format: date-time
-          description: The date and time when the error occurred.
-          example: 2026-03-05T20:57:38Z
+          type: integer
+          format: int64
+          description: The Unix timestamp in seconds when the error occurred.
+          example: 1772744258
         traceId:
           type: string
           description: "A unique identifier for the request trace, useful for debugging."
@@ -1012,7 +1120,7 @@ components:
       required:
         - accessToken
         - tokenType
-    AuthTokenRequestCookiesInnerDto:
+    AuthSSORequestCookiesInnerDto:
       type: object
       properties:
         name:
@@ -1036,40 +1144,6 @@ components:
       required:
         - name
         - value
-    AuthTokenRequestDto:
-      type: object
-      properties:
-        host:
-          type: string
-          format: uri
-          description: Moodle site URL
-          example: https://school.moodledemo.net
-        token:
-          type: string
-          description: Moodle token
-          example: abc123def456ghi789jkl012mno345pqr678stu901vwx234yz567
-        dbPassword:
-          type: string
-          description: Secret key used to encrypt the database using AES-256. This
-            value must be kept securely and must not be stored or exposed in plain
-            text.
-          example: my-secure-encryption-key
-        cookies:
-          type: array
-          description: "Cookies from SSO request, if any."
-          example:
-            - name: MoodleSession
-              value: abc123...
-              domain: moodle.midominio.com
-              path: /
-              secure: true
-              httpOnly: true
-          items:
-            $ref: "#/components/schemas/AuthTokenRequestCookiesInnerDto"
-      required:
-        - dbPassword
-        - host
-        - token
     AuthSSORequestDto:
       type: object
       properties:
@@ -1099,7 +1173,7 @@ components:
               secure: true
               httpOnly: true
           items:
-            $ref: "#/components/schemas/AuthTokenRequestCookiesInnerDto"
+            $ref: "#/components/schemas/AuthSSORequestCookiesInnerDto"
       required:
         - cookies
         - dbPassword
@@ -1172,25 +1246,25 @@ components:
           description: Indicates whether course completion tracking is enabled for
             the user.
         startDate:
-          type: string
-          format: date-time
-          description: The date and time when the user's enrollment in the course
-            starts.
+          type: integer
+          format: int64
+          description: The Unix timestamp in seconds when the user's enrollment in
+            the course starts.
         endDate:
-          type: string
-          format: date-time
-          description: The date and time when the user's enrollment in the course
-            ends.
+          type: integer
+          format: int64
+          description: The Unix timestamp in seconds when the user's enrollment in
+            the course ends.
         timeModified:
-          type: string
-          format: date-time
-          description: The date and time when the enrollment information was last
-            modified.
+          type: integer
+          format: int64
+          description: The Unix timestamp in seconds when the enrollment information
+            was last modified.
         lastSync:
-          type: string
-          format: date-time
-          description: The date and time when the enrollment information was last
-            synchronized.
+          type: integer
+          format: int64
+          description: The Unix timestamp in seconds when the enrollment information
+            was last synchronized.
       required:
         - enableCompletion
         - endDate
@@ -1400,11 +1474,10 @@ components:
       properties:
         fields:
           type: array
-          description: Columns to include in response
+          description: Columns to include in the response and use as grouping dimensions.
           items:
             type: string
             enum:
-              - COURSE_ID
               - USER_ID
               - MODULE_ID
               - COMPONENT_ID
@@ -1420,18 +1493,6 @@ components:
               - SECTION_NAME
         timeRange:
           $ref: "#/components/schemas/CourseLogsStatisticsRequestTimeRangeDto"
-        groupBy:
-          type: array
-          items:
-            type: string
-            enum:
-              - USER_ID
-              - MODULE_ID
-              - COMPONENT_ID
-              - EVENT_ID
-              - ORIGIN_ID
-              - IP_ADDRESS
-              - SECTION_ID
         interval:
           type: string
           description: "Optional time aggregation interval for grouping logs by time\
@@ -1443,31 +1504,20 @@ components:
             - MONTHLY
             - DAY_OF_WEEK
           example: DAILY
-        weekStartsOn:
-          type: integer
-          format: int32
-          description: "ISO day number used as the first day when interval is DAY_OF_WEEK\
-            \ (1=Monday, 7=Sunday). Defaults to Monday. "
-          maximum: 7
-          minimum: 1
-        fillGapsStrategy:
-          type:
-            - string
-            - "null"
-          enum:
-            - NONE
-            - ZERO
-        sortBy:
-          type: array
-          items:
-            $ref: "#/components/schemas/CourseLogsStatisticsRequestSortByItemDto"
+        timeZone:
+          type: string
+          description: "IANA time zone used to compute time buckets when `interval`
+            is set (e.g. Europe/Madrid). Ignored if `interval` is not provided. "
+          example: Europe/Madrid
         filters:
           $ref: "#/components/schemas/CourseLogsStatisticsRequestFiltersDto"
     CourseLogsStatisticsRequestFiltersDto:
       type: object
       properties:
         userIds:
-          type: array
+          type:
+            - array
+            - "null"
           items:
             type: integer
             format: int64
@@ -1512,36 +1562,19 @@ components:
           items:
             type: integer
             format: int64
-    CourseLogsStatisticsRequestSortByItemDto:
-      type: object
-      properties:
-        field:
-          type: string
-          enum:
-            - VALUE
-            - USER_ID
-            - MODULE_ID
-            - TIME
-            - TIME_BUCKET
-        direction:
-          type: string
-          enum:
-            - ASC
-            - DESC
-          example: ASC
-      required:
-        - field
     CourseLogsStatisticsRequestTimeRangeDto:
       type: object
       properties:
         from:
-          type: string
-          example: 2026-05-01T00:00:00
-          pattern: "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}(:\\d{2})?$"
+          type: integer
+          format: int64
+          description: Inclusive start time as a Unix timestamp in seconds.
+          example: 1777593600
         to:
-          type: string
-          example: 2026-05-31T23:59:59
-          pattern: "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}(:\\d{2})?$"
+          type: integer
+          format: int64
+          description: Inclusive end time as a Unix timestamp in seconds.
+          example: 1780185599
     CourseLogsListResponseDto:
       type: object
       properties:
@@ -1563,10 +1596,10 @@ components:
           format: int64
           description: Log entry ID
         timeCreated:
-          type: string
-          description: Log creation time
-          example: 2026-05-22T10:15:30
-          pattern: "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}(:\\d{2})?$"
+          type: integer
+          format: int64
+          description: Log creation time as a Unix timestamp in seconds.
+          example: 1779444930
         courseId:
           type: integer
           format: int64
@@ -1585,6 +1618,13 @@ components:
         moduleName:
           type: string
           description: Name of the module associated with the log
+        sectionId:
+          type: integer
+          format: int64
+          description: ID of the section associated with the log
+        sectionName:
+          type: string
+          description: Name of the section associated with the log
         component:
           type: string
           description: Component associated with the log
@@ -1736,8 +1776,9 @@ components:
             - 10.0.0.1
           items:
             type: string
-    CourseLogsInfoRequestPaginationDto:
+    CourseLogsInfoRequestPagination:
       type: object
+      description: "When omitted, all matching logs are returned without pagination."
       properties:
         page:
           type: integer
@@ -1764,16 +1805,18 @@ components:
       properties:
         from:
           type:
-            - string
+            - integer
             - "null"
-          example: 2026-05-01T00:00:00
-          pattern: "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}(:\\d{2})?$"
+          format: int64
+          description: Inclusive start time as a Unix timestamp in seconds.
+          example: 1777593600
         to:
           type:
-            - string
+            - integer
             - "null"
-          example: 2026-05-31T23:59:59
-          pattern: "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}(:\\d{2})?$"
+          format: int64
+          description: Inclusive end time as a Unix timestamp in seconds.
+          example: 1780185599
     CourseLogsListRequestDto:
       type: object
       properties:
@@ -1809,7 +1852,7 @@ components:
               - SECTION_ID
               - SECTION_NAME
         pagination:
-          $ref: "#/components/schemas/CourseLogsInfoRequestPaginationDto"
+          $ref: "#/components/schemas/CourseLogsInfoRequestPagination"
         sort:
           type: array
           items:
@@ -1823,10 +1866,10 @@ components:
         gradeItems:
           type: array
           items:
-            $ref: "#/components/schemas/CourseGradeItemsResponseGradeItemsInnerDto"
+            $ref: "#/components/schemas/GradeItemDto"
       required:
         - gradeItems
-    CourseGradeItemsResponseGradeItemsInnerDto:
+    GradeItemDto:
       type: object
       properties:
         id:
@@ -1838,9 +1881,7 @@ components:
           format: int64
           description: "Unique identifier for the parent grade item, if applicable"
         name:
-          type:
-            - string
-            - "null"
+          type: string
           description: Name of the grade item
         gradeMin:
           type: number
@@ -1891,17 +1932,20 @@ components:
           type: string
           description: The email address of the user.
         firstAccess:
-          type: string
-          format: date-time
-          description: The timestamp of the user's first access to the site.
+          type: integer
+          format: int64
+          description: The Unix timestamp in seconds of the user's first access to
+            the site.
         lastAccess:
-          type: string
-          format: date-time
-          description: The timestamp of the user's last access to the site.
+          type: integer
+          format: int64
+          description: The Unix timestamp in seconds of the user's last access to
+            the site.
         lastCourseAccess:
-          type: string
-          format: date-time
-          description: The timestamp of the user's last access to the course.
+          type: integer
+          format: int64
+          description: The Unix timestamp in seconds of the user's last access to
+            the course.
         imageUrl:
           type: string
           format: uri
@@ -1924,13 +1968,10 @@ components:
       required:
         - courses
         - email
-        - firstAccess
         - fullName
         - groups
         - id
         - imageUrl
-        - lastAccess
-        - lastCourseAccess
         - roles
     UserEnrollmentInfoGroupsInnerDto:
       type: object
@@ -1981,19 +2022,6 @@ components:
         visible:
           type: boolean
           description: Is module visible
-        tracking:
-          type: string
-          description: Module tracking type
-          enum:
-            - NONE
-            - MANUAL
-            - AUTOMATIC
-        valueUsed:
-          type: boolean
-          description: "Indicates if the module value is used for tracking another\
-            \ module. This is relevant for modules that are used as prerequisites\
-            \ for other modules, such as quizzes or assignments. If the module is\
-            \ not used for tracking another module, this value will be false."
       required:
         - description
         - id
@@ -2088,27 +2116,136 @@ components:
             - COMPLETE
             - PASS
             - FAIL
-        completedAt:
-          type:
-            - string
-            - "null"
-          format: date-time
-          description: Date and time when the activity was completed. Null if it has
-            not been completed.
-        overrideBy:
-          type:
-            - integer
-            - "null"
+        timeCompleted:
+          type: integer
           format: int64
-          description: Identifier of the user who manually overrode the status. Null
-            if it was not overridden.
-        visible:
+          description: Unix timestamp in seconds when the activity was completed.
+            Null if it has not been completed.
+        tracking:
+          type: string
+          description: "How completion is tracked for this activity. NONE means completion
+            is not tracked; MANUAL means the user marks the activity as done; AUTOMATIC
+            means it is completed automatically when the configured conditions are
+            met. "
+          enum:
+            - NONE
+            - MANUAL
+            - AUTOMATIC
+        overrideBy:
+          type: integer
+          format: int64
+          description: Identifier of the user who manually overrode the status.
+        valueUsed:
           type: boolean
-          description: Whether the activity is visible to this user.
+          description: "Whether the completion status of this activity is used by\
+            \ another activity, for example in an access restriction that requires\
+            \ it to be completed."
+        isTrackedUser:
+          type: boolean
+          description: "Whether the user is tracked for completion, meaning their\
+            \ progress counts towards the activity. Depends on the user's role in\
+            \ the course."
+        userVisible:
+          type: boolean
+          description: "Whether the activity is visible to this specific user, taking\
+            \ into account availability restrictions and group settings."
       required:
+        - isTrackedUser
         - state
+        - tracking
         - userId
-        - visible
+        - userVisible
+        - valueUsed
+    CurrentUserInfoResponseDto:
+      type: object
+      properties:
+        user:
+          $ref: "#/components/schemas/UserInfo"
+      required:
+        - user
+    UserInfo:
+      type: object
+      description: Information about the authenticated user.
+      properties:
+        id:
+          type: integer
+          format: int64
+          description: The unique identifier of the user.
+        userName:
+          type: string
+          description: The username of the user.
+        fullName:
+          type: string
+          description: The full name of the user.
+        firstName:
+          type: string
+          description: The first name of the user.
+        lastName:
+          type: string
+          description: The last name of the user.
+        initials:
+          type: string
+          description: Initials of the full name
+        email:
+          type: string
+          format: email
+        timeZone:
+          type: string
+          description: The timezone of the user.
+        userImageUrl:
+          type: string
+          description: Image url of the user.
+      required:
+        - fullName
+        - id
+        - userImageUrl
+        - userName
+    DatabaseHostInfoDto:
+      type: object
+      properties:
+        moodleUrl:
+          type: string
+          format: uri
+          description: URL of the Moodle site.
+          example: https://school.moodledemo.net
+        users:
+          type: array
+          description: Databases available for users on this Moodle site.
+          items:
+            $ref: "#/components/schemas/DatabaseUserInfoDto"
+      required:
+        - moodleUrl
+        - users
+    DatabaseUserInfoDto:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Unique identifier of the database.
+          example: https~school.moodledemo.net~student
+        userName:
+          type: string
+          description: Moodle user the database belongs to.
+          example: student
+        location:
+          type: string
+          format: uri
+          description: "Location of the database file, as a `file:` URI."
+          example: file:///data/databases/https~school.moodledemo.net~student.db
+      required:
+        - id
+        - location
+        - userName
+    DatabasesInfoResponseDto:
+      type: object
+      properties:
+        databases:
+          type: array
+          description: Available Moodle hosts and their databases.
+          items:
+            $ref: "#/components/schemas/DatabaseHostInfoDto"
+      required:
+        - databases
     PublicSiteInfoResponseDto:
       type: object
       properties:
@@ -2142,52 +2279,32 @@ components:
         maintenanceMessage:
           type: string
           description: "The maintenance message for the Moodle site, if applicable."
-    DatabaseHostInfoDto:
+    CourseGradesValuesResponseDto:
       type: object
       properties:
-        moodleUrl:
-          type: string
-          format: uri
-          description: URL of the Moodle site.
-          example: https://school.moodledemo.net
-        users:
+        grades:
           type: array
-          description: Databases available for users on this Moodle site.
           items:
-            $ref: "#/components/schemas/DatabaseUserInfoDto"
-      required:
-        - moodleUrl
-        - users
-    DatabaseUserInfoDto:
+            $ref: "#/components/schemas/CourseGradesValuesResponseRowDto"
+    CourseGradesValuesResponseRowDto:
       type: object
       properties:
         id:
-          type: string
-          description: Unique identifier of the database.
-          example: https~school.moodledemo.net~student
-        userName:
-          type: string
-          description: Moodle user the database belongs to.
-          example: student
-        location:
-          type: string
-          format: uri
-          description: "Location of the database file, as a `file:` URI."
-          example: file:///data/databases/https~school.moodledemo.net~student.mv.db
-      required:
-        - id
-        - location
-        - userName
-    DatabasesInfoResponseDto:
-      type: object
-      properties:
-        databases:
-          type: array
-          description: Available Moodle hosts and their databases.
-          items:
-            $ref: "#/components/schemas/DatabaseHostInfoDto"
-      required:
-        - databases
+          type: integer
+          format: int64
+          description: Unique identifier for the grade item
+        userId:
+          type: integer
+          format: int64
+          description: Unique identifier for the user
+        grade:
+          type: number
+          format: double
+          description: The grade value for the user in the specified grade item
+        percentage:
+          type: number
+          format: double
+          description: The percentage grade for the user in the specified grade item
   securitySchemes:
     bearerAuth:
       type: http

@@ -13,13 +13,18 @@ export interface UserInfo {
   /** The unique identifier of the user. */
   id: number
   /** The username of the user. */
-  username: string
+  userName: string
   /** The full name of the user. */
   fullName: string
   /** The first name of the user. */
-  firstName: string
+  firstName?: string
   /** The last name of the user. */
-  lastName: string
+  lastName?: string
+  /** Initials of the full name */
+  initials?: string
+  email?: string
   /** The timezone of the user. */
-  timeZone: string
+  timeZone?: string
+  /** Image url of the user. */
+  userImageUrl: string
 }

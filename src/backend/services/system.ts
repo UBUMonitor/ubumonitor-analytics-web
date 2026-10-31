@@ -8,7 +8,7 @@
 import { orvalFetch } from "../../shared/lib/orvalFetch"
 
 export const getShutdownUrl = () => {
-  return `http://localhost:9090/api/public/system/shutdown`
+  return `http://127.0.0.1:9090/api/public/system/shutdown`
 }
 
 /**
@@ -19,20 +19,5 @@ export const shutdown = async (options?: Parameters<typeof orvalFetch>[1]): Prom
   return orvalFetch<void>(getShutdownUrl(), {
     ...options,
     method: "POST",
-  })
-}
-
-export const getCheckHealthUrl = () => {
-  return `http://localhost:9090/api/public/system/health`
-}
-
-/**
- * Checks the health status of the service.
- * @summary Check service health
- */
-export const checkHealth = async (options?: Parameters<typeof orvalFetch>[1]): Promise<void> => {
-  return orvalFetch<void>(getCheckHealthUrl(), {
-    ...options,
-    method: "GET",
   })
 }

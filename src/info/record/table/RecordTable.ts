@@ -10,30 +10,43 @@ const COLUMNS = [
     key: "timeCreated",
     name: m.table_date_time(),
     type: "date",
+    width: "12%",
   },
   {
     key: "userFullName",
     name: m.table_name(),
+    filter: true,
+    width: "18%",
   },
   {
     key: "moduleName",
     name: m.table_module(),
+    filter: true,
+    width: "20%",
   },
   {
     key: "component",
     name: m.table_component(),
+    filter: true,
+    width: "10%",
   },
   {
     key: "eventName",
     name: m.table_event(),
+    filter: true,
+    width: "20%",
   },
   {
     key: "originName",
     name: m.table_origin(),
+    filter: true,
+    width: "5%",
   },
   {
     key: "ip",
     name: m.table_ip(),
+    filter: true,
+    width: "15%",
   },
 ] as const satisfies TableColumn[]
 
@@ -46,13 +59,13 @@ export class RecordTable extends RecordDisplay {
     selectedInfo,
     selectedItems,
   }: Resolve): Promise<DisplayConfig> {
-    if (userItems.length === 0 || selectedItems.length === 0)
+    if (courseId == null || userItems.length === 0 || selectedItems.length === 0)
       return { type: "table", option: { columns: COLUMNS, data: [] } }
 
     const selectedItemsIds = selectedItems.map(({ id }) => id)
 
     const logs = await getCourseLogsList(courseId, {
-      timeRange: { from: from.toUTC().toISO().slice(0, -5), to: to.toUTC().toISO().slice(0, -5) },
+      timeRange: { from: from.toSeconds(), to: to.toSeconds() },
       filters: {
         userIds: userItems.map(({ id }) => id),
         moduleIds: selectedInfo === "module" ? selectedItemsIds : undefined,
@@ -69,7 +82,7 @@ export class RecordTable extends RecordDisplay {
         "ORIGIN_NAME",
         "IP_ADDRESS",
       ],
-      pagination: { page: 0, size: 100 },
+      pagination: { page: 0, size: 10_000 },
       sort: [{ field: "TIMESTAMP", direction: "ASC" }],
       includeTotal: true,
     })
@@ -80,7 +93,7 @@ export class RecordTable extends RecordDisplay {
         columns: COLUMNS,
         data: logs.content.map(
           ({ timeCreated, userFullName, moduleName, component, eventName, originName, ip }) => ({
-            timeCreated: DateTime.fromISO(timeCreated),
+            timeCreated: DateTime.fromSeconds(timeCreated),
             userFullName,
             moduleName,
             component,

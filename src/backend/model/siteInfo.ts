@@ -10,10 +10,16 @@
  * Basic information about the Moodle site.
  */
 export interface SiteInfo {
+  /** Site id */
+  id?: string
   /** The name of the Moodle site. */
-  siteName: string
+  name: string
   /** The version of the Moodle site. */
-  siteVersion: string
+  number?: string
+  /** Moodle release number */
+  release?: string
+  /** Moodle version number */
+  version?: string
   /** The URL of the Moodle site. */
-  siteUrl: string
+  url?: string
 }

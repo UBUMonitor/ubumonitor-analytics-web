@@ -6,7 +6,28 @@
  * OpenAPI spec version: 1.0.0
  */
 import { orvalFetch } from "../../shared/lib/orvalFetch"
-import type { GetUserImagesProfileParams, GetUsersEnrollmentImagesDocumentParams } from "../model"
+import type {
+  CurrentUserInfoResponseDto,
+  GetUserImagesProfileParams,
+  GetUsersEnrollmentImagesDocumentParams,
+} from "../model"
+
+export const getGetCurrentUserInfoUrl = () => {
+  return `http://127.0.0.1:9090/api/users/me/info`
+}
+
+/**
+ * Retrieves the authenticated user's information.
+ * @summary Get site and current-user information
+ */
+export const getCurrentUserInfo = async (
+  options?: Parameters<typeof orvalFetch>[1],
+): Promise<CurrentUserInfoResponseDto> => {
+  return orvalFetch<CurrentUserInfoResponseDto>(getGetCurrentUserInfoUrl(), {
+    ...options,
+    method: "GET",
+  })
+}
 
 export const getGetUsersEnrollmentImagesDocumentUrl = (
   params: GetUsersEnrollmentImagesDocumentParams,
@@ -31,8 +52,8 @@ export const getGetUsersEnrollmentImagesDocumentUrl = (
   const stringifiedParams = normalizedParams.toString()
 
   return stringifiedParams.length > 0
-    ? `http://localhost:9090/api/users/images/document?${stringifiedParams}`
-    : `http://localhost:9090/api/users/images/document`
+    ? `http://127.0.0.1:9090/api/users/images/document?${stringifiedParams}`
+    : `http://127.0.0.1:9090/api/users/images/document`
 }
 
 /**
@@ -61,8 +82,8 @@ export const getGetUserImagesProfileUrl = (userId: number, params: GetUserImages
   const stringifiedParams = normalizedParams.toString()
 
   return stringifiedParams.length > 0
-    ? `http://localhost:9090/api/public/users/${userId}/images/profile?${stringifiedParams}`
-    : `http://localhost:9090/api/public/users/${userId}/images/profile`
+    ? `http://127.0.0.1:9090/api/public/users/${userId}/images/profile?${stringifiedParams}`
+    : `http://127.0.0.1:9090/api/public/users/${userId}/images/profile`
 }
 
 /**

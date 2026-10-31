@@ -29,33 +29,42 @@
     { value: "module", label: m.modules_label, items: () => recordStore.moduleItems },
   ]
 
-  type DisplayType = "total" | "heatmap" | "cumulative" | "relative_cumulative" | "table"
-
-  const displayTypes = {
-    total: new TotalChart(),
-    heatmap: new HeatMapChart(),
-    cumulative: new CumulativeChart(),
-    relative_cumulative: new RelativeCumulativeChart(),
-    table: new RecordTable(),
-  } as const satisfies Record<DisplayType, RecordDisplay>
+  const displayOptions = [
+    { value: "total", label: m.total, display: new TotalChart() },
+    { value: "heatmap", label: m.heatmap, display: new HeatMapChart() },
+    { value: "cumulative", label: m.cumulative, display: new CumulativeChart() },
+    {
+      value: "relative_cumulative",
+      label: m.relative_cumulative,
+      display: new RelativeCumulativeChart(),
+    },
+    { value: "table", label: m.table, display: new RecordTable() },
+  ] satisfies { value: string; label: () => string; display: RecordDisplay }[]
 
   $effect(() => {
     if (!active) return
 
-    displayStore.display = Object.keys(displayTypes)
+    displayStore.display = displayOptions.map(({ value, label }) => ({ value, label }))
     displayStore.selectedDisplay = "total"
-    displayStore.showGroup = displayTypes.total.hasGroup()
-    displayStore.showScale = displayTypes.total.hasScale()
+    displayStore.showGroup = displayOptions[0].display.hasGroup()
+    displayStore.showScale = displayOptions[0].display.hasScale()
   })
 
   $effect(() => {
-    if (!active) return
+    if (!active || courseStore.currentCourse == null) return
+
+    const selectedDisplay = displayOptions.find(
+      ({ value }) => value === displayStore.selectedDisplay,
+    )
+
+    if (!selectedDisplay) return
 
     const selectedItems = tabs
       .find(({ value }) => value === selected)!
       .items()
       .filter(({ checked }) => checked)
-    const display = displayTypes[displayStore.selectedDisplay as DisplayType]
+
+    const { display } = selectedDisplay
 
     displayStore.showGroup = display.hasGroup()
     displayStore.showScale = display.hasScale()
@@ -64,7 +73,7 @@
 
     display
       .resolveConfig({
-        courseId: courseStore.currentCourseId,
+        courseId: courseStore.currentCourse.id,
         from: displayStore.from,
         to: displayStore.to,
         interval: displayStore.group,
@@ -91,7 +100,21 @@
     />
     <div class="tab-content">
       <SelectButtons class="border-b border-base-200 p-1" items={tab.items()} />
-      <Select component={RecordItem} items={tab.items()} ariaLabel={tab.label()} />
+      {#if recordStore.isLoading}
+        {@render skeleton()}
+      {:else}
+        <Select component={RecordItem} items={tab.items()} ariaLabel={tab.label()} />
+      {/if}
     </div>
   {/each}
 </div>
+
+{#snippet skeleton()}
+  <div class="flex flex-col animate-pulse overflow-hidden">
+    {#each { length: 5 }, i (i)}
+      <div class="skeleton h-6 w-48 shrink-0 m-1"></div>
+      <div class="skeleton h-6 w-40 shrink-0 m-1"></div>
+      <div class="skeleton h-6 w-56 shrink-0 m-1"></div>
+    {/each}
+  </div>
+{/snippet}

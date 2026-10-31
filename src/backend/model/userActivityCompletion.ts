@@ -6,6 +6,7 @@
  * OpenAPI spec version: 1.0.0
  */
 import type { UserActivityCompletionState } from "./userActivityCompletionState"
+import type { UserActivityCompletionTracking } from "./userActivityCompletionTracking"
 
 /**
  * Completion status of one user for one activity.
@@ -15,16 +16,16 @@ export interface UserActivityCompletion {
   userId: number
   /** Completion state of the activity for the user. PASS means completed with a passing grade; FAIL means completed with a failing grade.  */
   state: UserActivityCompletionState
-  /**
-   * Date and time when the activity was completed. Null if it has not been completed.
-   * @nullable
-   */
-  completedAt?: string | null
-  /**
-   * Identifier of the user who manually overrode the status. Null if it was not overridden.
-   * @nullable
-   */
-  overrideBy?: number | null
-  /** Whether the activity is visible to this user. */
-  visible: boolean
+  /** Unix timestamp in seconds when the activity was completed. Null if it has not been completed. */
+  timeCompleted?: number
+  /** How completion is tracked for this activity. NONE means completion is not tracked; MANUAL means the user marks the activity as done; AUTOMATIC means it is completed automatically when the configured conditions are met.  */
+  tracking: UserActivityCompletionTracking
+  /** Identifier of the user who manually overrode the status. */
+  overrideBy?: number
+  /** Whether the completion status of this activity is used by another activity, for example in an access restriction that requires it to be completed. */
+  valueUsed: boolean
+  /** Whether the user is tracked for completion, meaning their progress counts towards the activity. Depends on the user's role in the course. */
+  isTrackedUser: boolean
+  /** Whether the activity is visible to this specific user, taking into account availability restrictions and group settings. */
+  userVisible: boolean
 }

@@ -8,13 +8,13 @@
 
 export interface CourseLogsInfoRequestTimeRangeDto {
   /**
+   * Inclusive start time as a Unix timestamp in seconds.
    * @nullable
-   * @pattern ^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}(:\d{2})?$
    */
-  from?: string | null
+  from?: number | null
   /**
+   * Inclusive end time as a Unix timestamp in seconds.
    * @nullable
-   * @pattern ^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}(:\d{2})?$
    */
-  to?: string | null
+  to?: number | null
 }

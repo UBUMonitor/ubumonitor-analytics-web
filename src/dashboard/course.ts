@@ -4,9 +4,11 @@ import {
   getCourseUsersEnrollmentsInfo,
   syncCourseUsersEnrollments,
 } from "@/backend/services/course-enrollments"
+import { getCourseGradesInfo, syncCourseGrades } from "@/backend/services/course-grades"
 import { getCourseLogsInfo, syncCourseLogs } from "@/backend/services/course-logs"
 import { courseStore } from "@/dashboard/course.svelte"
 import { updateChartDate } from "@/display/display"
+import { updateGrades } from "@/info/grade/grade"
 import { updateRecords } from "@/info/record/record"
 import { updateUsers } from "@/user/user"
 import { DateTime } from "luxon"
@@ -18,10 +20,12 @@ export async function updateCourses(enrollments: Promise<EnrollmentsResponseDto>
     id: course.id,
     name: course.fullName,
     startDate: course.startDate
-      ? (DateTime.fromISO(course.startDate) as DateTime<true>)
+      ? (DateTime.fromSeconds(course.startDate) as DateTime<true>)
       : undefined,
-    endDate: course.endDate ? (DateTime.fromISO(course.endDate) as DateTime<true>) : undefined,
-    lastSync: course.lastSync ? (DateTime.fromISO(course.lastSync) as DateTime<true>) : undefined,
+    endDate: course.endDate ? (DateTime.fromSeconds(course.endDate) as DateTime<true>) : undefined,
+    lastSync: course.lastSync
+      ? (DateTime.fromSeconds(course.lastSync) as DateTime<true>)
+      : undefined,
   }))
 }
 
@@ -30,32 +34,30 @@ export async function changeCourse(courseId: number) {
 
   if (!course) return
 
-  courseStore.currentCourseId = course.id
+  courseStore.currentCourse = course
 
   updateChartDate(course.startDate, course.endDate)
 
   if (course.lastSync) {
-    updateAll()
+    updateAll(course.id)
   } else {
-    await syncAll()
+    await syncAll(course.id)
     course.lastSync = DateTime.now()
   }
 }
 
-async function updateAll() {
-  const courseId = courseStore.currentCourseId
-
+async function updateAll(courseId: number) {
   return Promise.all([
     updateUsers(getCourseUsersEnrollmentsInfo(courseId)),
     updateRecords(getCourseUsersContentInfo(courseId), getCourseLogsInfo(courseId)),
+    updateGrades(getCourseGradesInfo(courseId)),
   ])
 }
 
-export async function syncAll() {
-  const courseId = courseStore.currentCourseId
-
+export async function syncAll(courseId = courseStore.currentCourse!.id) {
   return Promise.all([
     updateUsers(syncCourseUsersEnrollments(courseId)),
     updateRecords(syncCourseContent(courseId), syncCourseLogs(courseId)),
+    updateGrades(syncCourseGrades(courseId)),
   ])
 }

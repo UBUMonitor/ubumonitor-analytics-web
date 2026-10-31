@@ -1,5 +1,18 @@
 import { getLocale } from "@/shared/paraglide/runtime"
-import { tableFeatures } from "@tanstack/svelte-table"
+import {
+  columnFacetingFeature,
+  columnFilteringFeature,
+  createFacetedRowModel,
+  createFacetedUniqueValues,
+  createFilteredRowModel,
+  createSortedRowModel,
+  filterFn_includesString,
+  metaHelper,
+  rowSortingFeature,
+  sortFn_alphanumeric,
+  sortFn_text,
+  tableFeatures,
+} from "@tanstack/svelte-table"
 import { DateTime } from "luxon"
 
 export type DynamicRow = Record<string, unknown>
@@ -10,6 +23,8 @@ export interface TableColumn {
   key: string
   name: string
   type?: DataType
+  filter?: boolean
+  width?: string
 }
 
 export interface TableOption {
@@ -17,7 +32,28 @@ export interface TableOption {
   data: DynamicRow[]
 }
 
-export const features = tableFeatures({})
+interface ColumnMeta {
+  dataType?: DataType
+  width?: string
+}
+
+export const features = tableFeatures({
+  columnMeta: metaHelper<ColumnMeta>(),
+  rowSortingFeature,
+  columnFilteringFeature,
+  filteredRowModel: createFilteredRowModel(),
+  filterFns: {
+    includesString: filterFn_includesString,
+  },
+  columnFacetingFeature,
+  facetedRowModel: createFacetedRowModel(),
+  facetedUniqueValues: createFacetedUniqueValues(),
+  sortedRowModel: createSortedRowModel(),
+  sortFns: {
+    alphanumeric: sortFn_alphanumeric,
+    text: sortFn_text,
+  },
+})
 
 export function renderValue(value: unknown, dataType?: DataType) {
   if (value == null) return ""

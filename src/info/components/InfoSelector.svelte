@@ -1,4 +1,5 @@
 <script lang="ts">
+  import GradesSelector from "@/info/grade/components/GradesSelector.svelte"
   import RecordsSelector from "@/info/record/components/RecordsSelector.svelte"
   import { m } from "@/shared/paraglide/messages"
 
@@ -19,6 +20,16 @@
       <RecordsSelector active={selectedTab === "records"} />
     </div>
 
-    <!-- TODO -->
+    <input
+      type="radio"
+      name="main_tabs"
+      class="tab"
+      aria-label={m.grades_label()}
+      bind:group={selectedTab}
+      value="grades"
+    />
+    <div class="tab-content">
+      <GradesSelector />
+    </div>
   </div>
 </div>

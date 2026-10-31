@@ -35,13 +35,13 @@ export class HeatMapChart extends RecordChart {
     scale,
   }: Resolve): Promise<ECOption> {
     const rows = await this.requestLogsStatistics(
-      courseId,
       from,
       to,
       interval,
       userItems,
       selectedInfo,
       selectedItems,
+      courseId,
     )
 
     const range = intervalSlots(interval, from, to)

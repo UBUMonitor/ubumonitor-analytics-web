@@ -9,11 +9,8 @@
 export interface LogEntryDto {
   /** Log entry ID */
   id: number
-  /**
-   * Log creation time
-   * @pattern ^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}(:\d{2})?$
-   */
-  timeCreated: string
+  /** Log creation time as a Unix timestamp in seconds. */
+  timeCreated: number
   /** ID of the course associated with the log */
   courseId: number
   /** ID of the user associated with the log */
@@ -24,6 +21,10 @@ export interface LogEntryDto {
   moduleId: number
   /** Name of the module associated with the log */
   moduleName: string
+  /** ID of the section associated with the log */
+  sectionId?: number
+  /** Name of the section associated with the log */
+  sectionName?: string
   /** Component associated with the log */
   component: string
   /** ID of the component associated with the log */

@@ -1,5 +1,5 @@
 import type { ErrorResponse } from "@/backend/model"
-import { getCheckHealthUrl } from "@/backend/services/system"
+import { getCheckHealthUrl } from "@/backend/services/health"
 import { loginStore } from "@/login/login.svelte"
 import ky from "ky"
 
@@ -31,7 +31,7 @@ export async function orvalFetch<T>(url: string, options: RequestInit = {}) {
 export function healthCheck() {
   return ky.get(getCheckHealthUrl(), {
     retry: {
-      limit: 20,
+      limit: 50,
       delay: () => 200,
     },
   })

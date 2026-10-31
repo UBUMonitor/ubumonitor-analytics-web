@@ -17,9 +17,9 @@ export async function updateUsers(response: Promise<CourseEnrollmentsResponseDto
       .toSorted((x, y) => comparator(x.fullName, y.fullName))
       .map(({ id, imageUrl, fullName, lastAccess, lastCourseAccess, roles, groups }) => {
         const now = DateTime.now()
-        const lastAccessDate = lastAccess ? DateTime.fromISO(lastAccess) : undefined
+        const lastAccessDate = lastAccess ? DateTime.fromSeconds(lastAccess) : undefined
         const lastCourseAccessDate = lastCourseAccess
-          ? DateTime.fromISO(lastCourseAccess)
+          ? DateTime.fromSeconds(lastCourseAccess)
           : undefined
 
         const lastAccessItems = userStore.lastAccessItems

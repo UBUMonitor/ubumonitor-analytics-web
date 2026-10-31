@@ -6,7 +6,7 @@ import type { UserItem } from "@/user/user.svelte"
 import type { DateTime } from "luxon"
 
 export interface Resolve {
-  courseId: number
+  courseId?: number
   from: DateTime<true>
   to: DateTime<true>
   interval: StatsInterval

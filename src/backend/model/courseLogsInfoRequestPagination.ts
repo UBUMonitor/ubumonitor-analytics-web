@@ -6,7 +6,10 @@
  * OpenAPI spec version: 1.0.0
  */
 
-export interface CourseLogsInfoRequestPaginationDto {
+/**
+ * When omitted, all matching logs are returned without pagination.
+ */
+export interface CourseLogsInfoRequestPagination {
   page?: number
   size?: number
 }

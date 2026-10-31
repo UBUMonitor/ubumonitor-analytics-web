@@ -7,7 +7,8 @@
  */
 
 export interface CourseLogsStatisticsRequestFiltersDto {
-  userIds?: number[]
+  /** @nullable */
+  userIds?: number[] | null
   /** @nullable */
   moduleIds?: number[] | null
   /** @nullable */

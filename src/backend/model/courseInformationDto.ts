@@ -15,12 +15,12 @@ export interface CourseInformationDto {
   showGrades: boolean
   /** Indicates whether course completion tracking is enabled for the user. */
   enableCompletion: boolean
-  /** The date and time when the user's enrollment in the course starts. */
-  startDate: string
-  /** The date and time when the user's enrollment in the course ends. */
-  endDate: string
-  /** The date and time when the enrollment information was last modified. */
-  timeModified: string
-  /** The date and time when the enrollment information was last synchronized. */
-  lastSync?: string
+  /** The Unix timestamp in seconds when the user's enrollment in the course starts. */
+  startDate: number
+  /** The Unix timestamp in seconds when the user's enrollment in the course ends. */
+  endDate: number
+  /** The Unix timestamp in seconds when the enrollment information was last modified. */
+  timeModified: number
+  /** The Unix timestamp in seconds when the enrollment information was last synchronized. */
+  lastSync?: number
 }

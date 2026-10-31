@@ -6,10 +6,13 @@
  * OpenAPI spec version: 1.0.0
  */
 import { orvalFetch } from "../../shared/lib/orvalFetch"
-import type { CourseActivityCompletionResponse } from "../model"
+import type {
+  CourseActivityCompletionResponse,
+  GetCourseActivityCompletionValuesParams,
+} from "../model"
 
 export const getSyncCourseActivityCompletionUrl = (courseId: number) => {
-  return `http://localhost:9090/api/courses/${courseId}/activitycompletion/sync`
+  return `http://127.0.0.1:9090/api/courses/${courseId}/activitycompletion/sync`
 }
 
 /**
@@ -25,6 +28,69 @@ export const syncCourseActivityCompletion = async (
     {
       ...options,
       method: "POST",
+    },
+  )
+}
+
+export const getGetCourseActivityCompletionValuesUrl = (
+  courseId: number,
+  params: GetCourseActivityCompletionValuesParams,
+) => {
+  const normalizedParams = new URLSearchParams()
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+    const explodeParameters = ["moduleIds", "userIds"]
+
+    if (Array.isArray(value) && explodeParameters.includes(key)) {
+      value.forEach((v) => {
+        normalizedParams.append(key, v === null ? "null" : String(v))
+      })
+      return
+    }
+  })
+
+  const stringifiedParams = normalizedParams.toString()
+
+  return stringifiedParams.length > 0
+    ? `http://127.0.0.1:9090/api/courses/${courseId}/activitycompletion/values?${stringifiedParams}`
+    : `http://127.0.0.1:9090/api/courses/${courseId}/activitycompletion/values`
+}
+
+/**
+ * Retrieves the activity completion information for a course.
+ * @summary Get course activity completion information with filter
+ */
+export const getCourseActivityCompletionValues = async (
+  courseId: number,
+  params: GetCourseActivityCompletionValuesParams,
+  options?: Parameters<typeof orvalFetch>[1],
+): Promise<CourseActivityCompletionResponse> => {
+  return orvalFetch<CourseActivityCompletionResponse>(
+    getGetCourseActivityCompletionValuesUrl(courseId, params),
+    {
+      ...options,
+      method: "GET",
+    },
+  )
+}
+
+export const getGetCourseActivityCompletionInfoUrl = (courseId: number) => {
+  return `http://127.0.0.1:9090/api/courses/${courseId}/activitycompletion/info`
+}
+
+/**
+ * Retrieves the activity completion information for a course.
+ * @summary Get course activity completion information
+ */
+export const getCourseActivityCompletionInfo = async (
+  courseId: number,
+  options?: Parameters<typeof orvalFetch>[1],
+): Promise<CourseActivityCompletionResponse> => {
+  return orvalFetch<CourseActivityCompletionResponse>(
+    getGetCourseActivityCompletionInfoUrl(courseId),
+    {
+      ...options,
+      method: "GET",
     },
   )
 }

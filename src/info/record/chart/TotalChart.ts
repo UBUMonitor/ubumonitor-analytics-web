@@ -1,6 +1,5 @@
 import {
   CourseLogsStatisticsRequestDtoFieldsItem,
-  type CourseLogsStatisticsRequestDtoGroupByItem,
   type CourseLogsStatisticsResponseRowDto,
 } from "@/backend/model"
 import type { ECOption } from "@/display/impl/echarts"
@@ -30,10 +29,6 @@ export class TotalChart extends RecordChart {
     return [FIELDS[selectedInfo]]
   }
 
-  getGroupBy(selectedInfo: RecordType): CourseLogsStatisticsRequestDtoGroupByItem[] {
-    return [FIELDS[selectedInfo]]
-  }
-
   async resolveOptions({
     courseId,
     from,
@@ -44,13 +39,13 @@ export class TotalChart extends RecordChart {
     selectedItems,
   }: Resolve): Promise<ECOption> {
     const rows = await this.requestLogsStatistics(
-      courseId,
       from,
       to,
       interval,
       userItems,
       selectedInfo,
       selectedItems,
+      courseId,
     )
 
     const matcher = ROW_MATCHER[selectedInfo]

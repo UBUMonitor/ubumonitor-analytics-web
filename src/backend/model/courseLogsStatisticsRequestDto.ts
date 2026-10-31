@@ -6,28 +6,17 @@
  * OpenAPI spec version: 1.0.0
  */
 import type { CourseLogsStatisticsRequestDtoFieldsItem } from "./courseLogsStatisticsRequestDtoFieldsItem"
-import type { CourseLogsStatisticsRequestDtoFillGapsStrategy } from "./courseLogsStatisticsRequestDtoFillGapsStrategy"
-import type { CourseLogsStatisticsRequestDtoGroupByItem } from "./courseLogsStatisticsRequestDtoGroupByItem"
 import type { CourseLogsStatisticsRequestDtoInterval } from "./courseLogsStatisticsRequestDtoInterval"
 import type { CourseLogsStatisticsRequestFiltersDto } from "./courseLogsStatisticsRequestFiltersDto"
-import type { CourseLogsStatisticsRequestSortByItemDto } from "./courseLogsStatisticsRequestSortByItemDto"
 import type { CourseLogsStatisticsRequestTimeRangeDto } from "./courseLogsStatisticsRequestTimeRangeDto"
 
 export interface CourseLogsStatisticsRequestDto {
-  /** Columns to include in response */
+  /** Columns to include in the response and use as grouping dimensions. */
   fields?: CourseLogsStatisticsRequestDtoFieldsItem[]
   timeRange?: CourseLogsStatisticsRequestTimeRangeDto
-  groupBy?: CourseLogsStatisticsRequestDtoGroupByItem[]
   /** Optional time aggregation interval for grouping logs by time buckets. If not provided, no time-based grouping is applied.  */
   interval?: CourseLogsStatisticsRequestDtoInterval
-  /**
-   * ISO day number used as the first day when interval is DAY_OF_WEEK (1=Monday, 7=Sunday). Defaults to Monday.
-   * @minimum 1
-   * @maximum 7
-   */
-  weekStartsOn?: number
-  /** @nullable */
-  fillGapsStrategy?: CourseLogsStatisticsRequestDtoFillGapsStrategy
-  sortBy?: CourseLogsStatisticsRequestSortByItemDto[]
+  /** IANA time zone used to compute time buckets when `interval` is set (e.g. Europe/Madrid). Ignored if `interval` is not provided.  */
+  timeZone?: string
   filters?: CourseLogsStatisticsRequestFiltersDto
 }

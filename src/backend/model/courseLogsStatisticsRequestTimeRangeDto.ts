@@ -7,8 +7,8 @@
  */
 
 export interface CourseLogsStatisticsRequestTimeRangeDto {
-  /** @pattern ^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}(:\d{2})?$ */
-  from?: string
-  /** @pattern ^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}(:\d{2})?$ */
-  to?: string
+  /** Inclusive start time as a Unix timestamp in seconds. */
+  from?: number
+  /** Inclusive end time as a Unix timestamp in seconds. */
+  to?: number
 }

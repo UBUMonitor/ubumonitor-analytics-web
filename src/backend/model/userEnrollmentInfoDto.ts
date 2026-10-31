@@ -16,12 +16,12 @@ export interface UserEnrollmentInfoDto {
   fullName: string
   /** The email address of the user. */
   email: string
-  /** The timestamp of the user's first access to the site. */
-  firstAccess: string
-  /** The timestamp of the user's last access to the site. */
-  lastAccess: string
-  /** The timestamp of the user's last access to the course. */
-  lastCourseAccess: string
+  /** The Unix timestamp in seconds of the user's first access to the site. */
+  firstAccess?: number
+  /** The Unix timestamp in seconds of the user's last access to the site. */
+  lastAccess?: number
+  /** The Unix timestamp in seconds of the user's last access to the course. */
+  lastCourseAccess?: number
   /** The URL of the user's profile image. */
   imageUrl: string
   /** List of roles the user has in the course. */

@@ -6,16 +6,13 @@
  * OpenAPI spec version: 1.0.0
  */
 
-export interface CourseGradeItemsResponseGradeItemsInnerDto {
+export interface GradeItemDto {
   /** Unique identifier for the grade item */
   id: number
   /** Unique identifier for the parent grade item, if applicable */
   parentId?: number
-  /**
-   * Name of the grade item
-   * @nullable
-   */
-  name?: string | null
+  /** Name of the grade item */
+  name?: string
   /** Minimum grade value for the grade item */
   gradeMin: number
   /** Maximum grade value for the grade item */

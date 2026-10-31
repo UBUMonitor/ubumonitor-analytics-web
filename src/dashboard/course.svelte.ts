@@ -9,11 +9,11 @@ export interface CourseItem {
 }
 
 export const courseStore = $state({
-  currentCourseId: 0,
+  currentCourse: null as CourseItem | null,
   courseItems: [] as CourseItem[],
 })
 
 export function clearAppStore() {
-  courseStore.currentCourseId = 0
+  courseStore.currentCourse = null
   courseStore.courseItems = []
 }

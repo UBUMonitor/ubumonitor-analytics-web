@@ -6,7 +6,7 @@
  * OpenAPI spec version: 1.0.0
  */
 
-export interface AuthTokenRequestCookiesInnerDto {
+export interface AuthSSORequestCookiesInnerDto {
   /** Cookie name. */
   name: string
   /** Cookie value. */

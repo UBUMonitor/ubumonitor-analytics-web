@@ -7,13 +7,13 @@
 
 <main class="flex size-full flex-col">
   <div class="tabs tabs-box">
-    {#each displayStore.display as name (name)}
+    {#each displayStore.display as option (option.value)}
       <input
         type="radio"
         name="chart_select"
         class="tab"
-        aria-label={name}
-        value={name}
+        aria-label={option.label()}
+        value={option.value}
         bind:group={displayStore.selectedDisplay}
       />
     {/each}

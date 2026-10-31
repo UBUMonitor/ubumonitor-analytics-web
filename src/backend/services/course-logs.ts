@@ -16,7 +16,7 @@ import type {
 } from "../model"
 
 export const getSyncCourseLogsUrl = (courseId: number) => {
-  return `http://localhost:9090/api/courses/${courseId}/logs/sync`
+  return `http://127.0.0.1:9090/api/courses/${courseId}/logs/sync`
 }
 
 /**
@@ -33,7 +33,7 @@ export const syncCourseLogs = async (
 }
 
 export const getGetCourseLogsStatisticsUrl = (courseId: number) => {
-  return `http://localhost:9090/api/courses/${courseId}/logs/statistics`
+  return `http://127.0.0.1:9090/api/courses/${courseId}/logs/statistics`
 }
 
 /**
@@ -73,7 +73,7 @@ export const getCourseLogsStatistics = async (
 }
 
 export const getGetCourseLogsListUrl = (courseId: number) => {
-  return `http://localhost:9090/api/courses/${courseId}/logs/list`
+  return `http://127.0.0.1:9090/api/courses/${courseId}/logs/list`
 }
 
 /**
@@ -113,7 +113,7 @@ export const getCourseLogsList = async (
 }
 
 export const getGetCourseLogsInfoUrl = (courseId: number) => {
-  return `http://localhost:9090/api/courses/${courseId}/logs/info`
+  return `http://127.0.0.1:9090/api/courses/${courseId}/logs/info`
 }
 
 /**
@@ -131,7 +131,7 @@ export const getCourseLogsInfo = async (
 }
 
 export const getImportCourseLogsUrl = (courseId: number) => {
-  return `http://localhost:9090/api/courses/${courseId}/logs/import`
+  return `http://127.0.0.1:9090/api/courses/${courseId}/logs/import`
 }
 
 /**

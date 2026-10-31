@@ -10,7 +10,6 @@ export type CourseLogsStatisticsRequestDtoFieldsItem =
   (typeof CourseLogsStatisticsRequestDtoFieldsItem)[keyof typeof CourseLogsStatisticsRequestDtoFieldsItem]
 
 export const CourseLogsStatisticsRequestDtoFieldsItem = {
-  COURSE_ID: "COURSE_ID",
   USER_ID: "USER_ID",
   MODULE_ID: "MODULE_ID",
   COMPONENT_ID: "COMPONENT_ID",

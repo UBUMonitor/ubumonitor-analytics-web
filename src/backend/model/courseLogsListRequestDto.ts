@@ -6,7 +6,7 @@
  * OpenAPI spec version: 1.0.0
  */
 import type { CourseLogsInfoRequestFiltersDto } from "./courseLogsInfoRequestFiltersDto"
-import type { CourseLogsInfoRequestPaginationDto } from "./courseLogsInfoRequestPaginationDto"
+import type { CourseLogsInfoRequestPagination } from "./courseLogsInfoRequestPagination"
 import type { CourseLogsInfoRequestSortItemDto } from "./courseLogsInfoRequestSortItemDto"
 import type { CourseLogsInfoRequestTimeRangeDto } from "./courseLogsInfoRequestTimeRangeDto"
 import type { CourseLogsListRequestDtoFieldsItem } from "./courseLogsListRequestDtoFieldsItem"
@@ -16,7 +16,7 @@ export interface CourseLogsListRequestDto {
   filters?: CourseLogsInfoRequestFiltersDto
   /** Columns to include in response */
   fields?: CourseLogsListRequestDtoFieldsItem[]
-  pagination?: CourseLogsInfoRequestPaginationDto
+  pagination?: CourseLogsInfoRequestPagination
   sort?: CourseLogsInfoRequestSortItemDto[]
   includeTotal?: boolean
 }

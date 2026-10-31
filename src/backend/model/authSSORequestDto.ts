@@ -5,7 +5,7 @@
  * API documentation for UBUMonitor Analytics
  * OpenAPI spec version: 1.0.0
  */
-import type { AuthTokenRequestCookiesInnerDto } from "./authTokenRequestCookiesInnerDto"
+import type { AuthSSORequestCookiesInnerDto } from "./authSSORequestCookiesInnerDto"
 
 export interface AuthSSORequestDto {
   /** Moodle site URL */
@@ -15,5 +15,5 @@ export interface AuthSSORequestDto {
   /** Secret key used to encrypt the database using AES-256. This value must be kept securely and must not be stored or exposed in plain text. */
   dbPassword: string
   /** Cookies from SSO request, if any. */
-  cookies: AuthTokenRequestCookiesInnerDto[]
+  cookies: AuthSSORequestCookiesInnerDto[]
 }
