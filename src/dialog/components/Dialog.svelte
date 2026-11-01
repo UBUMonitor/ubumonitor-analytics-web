@@ -1,13 +1,15 @@
 <script lang="ts">
-  import { closeDialog, dialog } from "@/dialog/dialog.svelte"
+  import { dialog } from "@/dialog/dialog.svelte"
 </script>
 
 <dialog
   id="main_dialog"
   class="modal"
   bind:this={dialog.dialogRef}
-  onclose={closeDialog}
+  onclose={() => dialog.reset()}
   oncancel={(e) => e.preventDefault()}
 >
-  <dialog.component {...dialog.props} />
+  {#if dialog.component}
+    <dialog.component {...dialog.props} />
+  {/if}
 </dialog>

@@ -6,19 +6,22 @@ import { DateTime } from "luxon"
 export type DisplayConfig =
   { type: "chart"; option: ECOption } | { type: "table"; option: TableOption }
 
-export interface DisplayOption {
-  value: string
-  label: () => string
+class DisplayStore {
+  config = $state.raw<DisplayConfig>({ type: "chart", option: {} })
+  selectedDisplay = $state("total")
+  from = $state(DateTime.now().startOf("year"))
+  to = $state(DateTime.now().plus({ day: 1 }).startOf("day"))
+  group = $state<StatsInterval>("MONTHLY")
+  scale = $state(60)
+
+  reset() {
+    this.config = { type: "chart", option: {} }
+    this.selectedDisplay = "total"
+    this.from = DateTime.now().startOf("year")
+    this.to = DateTime.now().plus({ day: 1 }).startOf("day")
+    this.group = "MONTHLY"
+    this.scale = 60
+  }
 }
 
-export const displayStore = $state({
-  config: { type: "chart", option: {} } as DisplayConfig,
-  display: [] as DisplayOption[],
-  selectedDisplay: "",
-  from: DateTime.now().startOf("year"),
-  to: DateTime.now().plus({ day: 1 }).startOf("day"),
-  group: "MONTHLY" as StatsInterval,
-  scale: 60,
-  showScale: false,
-  showGroup: false,
-})
+export const displayStore = new DisplayStore()

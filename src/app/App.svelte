@@ -4,14 +4,21 @@
   import { openDialog } from "@/dialog/dialog.svelte"
   import Login from "@/login/components/Login.svelte"
   import { loginStore } from "@/login/login.svelte"
+  import { notifyError } from "@/shared/lib/notify"
   import { check } from "@tauri-apps/plugin-updater"
-  import { onMount } from "svelte"
+  import { Toaster } from "svelte-sonner"
 
   const dashboard = import("@/dashboard/components/Dashboard.svelte")
 
-  onMount(() => {
-    check().then((update) => update && openDialog(UpdateDialog, { update }))
-  })
+  const initialize = async () => {
+    try {
+      const update = await check()
+      if (update) openDialog(UpdateDialog, { update })
+    } catch (error) {
+      notifyError(error)
+    }
+  }
+  void initialize()
 </script>
 
 {#if !loginStore.token}
@@ -22,3 +29,4 @@
   {/await}
 {/if}
 <Dialog />
+<Toaster position="top-right" visibleToasts={1} />

@@ -3,47 +3,59 @@
   import AppForm from "@/login/components/AppForm.svelte"
   import LocaleSelector from "@/login/components/LocaleSelector.svelte"
   import WebForm from "@/login/components/WebForm.svelte"
+  import { notifyError } from "@/shared/lib/notify"
+  import { readStorageItem, writeStorageItem } from "@/shared/lib/storage"
   import { m } from "@/shared/paraglide/messages.js"
-  import { ArrowRightIcon, CircleXIcon, LinkIcon, SquarePenIcon } from "@lucide/svelte"
-  import { onMount } from "svelte"
+  import { ArrowRightIcon, LinkIcon, SquarePenIcon } from "@lucide/svelte"
+  import { warn } from "@tauri-apps/plugin-log"
+  import { untrack } from "svelte"
+  import type { Attachment } from "svelte/attachments"
 
-  let host = $state(localStorage.getItem("host") ?? "")
-  let hostDisabled = $state(false)
-  let checkingHost = $state(false)
-  let errorHost = $state<string | null>(null)
+  type HostState =
+    | { status: "idle" }
+    | { status: "checking" }
+    | { status: "ready"; typeOfLogin: TypeOfLogin; launchUrl?: string }
 
-  let typeOfLogin = $state<TypeOfLogin | null>(null)
-  let launchUrl = $state<string | null | undefined>(null)
+  const hostResult = readStorageItem("host")
+  if (!hostResult.ok) warn("Failed to read the saved host from local storage")
+  let host = $state(hostResult.ok ? (hostResult.value ?? "") : "")
+  let hostState = $state<HostState>({ status: "idle" })
 
-  let hostInput: HTMLInputElement
+  const checkingHost = $derived(hostState.status === "checking")
+  const hostDisabled = $derived(hostState.status === "ready")
+  const typeOfLogin = $derived(hostState.status === "ready" ? hostState.typeOfLogin : null)
+  const launchUrl = $derived(hostState.status === "ready" ? hostState.launchUrl : undefined)
 
-  const checkHost = async (host: string) => {
+  const focusHost: Attachment<HTMLInputElement> = (input) => input.focus()
+
+  const checkHost = async (value: string) => {
+    hostState = { status: "checking" }
+
     try {
-      checkingHost = true
-      errorHost = null
-
-      const result = await validateHost(host)
+      const result = await validateHost(value)
 
       if (!result.enableMobileWebService || !result.enableWebServices) {
-        errorHost = m.host_unsupported_error()
+        notifyError(new Error(m.host_unsupported_error()))
+        hostState = { status: "idle" }
         return
       }
 
       if (result.maintenanceEnabled) {
-        errorHost = result.maintenanceMessage || m.host_maintenance_error()
+        notifyError(new Error(result.maintenanceMessage || m.host_maintenance_error()))
+        hostState = { status: "idle" }
         return
       }
 
-      typeOfLogin = result.typeOfLogin
-      launchUrl = result.launchUrl
-
-      localStorage.setItem("host", host)
-
-      hostDisabled = true
+      hostState = {
+        status: "ready",
+        typeOfLogin: result.typeOfLogin,
+        launchUrl: result.launchUrl,
+      }
+      const storageResult = writeStorageItem("host", value)
+      if (!storageResult.ok) warn("Failed to save the host to local storage")
     } catch {
-      errorHost = m.host_invalid_error()
-    } finally {
-      checkingHost = false
+      notifyError(new Error(m.host_invalid_error()))
+      hostState = { status: "idle" }
     }
   }
 
@@ -51,18 +63,15 @@
     event.preventDefault()
 
     if (hostDisabled) {
-      hostDisabled = false
-      typeOfLogin = null
-      launchUrl = null
+      hostState = { status: "idle" }
       return
     }
 
     await checkHost(host)
   }
 
-  onMount(() => {
-    if (host) checkHost(host)
-    hostInput?.focus()
+  untrack(() => {
+    if (host) void checkHost(host)
   })
 </script>
 
@@ -74,7 +83,6 @@
     <label class="input join-item w-full">
       <LinkIcon />
       <input
-        bind:this={hostInput}
         type="url"
         name="host"
         aria-label={m.host()}
@@ -82,6 +90,7 @@
         required
         bind:value={host}
         disabled={hostDisabled || checkingHost}
+        {@attach focusHost}
       />
     </label>
 
@@ -99,13 +108,6 @@
       {/if}
     </button>
   </form>
-
-  {#if errorHost}
-    <div role="alert" class="alert alert-error">
-      <CircleXIcon />
-      <span>{errorHost}</span>
-    </div>
-  {/if}
 
   {#if typeOfLogin === "APP"}
     <AppForm {host} />

@@ -20,6 +20,13 @@ export type StatsInterval = (typeof StatsInterval)[keyof typeof StatsInterval]
 
 Settings.defaultLocale = getLocale()
 
+export function fromSecondsOrUndefined(seconds?: number): DateTime<true> | undefined {
+  if (seconds === undefined) return undefined
+
+  const dateTime = DateTime.fromSeconds(seconds)
+  return dateTime.isValid ? dateTime : undefined
+}
+
 const INTERVAL_CONFIG: Record<StatsInterval, { unit: DateTimeUnit; format: string }> = {
   HOURLY: { unit: "hour", format: "yyyy-MM-dd'T'HH:00:00" },
   DAILY: { unit: "day", format: "yyyy-MM-dd" },
@@ -33,7 +40,7 @@ export function intervalSlots(interval: StatsInterval, start: DateTime, end: Dat
 
   const slots = Interval.fromDateTimes(start.startOf(unit), end)
     .splitBy({ [unit]: 1 })
-    .map((slot) => slot.start!.toFormat(format))
+    .flatMap((slot) => (slot.start ? [slot.start.toFormat(format)] : []))
 
   if (interval === StatsInterval.DAY_OF_WEEK) {
     return [...new Set(slots)].sort()
@@ -68,8 +75,9 @@ export function toDateTimeInput(dateTime: DateTime) {
   return dateTime.toFormat(DATE_TIME_INPUT_FORMAT)
 }
 
-export function fromDateTimeInput(dateTime: string) {
-  return DateTime.fromISO(dateTime) as DateTime<true>
+export function fromDateTimeInput(dateTime: string): DateTime<true> | undefined {
+  const parsedDateTime = DateTime.fromISO(dateTime)
+  return parsedDateTime.isValid ? parsedDateTime : undefined
 }
 
 /**

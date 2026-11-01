@@ -1,8 +1,7 @@
 import type { CourseEnrollmentsResponseDto } from "@/backend/model"
 import { isBetweenDaysAgo, isMoreRecentThan, isOlderThan } from "@/shared/lib/datetime"
-import { includeIntl } from "@/shared/lib/utils"
+import { getLocaleCollator, includeIntl } from "@/shared/lib/utils"
 import { m } from "@/shared/paraglide/messages"
-import { getLocale } from "@/shared/paraglide/runtime"
 import type { SelectableItem } from "@/shared/types/selectable-item"
 import { DateTime } from "luxon"
 
@@ -20,114 +19,91 @@ export interface LastAccessItem extends SelectableItem {
   is: (now: DateTime<true>, lastCourseAccess?: DateTime) => boolean
 }
 
-const lastAccessItems: Array<LastAccessItem> = [
-  {
-    id: 0,
-    name: m.date_range_within_days({ days: 2 }),
-    checked: false,
-    is: (now, lastCourseAccess) =>
-      lastCourseAccess != null && isMoreRecentThan(lastCourseAccess, 2, now),
-  },
-  {
-    id: 1,
-    name: m.date_range_between_days_ago({
-      minDays: 3,
-      maxDays: 6,
-    }),
-    checked: false,
-    is: (now, lastCourseAccess) =>
-      lastCourseAccess != null && isBetweenDaysAgo(lastCourseAccess, 3, 6, now),
-  },
-  {
-    id: 2,
-    name: m.date_range_between_days_ago({
-      minDays: 7,
-      maxDays: 12,
-    }),
-    checked: false,
-    is: (now, lastCourseAccess) =>
-      lastCourseAccess != null && isBetweenDaysAgo(lastCourseAccess, 7, 12, now),
-  },
-  {
-    id: 3,
-    name: m.date_range_older_than({
-      days: 13,
-    }),
-    checked: false,
-    is: (now, lastCourseAccess) =>
-      lastCourseAccess == null || isOlderThan(lastCourseAccess, 13, now),
-  },
-]
+class UserStore {
+  userItems = $state<UserItem[]>([])
+  roleItems = $state<SelectableItem[]>([])
+  groupItems = $state<SelectableItem[]>([])
+  lastAccessItems = $state<LastAccessItem[]>([
+    {
+      id: 0,
+      name: m.date_range_within_days({ days: 2 }),
+      checked: false,
+      is: (now, lastCourseAccess) =>
+        lastCourseAccess != null && isMoreRecentThan(lastCourseAccess, 2, now),
+    },
+    {
+      id: 1,
+      name: m.date_range_between_days_ago({ minDays: 3, maxDays: 6 }),
+      checked: false,
+      is: (now, lastCourseAccess) =>
+        lastCourseAccess != null && isBetweenDaysAgo(lastCourseAccess, 3, 6, now),
+    },
+    {
+      id: 2,
+      name: m.date_range_between_days_ago({ minDays: 7, maxDays: 12 }),
+      checked: false,
+      is: (now, lastCourseAccess) =>
+        lastCourseAccess != null && isBetweenDaysAgo(lastCourseAccess, 7, 12, now),
+    },
+    {
+      id: 3,
+      name: m.date_range_older_than({ days: 13 }),
+      checked: false,
+      is: (now, lastCourseAccess) =>
+        lastCourseAccess == null || isOlderThan(lastCourseAccess, 13, now),
+    },
+  ])
+  nameFilter = $state("")
+  filtered = $derived.by(() => {
+    const selectedRoles = new Set(
+      this.roleItems.filter(({ checked }) => checked).map(({ id }) => id),
+    )
+    const selectedGroups = new Set(
+      this.groupItems.filter(({ checked }) => checked).map(({ id }) => id),
+    )
+    const selectedAccess = new Set(
+      this.lastAccessItems.filter(({ checked }) => checked).map(({ id }) => id),
+    )
 
-export const userStore = $state({
-  isLoading: false,
-  userItems: [] as UserItem[],
-  roleItems: [] as SelectableItem[],
-  groupItems: [] as SelectableItem[],
-  lastAccessItems: lastAccessItems,
-  nameFilter: "",
-})
+    if (
+      selectedRoles.size === 0 &&
+      selectedGroups.size === 0 &&
+      selectedAccess.size === 0 &&
+      this.nameFilter === ""
+    ) {
+      return this.userItems
+    }
 
-const _filteredUsers = $derived.by(() => {
-  const selectedRoles = new Set(
-    userStore.roleItems.filter(({ checked }) => checked).map(({ id }) => id),
-  )
-  const selectedGroups = new Set(
-    userStore.groupItems.filter(({ checked }) => checked).map(({ id }) => id),
-  )
+    return this.userItems.filter((user) => {
+      const matchesRole = selectedRoles.size === 0 || user.roles.some((r) => selectedRoles.has(r))
+      const matchesGroup =
+        selectedGroups.size === 0 || user.groups.some((g) => selectedGroups.has(g))
+      const matchesLastAccess =
+        selectedAccess.size === 0 || selectedAccess.has(user.lastCourseAccessGroup)
+      const matchesName = includeIntl(user.name, this.nameFilter)
 
-  const selectedAccess = new Set(
-    userStore.lastAccessItems.filter(({ checked }) => checked).map(({ id }) => id),
-  )
+      return matchesRole && matchesGroup && matchesLastAccess && matchesName
+    })
+  })
+  selected = $derived(this.filtered.filter(({ checked }) => checked))
 
-  if (
-    selectedRoles.size === 0 &&
-    selectedGroups.size === 0 &&
-    selectedAccess.size === 0 &&
-    userStore.nameFilter === ""
-  ) {
-    return userStore.userItems
+  reset() {
+    this.userItems = []
+    this.roleItems = []
+    this.groupItems = []
+    this.lastAccessItems.forEach((item) => (item.checked = false))
+    this.nameFilter = ""
   }
 
-  return userStore.userItems.filter((user) => {
-    const matchesRole = selectedRoles.size === 0 || user.roles.some((r) => selectedRoles.has(r))
-    const matchesGroup = selectedGroups.size === 0 || user.groups.some((g) => selectedGroups.has(g))
-    const matchesLastAccess =
-      selectedAccess.size === 0 || selectedAccess.has(user.lastCourseAccessGroup)
-
-    const matchesName = includeIntl(user.name, userStore.nameFilter)
-
-    return matchesRole && matchesGroup && matchesLastAccess && matchesName
-  })
-})
-
-const _selectedUsers = $derived(_filteredUsers.filter(({ checked }) => checked))
-
-export function getFilteredUsers() {
-  return _filteredUsers
-}
-
-export function getSelectedUsers() {
-  return _selectedUsers
-}
-
-export function clearUsers() {
-  userStore.userItems = []
-  userStore.roleItems = []
-  userStore.groupItems = []
-  userStore.nameFilter = ""
-}
-
-export async function updateUsers(response: Promise<CourseEnrollmentsResponseDto>) {
-  userStore.isLoading = true
-  clearUsers()
-
-  try {
-    const comparator = Intl.Collator(getLocale()).compare
-
+  async updateUsers(response: Promise<CourseEnrollmentsResponseDto>) {
+    const comparator = getLocaleCollator().compare
     const { users, roles, groups } = await response
-
-    userStore.userItems = users
+    const checkedIds = (items: readonly SelectableItem[]) =>
+      new Set(items.filter(({ checked }) => checked).map(({ id }) => id))
+    const checkedUsers = checkedIds(this.userItems)
+    const checkedRoles = checkedIds(this.roleItems)
+    const checkedGroups = checkedIds(this.groupItems)
+    const userItems = users
       .toSorted((x, y) => comparator(x.fullName, y.fullName))
       .map(({ id, imageUrl, fullName, lastAccess, lastCourseAccess, roles, groups }) => {
         const now = DateTime.now()
@@ -135,37 +111,33 @@ export async function updateUsers(response: Promise<CourseEnrollmentsResponseDto
         const lastCourseAccessDate = lastCourseAccess
           ? DateTime.fromSeconds(lastCourseAccess)
           : undefined
-
-        const lastAccessItems = userStore.lastAccessItems
+        const accessGroup = (date: DateTime | undefined) =>
+          this.lastAccessItems.find((item) => item.is(now, date))?.id ?? 3
+        const lastAccessGroup = accessGroup(lastAccessDate)
+        const lastCourseAccessGroup = accessGroup(lastCourseAccessDate)
 
         return {
           id,
-          checked: false,
+          checked: checkedUsers.has(id),
           name: fullName,
           imageUrl,
           lastAccess: lastAccessDate,
           lastCourseAccess: lastCourseAccessDate,
           roles: roles.map(({ id }) => id),
           groups: groups.map(({ id }) => id),
-          lastAccessGroup: lastAccessItems.find((i) => i.is(now, lastAccessDate))!.id,
-          lastCourseAccessGroup: lastAccessItems.find((i) => i.is(now, lastCourseAccessDate))!.id,
+          lastAccessGroup,
+          lastCourseAccessGroup,
         }
       })
+    const roleItems =
+      roles?.map(({ id, name }) => ({ id, name, checked: checkedRoles.has(id) })) ?? []
+    const groupItems =
+      groups?.map(({ id, name }) => ({ id, name, checked: checkedGroups.has(id) })) ?? []
 
-    userStore.roleItems =
-      roles?.map(({ id, name }) => ({
-        id,
-        name,
-        checked: false,
-      })) ?? []
-
-    userStore.groupItems =
-      groups?.map(({ id, name }) => ({
-        id,
-        name,
-        checked: false,
-      })) ?? []
-  } finally {
-    userStore.isLoading = false
+    this.userItems = userItems
+    this.roleItems = roleItems
+    this.groupItems = groupItems
   }
 }
+
+export const userStore = new UserStore()

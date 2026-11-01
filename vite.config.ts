@@ -38,5 +38,28 @@ export default defineConfig({
     target: process.env.TAURI_ENV_PLATFORM == "windows" ? "chrome111" : "safari16.4",
     minify: !process.env.TAURI_ENV_DEBUG,
     sourcemap: !!process.env.TAURI_ENV_DEBUG,
+    rolldownOptions: {
+      output: {
+        codeSplitting: {
+          groups: [
+            {
+              name: "renderer",
+              test: /[\\/]node_modules[\\/]zrender[\\/]/,
+              priority: 3,
+            },
+            {
+              name: "charts",
+              test: /[\\/]node_modules[\\/]echarts[\\/]/,
+              priority: 2,
+            },
+            {
+              name: "tanstack",
+              test: /[\\/]node_modules[\\/]@tanstack[\\/]/,
+              priority: 1,
+            },
+          ],
+        },
+      },
+    },
   },
 })

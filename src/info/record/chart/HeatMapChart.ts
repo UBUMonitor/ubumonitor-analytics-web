@@ -1,10 +1,10 @@
 import type { CourseLogsStatisticsRequestDtoFieldsItem } from "@/backend/model"
+import type { CourseLogsStatisticsResponseRowDto } from "@/backend/model"
 import type { ECOption } from "@/display/impl/echarts"
 import { formatTooltip } from "@/display/impl/utils"
 import type { Resolve } from "@/info/record/RecordDisplay"
 import { RecordChart } from "@/info/record/chart/RecordChart"
 import { formatSlot, intervalSlots } from "@/shared/lib/datetime"
-import type { CallbackDataParams } from "echarts/types/dist/shared"
 
 type HeatMapDatum = {
   value: [x: number, y: number, count: number]
@@ -17,26 +17,10 @@ export class HeatMapChart extends RecordChart {
     return ["USER_ID"]
   }
 
-  async resolveOptions({
-    courseId,
-    from,
-    to,
-    interval,
-    userItems,
-    selectedInfo,
-    selectedItems,
-    scale,
-  }: Resolve): Promise<ECOption> {
-    const rows = await this.requestLogsStatistics(
-      from,
-      to,
-      interval,
-      userItems,
-      selectedInfo,
-      selectedItems,
-      courseId,
-    )
-
+  buildOptions(
+    rows: CourseLogsStatisticsResponseRowDto[],
+    { from, to, interval, userItems, scale = 60 }: Resolve,
+  ): ECOption {
     const range = intervalSlots(interval, from, to)
 
     // Precomputed indices avoid scanning range/userItems for each row (O(n) instead of O(n*m))
@@ -47,7 +31,7 @@ export class HeatMapChart extends RecordChart {
     let maxValue = scale
 
     const data = rows.reduce<HeatMapDatum[]>((acc, row) => {
-      const x = dateIndex.get(row.timeBucket!)
+      const x = row.timeBucket ? dateIndex.get(row.timeBucket) : undefined
       const y = row.user ? userIndex.get(row.user.id) : undefined
 
       if (x !== undefined && y !== undefined) {
@@ -66,8 +50,19 @@ export class HeatMapChart extends RecordChart {
     return {
       tooltip: {
         formatter: (params) => {
-          const p = params as CallbackDataParams
-          return formatTooltip(interval, p, (p.data as HeatMapDatum).value[2])
+          const currentParams = Array.isArray(params) ? params[0] : params
+          const data =
+            currentParams &&
+            typeof currentParams === "object" &&
+            "data" in currentParams &&
+            currentParams.data &&
+            typeof currentParams.data === "object"
+              ? currentParams.data
+              : undefined
+          const values = data && "value" in data ? data.value : undefined
+          const value =
+            Array.isArray(values) && typeof values[2] === "number" ? values[2] : undefined
+          return formatTooltip(interval, params, value)
         },
       },
       xAxis: {

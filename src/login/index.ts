@@ -2,11 +2,15 @@ import BackendErrorDialog from "@/app/BackendErrorDialog.svelte"
 import { authLogout, authSSO } from "@/backend/services/auth"
 import { authLogin } from "@/backend/services/auth"
 import { syncUserEnrollments } from "@/backend/services/user-enrollments"
-import { updateCourses } from "@/dashboard/course"
-import { openDialog } from "@/dialog/dialog.svelte"
+import { courseStore } from "@/dashboard/course.svelte"
+import { dialog, openDialog } from "@/dialog/dialog.svelte"
+import { displayStore } from "@/display/display.svelte"
+import { gradeStore } from "@/info/grade/grade.svelte"
+import { recordStore } from "@/info/record/record.svelte"
 import { loginStore } from "@/login/login.svelte"
 import { healthCheck } from "@/shared/lib/orvalFetch"
 import { m } from "@/shared/paraglide/messages"
+import { userStore } from "@/user/user.svelte"
 import { invoke } from "@tauri-apps/api/core"
 import { once, type UnlistenFn } from "@tauri-apps/api/event"
 import { info } from "@tauri-apps/plugin-log"
@@ -29,21 +33,27 @@ export async function validateHost(host: string) {
   return invoke<SiteInfo>("get_public_moodle_config", { host })
 }
 
-const backendUp = healthCheck()
-  .then(() => {
-    info("Backend up")
-  })
-  .catch(() => {
-    openDialog(BackendErrorDialog)
-    throw Error("Backend failed")
-  })
+let backendUp: Promise<void> | undefined
+
+export function ensureBackendUp() {
+  backendUp ??= healthCheck()
+    .then(() => {
+      info("Backend up")
+    })
+    .catch((error: unknown) => {
+      openDialog(BackendErrorDialog)
+      throw new Error("Backend failed", { cause: error })
+    })
+
+  return backendUp
+}
 
 export async function login(token: Promise<string>) {
-  await backendUp
+  await ensureBackendUp()
 
   loginStore.token = await token
 
-  updateCourses(syncUserEnrollments())
+  void courseStore.updateCourses(syncUserEnrollments())
 }
 
 export async function appLogin(
@@ -125,6 +135,19 @@ export async function loginWeb(host: string, dbPassword: string, launchUrl: stri
 }
 
 export async function logout() {
-  await authLogout()
-  loginStore.token = null
+  try {
+    await authLogout()
+  } finally {
+    resetAll()
+  }
+}
+
+export function resetAll() {
+  loginStore.reset()
+  courseStore.reset()
+  userStore.reset()
+  recordStore.reset()
+  gradeStore.reset()
+  displayStore.reset()
+  dialog.close()
 }

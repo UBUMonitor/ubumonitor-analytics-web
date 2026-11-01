@@ -2,16 +2,20 @@
   import { m } from "@/shared/paraglide/messages"
   import type { UserItem } from "@/user/user.svelte"
 
-  let { imageUrl, name, lastAccess, lastCourseAccess }: UserItem = $props()
+  interface Props {
+    item: UserItem
+  }
 
-  const lastAccessLabel = $derived(lastAccess?.toRelative() ?? m.not_available())
-  const lastCourseAccessLabel = $derived(lastCourseAccess?.toRelative() ?? m.not_available())
+  let { item }: Props = $props()
+
+  const lastAccessLabel = $derived(item.lastAccess?.toRelative() ?? m.not_available())
+  const lastCourseAccessLabel = $derived(item.lastCourseAccess?.toRelative() ?? m.not_available())
 </script>
 
 <div class="flex h-14 gap-2">
-  <img class="m-1 aspect-square rounded-box" src={imageUrl} alt={name} />
+  <img class="m-1 aspect-square rounded-box" src={item.imageUrl} alt="" />
   <div class="flex flex-col">
-    <span class="truncate font-bold">{name}</span>
+    <span class="truncate font-bold">{item.name}</span>
     <span class="truncate text-xs">
       {m.last_access()}: {lastAccessLabel}
     </span>

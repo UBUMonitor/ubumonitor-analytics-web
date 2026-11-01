@@ -4,6 +4,7 @@
   import { m } from "@/shared/paraglide/messages"
   import { createTable, FlexRender, type ColumnDef } from "@tanstack/svelte-table"
   import { createVirtualizer } from "@tanstack/svelte-virtual"
+  import { untrack } from "svelte"
   import { get } from "svelte/store"
 
   interface Props {
@@ -13,7 +14,6 @@
   let { option }: Props = $props()
   let scrollElement: HTMLDivElement | undefined = $state(undefined)
 
-  const data = $derived(option.data)
   const columns = $derived.by<Array<ColumnDef<typeof features, DynamicRow>>>(() => {
     if (option.columns.length === 0) return []
 
@@ -33,7 +33,7 @@
   const table = createTable({
     features,
     get data() {
-      return data
+      return option.data
     },
     get columns() {
       return columns
@@ -42,28 +42,33 @@
 
   const rows = $derived(table.getRowModel().rows)
 
-  const virtualizer = createVirtualizer({
+  // The adapter emits the same virtualizer instance, so derive directly from its store values.
+  const virtualizerStore = createVirtualizer({
     get count() {
       return rows.length
     },
     getScrollElement: () => scrollElement ?? null,
     estimateSize: () => 46,
   })
+  // The adapter spreads options and evaluates the count getter only once.
+  const virtualRows = $derived($virtualizerStore.getVirtualItems())
+  const totalSize = $derived($virtualizerStore.getTotalSize())
+  let previousRows: typeof rows = []
 
   $effect.pre(() => {
-    get(virtualizer).setOptions({ count: rows.length })
-    if (scrollElement) scrollElement.scrollTop = 0
+    const currentRows = rows
+    const count = currentRows.length
+    untrack(() => get(virtualizerStore).setOptions({ count }))
+    if (currentRows !== previousRows) {
+      if (scrollElement) scrollElement.scrollTop = 0
+      previousRows = currentRows
+    }
   })
 
-  function measureElement(element: HTMLTableRowElement) {
-    get(virtualizer).measureElement(element)
-  }
-
-  const virtualRows = $derived($virtualizer.getVirtualItems())
   const paddingTop = $derived(virtualRows[0]?.start ?? 0)
   const paddingBottom = $derived.by(() => {
     const lastVirtualRow = virtualRows[virtualRows.length - 1]
-    return lastVirtualRow ? $virtualizer.getTotalSize() - lastVirtualRow.end : 0
+    return lastVirtualRow ? totalSize - lastVirtualRow.end : 0
   })
 </script>
 
@@ -74,23 +79,34 @@
         {#each table.getHeaderGroups() as headerGroup (headerGroup.id)}
           <tr>
             {#each headerGroup.headers as header (header.id)}
+              {@const sortState = header.column.getIsSorted()}
+              {@const uniqueValues = header.column.getFacetedUniqueValues()}
               <th
                 colSpan={header.colSpan}
                 style:width={header.column.columnDef.meta?.width ?? "auto"}
+                aria-sort={sortState === "asc"
+                  ? "ascending"
+                  : sortState === "desc"
+                    ? "descending"
+                    : "none"}
               >
                 {#if !header.isPlaceholder}
-                  <button class="cursor-pointer" onclick={header.column.getToggleSortingHandler()}>
+                  <button
+                    type="button"
+                    class="cursor-pointer"
+                    onclick={header.column.getToggleSortingHandler()}
+                  >
                     <FlexRender {header} />
-                    {#if header.column.getIsSorted() === "asc"}
+                    {#if sortState === "asc"}
                       ▴
-                    {:else if header.column.getIsSorted() === "desc"}
+                    {:else if sortState === "desc"}
                       ▾
                     {/if}
                   </button>
                   {#if header.column.getCanFilter()}
                     <div>
                       <datalist id="{header.column.id}List">
-                        {#each header.column.getFacetedUniqueValues().keys() as value (value)}
+                        {#each uniqueValues.keys() as value (value)}
                           <option {value}></option>
                         {/each}
                       </datalist>
@@ -98,10 +114,11 @@
                         class="input mt-1 input-xs"
                         name="filter-{header.column.id}"
                         type="text"
+                        aria-label="{m.filter()} {header.column.id}"
                         value={(header.column.getFilterValue() ?? "") as string}
                         onchange={(value) => header.column.setFilterValue(value)}
                         debounce={500}
-                        placeholder="{m.filter()} ({header.column.getFacetedUniqueValues().size})"
+                        placeholder="{m.filter()} ({uniqueValues.size})"
                         list="{header.column.id}List"
                       />
                     </div>
@@ -120,7 +137,10 @@
         {/if}
         {#each virtualRows as virtualRow (virtualRow.key)}
           {@const row = rows[virtualRow.index]}
-          <tr data-index={virtualRow.index} use:measureElement>
+          <tr
+            data-index={virtualRow.index}
+            {@attach (element) => get(virtualizerStore).measureElement(element)}
+          >
             {#each row.getAllCells() as cell (cell.id)}
               <td
                 class="truncate"

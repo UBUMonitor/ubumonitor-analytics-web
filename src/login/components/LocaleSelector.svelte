@@ -4,7 +4,7 @@
   import type { ClassValue } from "svelte/elements"
 
   interface Props {
-    class: ClassValue
+    class?: ClassValue
   }
 
   const props: Props = $props()

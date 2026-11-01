@@ -1,8 +1,9 @@
-import { recordStore } from "../record.svelte"
 import { getCourseLogsList } from "@/backend/services/course-logs"
 import type { DisplayConfig } from "@/display/display.svelte"
 import type { TableColumn } from "@/display/impl/table"
-import { RecordDisplay, type Resolve } from "@/info/record/RecordDisplay"
+import { RecordDisplay, type DisplayData, type Resolve } from "@/info/record/RecordDisplay"
+import { recordStore } from "@/info/record/record.svelte"
+import { buildLogFilters } from "@/info/record/recordFilters"
 import { m } from "@/shared/paraglide/messages"
 import { DateTime } from "luxon"
 
@@ -17,7 +18,7 @@ const COLUMNS = [
     key: "user",
     name: m.table_name(),
     filter: true,
-    width: "18%",
+    width: "14%",
   },
   {
     key: "component",
@@ -32,10 +33,16 @@ const COLUMNS = [
     width: "20%",
   },
   {
+    key: "section",
+    name: "Section",
+    filter: true,
+    width: "14%",
+  },
+  {
     key: "module",
     name: m.table_module(),
     filter: true,
-    width: "20%",
+    width: "15%",
   },
   {
     key: "origin",
@@ -47,46 +54,26 @@ const COLUMNS = [
     key: "ip",
     name: m.table_ip(),
     filter: true,
-    width: "15%",
+    width: "10%",
   },
 ] as const satisfies TableColumn[]
 
 export class RecordTable extends RecordDisplay {
-  async resolveConfig({
+  async fetch({
     courseId,
     from,
     to,
     userItems,
     selectedInfo,
     selectedItems,
-  }: Resolve): Promise<DisplayConfig> {
-    if (courseId == null || userItems.length === 0 || selectedItems.length === 0)
-      return { type: "table", option: { columns: COLUMNS, data: [] } }
-
-    const userMap = new Map(userItems.map(({ id, name }) => [id, name]))
-    const componentMap = new Map(recordStore.componentItems.map(({ id, name }) => [id, name]))
-    const eventMap = new Map(recordStore.eventItems.map(({ id, name }) => [id, name]))
-    const sectionMap = new Map(recordStore.sectionItems.map(({ id, name }) => [id, name]))
-
-    const moduleMap = new Map(
-      recordStore.moduleItems.map(({ id, name, sectionId }) => [
-        id,
-        { name, sectionName: sectionMap.get(sectionId) },
-      ]),
-    )
-    const originMap = new Map(recordStore.originItems.map(({ id, name }) => [id, name]))
-
-    const selectedItemsIds = selectedItems.map(({ id }) => id)
+  }: Resolve): Promise<DisplayData> {
+    if (courseId == null || userItems.length === 0 || selectedItems.length === 0) {
+      return { kind: "table", entries: [] }
+    }
 
     const logs = await getCourseLogsList(courseId, {
       timeRange: { from: from.toSeconds(), to: to.toSeconds() },
-      filters: {
-        userIds: userItems.map(({ id }) => id),
-        moduleIds: selectedInfo === "module" ? selectedItemsIds : undefined,
-        sectionIds: selectedInfo === "section" ? selectedItemsIds : undefined,
-        componentIds: selectedInfo === "component" ? selectedItemsIds : undefined,
-        eventIds: selectedInfo === "event" ? selectedItemsIds : undefined,
-      },
+      filters: buildLogFilters(selectedInfo, selectedItems, userItems),
       fields: [
         "TIMESTAMP",
         "USER_ID",
@@ -98,17 +85,35 @@ export class RecordTable extends RecordDisplay {
       ],
     })
 
+    return { kind: "table", entries: logs.content }
+  }
+
+  build(data: DisplayData, { userItems }: Resolve): DisplayConfig {
+    if (data.kind !== "table") throw new Error("Table display received non-table data")
+
+    const userMap = new Map(userItems.map(({ id, name }) => [id, name]))
+    const componentMap = new Map(recordStore.componentItems.map(({ id, name }) => [id, name]))
+    const eventMap = new Map(recordStore.eventItems.map(({ id, name }) => [id, name]))
+    const sectionMap = new Map(recordStore.sectionItems.map(({ id, name }) => [id, name]))
+    const moduleMap = new Map(
+      recordStore.moduleItems.map(({ id, name, sectionId }) => [
+        id,
+        { name, sectionName: sectionMap.get(sectionId) },
+      ]),
+    )
+    const originMap = new Map(recordStore.originItems.map(({ id, name }) => [id, name]))
+
     return {
       type: "table",
       option: {
         columns: COLUMNS,
-        data: logs.content.map(
+        data: data.entries.map(
           ({ timeCreated, userId, componentId, eventId, moduleId, originId, ip }) => ({
             dateTime: DateTime.fromSeconds(timeCreated),
             user: userMap.get(userId),
             component: componentMap.get(componentId),
             event: eventMap.get(eventId),
-            sectionId: moduleMap.get(moduleId)?.sectionName,
+            section: moduleMap.get(moduleId)?.sectionName,
             module: moduleMap.get(moduleId)?.name,
             origin: originMap.get(originId),
             ip,

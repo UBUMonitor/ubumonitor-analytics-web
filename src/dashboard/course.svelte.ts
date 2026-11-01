@@ -1,3 +1,7 @@
+import type { EnrollmentsResponseDto } from "@/backend/model"
+import { loginStore } from "@/login/login.svelte"
+import { fromSecondsOrUndefined } from "@/shared/lib/datetime"
+import { notifyError, notifySyncStart } from "@/shared/lib/notify"
 import type { DateTime } from "luxon"
 
 export interface CourseItem {
@@ -8,12 +12,34 @@ export interface CourseItem {
   lastSync?: DateTime<true>
 }
 
-export const courseStore = $state({
-  currentCourse: null as CourseItem | null,
-  courseItems: [] as CourseItem[],
-})
+class CourseStore {
+  currentCourse = $state<CourseItem | null>(null)
+  courseItems = $state<CourseItem[]>([])
 
-export function clearAppStore() {
-  courseStore.currentCourse = null
-  courseStore.courseItems = []
+  reset() {
+    this.currentCourse = null
+    this.courseItems = []
+  }
+
+  async updateCourses(enrollments: Promise<EnrollmentsResponseDto>) {
+    const stopSyncToast = notifySyncStart()
+    try {
+      const { courses } = await enrollments
+      if (loginStore.token === null) return
+
+      this.courseItems = courses.map((course) => ({
+        id: course.id,
+        name: course.fullName,
+        startDate: fromSecondsOrUndefined(course.startDate),
+        endDate: fromSecondsOrUndefined(course.endDate),
+        lastSync: fromSecondsOrUndefined(course.lastSync),
+      }))
+    } catch (error) {
+      notifyError(error)
+    } finally {
+      stopSyncToast()
+    }
+  }
 }
+
+export const courseStore = new CourseStore()

@@ -12,7 +12,12 @@ const gitignorePath = path.resolve(import.meta.dirname, ".gitignore")
 export default defineConfig(
   includeIgnoreFile(gitignorePath),
   {
-    ignores: ["src-tauri/"],
+    ignores: [
+      "src-tauri/",
+      "src/backend/model/**",
+      "src/backend/services/**",
+      "src/shared/paraglide/**",
+    ],
   },
   js.configs.recommended,
   ts.configs.recommended,
@@ -39,8 +44,11 @@ export default defineConfig(
     },
   },
   {
-    // Override or add rule settings here, such as:
-    // 'svelte/button-has-type': 'error'
-    rules: {},
+    rules: {
+      "svelte/no-unused-props": "error",
+      "svelte/prefer-const": "error",
+      "svelte/require-each-key": "error",
+      "@typescript-eslint/no-non-null-assertion": "warn",
+    },
   },
 )

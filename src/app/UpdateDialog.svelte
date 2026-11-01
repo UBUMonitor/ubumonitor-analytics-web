@@ -70,10 +70,11 @@
     {/if}
 
     <div class="modal-actions flex justify-end gap-2">
-      <button class="btn btn-neutral" onclick={handleUpdate}>
+      <button type="button" class="btn btn-neutral" onclick={handleUpdate}>
         {errorMessage ? m.retry_update() : m.update_action()}
       </button>
-      <button class="btn btn-error" onclick={handleCancel}>{m.cancel_update()}</button>
+      <button type="button" class="btn btn-error" onclick={handleCancel}>{m.cancel_update()}</button
+      >
     </div>
   {/if}
 </div>

@@ -4,13 +4,15 @@
   interface Props {
     items: SelectableItem[]
     ariaLabel: string
+    onToggle: (item: SelectableItem, checked: boolean) => void
   }
 
   const uid = $props.id()
-  let { items, ariaLabel }: Props = $props()
+  let { items, ariaLabel, onToggle }: Props = $props()
 </script>
 
 <button
+  type="button"
   class="select w-20 select-sm"
   aria-label={ariaLabel}
   title={ariaLabel}
@@ -34,7 +36,8 @@
           <input
             type="checkbox"
             class="checkbox checkbox-sm checkbox-primary"
-            bind:checked={item.checked}
+            checked={item.checked}
+            onchange={(event) => onToggle(item, event.currentTarget.checked)}
           />
         </label>
       </li>

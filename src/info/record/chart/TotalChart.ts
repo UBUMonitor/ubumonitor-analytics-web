@@ -1,5 +1,5 @@
 import {
-  CourseLogsStatisticsRequestDtoFieldsItem,
+  type CourseLogsStatisticsRequestDtoFieldsItem,
   type CourseLogsStatisticsResponseRowDto,
 } from "@/backend/model"
 import type { ECOption } from "@/display/impl/echarts"
@@ -29,25 +29,10 @@ export class TotalChart extends RecordChart {
     return [FIELDS[selectedInfo]]
   }
 
-  async resolveOptions({
-    courseId,
-    from,
-    to,
-    interval,
-    userItems,
-    selectedInfo,
-    selectedItems,
-  }: Resolve): Promise<ECOption> {
-    const rows = await this.requestLogsStatistics(
-      from,
-      to,
-      interval,
-      userItems,
-      selectedInfo,
-      selectedItems,
-      courseId,
-    )
-
+  buildOptions(
+    rows: CourseLogsStatisticsResponseRowDto[],
+    { selectedInfo, selectedItems }: Resolve,
+  ): ECOption {
     const matcher = ROW_MATCHER[selectedInfo]
     const data = selectedItems.map((item) => rows.find((row) => matcher(row, item.id))?.value ?? 0)
 

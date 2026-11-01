@@ -1,10 +1,11 @@
 <script lang="ts">
   import { login, loginWeb } from "@/login"
   import PasswordInput from "@/shared/components/PasswordInput.svelte"
-  import { getErrorMessage } from "@/shared/error/errorMessage"
+  import { AsyncAction } from "@/shared/lib/async.svelte"
+  import { getFormString } from "@/shared/lib/form"
   import { m } from "@/shared/paraglide/messages"
-  import { CircleXIcon, DatabaseIcon } from "@lucide/svelte"
-  import { onMount } from "svelte"
+  import { DatabaseIcon } from "@lucide/svelte"
+  import type { Attachment } from "svelte/attachments"
   import type { EventHandler } from "svelte/elements"
 
   interface Props {
@@ -13,56 +14,37 @@
   }
 
   let { host, launchUrl }: Props = $props()
+  const action = new AsyncAction()
 
-  let loading = $state(false)
-  let errorLogin = $state<string | null>()
-
-  let dbPasswordInput = $state<HTMLInputElement>()
-
-  const handleSubmit: EventHandler<SubmitEvent, HTMLFormElement> = async (event) => {
-    try {
-      event.preventDefault()
-      loading = true
-      errorLogin = null
-
-      const dbPassword = event.currentTarget.dbPassword.value as string
-
-      await login(loginWeb(host, dbPassword, launchUrl))
-    } catch (e) {
-      errorLogin = getErrorMessage(e)
-    } finally {
-      loading = false
-    }
+  const focusPassword: Attachment<HTMLFormElement> = (form) => {
+    form.querySelector<HTMLInputElement>('input[name="dbPassword"]')?.focus()
   }
 
-  onMount(() => {
-    dbPasswordInput?.focus()
-  })
+  const handleSubmit: EventHandler<SubmitEvent, HTMLFormElement> = async (event) => {
+    event.preventDefault()
+    const dbPassword = getFormString(new FormData(event.currentTarget), "dbPassword")
+
+    await action.run(() => login(loginWeb(host, dbPassword, launchUrl)))
+  }
 </script>
 
-<form class="fieldset" onsubmit={handleSubmit}>
+<form class="fieldset" onsubmit={handleSubmit} {@attach focusPassword}>
   <PasswordInput
-    bind:inputElement={dbPasswordInput}
     name="dbPassword"
     placeholder={m.database_password()}
     showLabel={m.show_database_password()}
     hideLabel={m.hide_database_password()}
   >
-    <DatabaseIcon />
+    {#snippet icon()}
+      <DatabaseIcon />
+    {/snippet}
   </PasswordInput>
 
-  <button class="btn mt-2 btn-primary" disabled={loading}>
-    {#if loading}
+  <button class="btn mt-2 btn-primary" disabled={action.loading}>
+    {#if action.loading}
       <span class="loading loading-spinner"></span>
     {:else}
       {m.login_sso()}
     {/if}
   </button>
-
-  {#if errorLogin}
-    <div role="alert" class="alert alert-error">
-      <CircleXIcon />
-      <span>{errorLogin}</span>
-    </div>
-  {/if}
 </form>

@@ -23,6 +23,7 @@
     <input
       type="radio"
       name="main_tabs"
+      disabled
       class="tab"
       aria-label={m.grades()}
       bind:group={selectedTab}

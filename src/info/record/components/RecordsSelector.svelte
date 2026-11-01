@@ -1,90 +1,79 @@
-<script lang="ts">
-  import type { RecordDisplay } from "../RecordDisplay"
-  import { RecordTable } from "../table/RecordTable"
-  import { courseStore } from "@/dashboard/course.svelte"
-  import { displayStore } from "@/display/display.svelte"
-  import { CumulativeChart } from "@/info/record/chart/CumulativeChart"
-  import { HeatMapChart } from "@/info/record/chart/HeatMapChart"
-  import { RelativeCumulativeChart } from "@/info/record/chart/RelativeCumulativeChart"
-  import { TotalChart } from "@/info/record/chart/TotalChart"
-  import RecordItem from "@/info/record/components/RecordItem.svelte"
-  import { recordStore, type RecordType } from "@/info/record/record.svelte"
-  import Select from "@/shared/components/Select.svelte"
-  import SelectButtons from "@/shared/components/SelectButtons.svelte"
+<script module lang="ts">
+  import { getDisplayOption } from "@/info/record/displayOptions"
+  import type { RecordType } from "@/info/record/record.svelte"
+  import { recordStore } from "@/info/record/record.svelte"
   import { m } from "@/shared/paraglide/messages"
-  import { getSelectedUsers } from "@/user/user.svelte"
-
-  interface Props {
-    active: boolean
-  }
-
-  let { active = $bindable() }: Props = $props()
-
-  let selected = $state<RecordType>("component")
 
   const tabs = [
     { value: "component", label: m.components, items: () => recordStore.componentItems },
     { value: "event", label: m.events, items: () => recordStore.eventItems },
     { value: "section", label: m.section, items: () => recordStore.sectionItems },
     { value: "module", label: m.modules, items: () => recordStore.moduleItems },
-  ]
+  ] satisfies {
+    value: RecordType
+    label: () => string
+    items: () => typeof recordStore.componentItems
+  }[]
+</script>
 
-  const displayOptions = [
-    { value: "total", label: m.total, display: new TotalChart() },
-    { value: "heatmap", label: m.heatmap, display: new HeatMapChart() },
-    { value: "cumulative", label: m.cumulative, display: new CumulativeChart() },
-    {
-      value: "relative_cumulative",
-      label: m.relative_cumulative,
-      display: new RelativeCumulativeChart(),
-    },
-    { value: "table", label: m.table, display: new RecordTable() },
-  ] satisfies { value: string; label: () => string; display: RecordDisplay }[]
+<script lang="ts">
+  import { courseStore } from "@/dashboard/course.svelte"
+  import { displayStore } from "@/display/display.svelte"
+  import RecordItem from "@/info/record/components/RecordItem.svelte"
+  import Select from "@/shared/components/Select.svelte"
+  import SelectButtons from "@/shared/components/SelectButtons.svelte"
+  import { notifyError } from "@/shared/lib/notify"
+  import { setChecked } from "@/shared/lib/selection"
+  import type { SelectableItem } from "@/shared/types/selectable-item"
+  import { userStore } from "@/user/user.svelte"
 
-  $effect(() => {
-    if (!active) return
+  interface Props {
+    active: boolean
+  }
 
-    displayStore.display = displayOptions.map(({ value, label }) => ({ value, label }))
-    displayStore.selectedDisplay = "total"
-    displayStore.showGroup = displayOptions[0].display.hasGroup()
-    displayStore.showScale = displayOptions[0].display.hasScale()
+  let { active }: Props = $props()
+  let selected = $state<RecordType>("component")
+
+  async function refresh(params: NonNullable<typeof requestParams>) {
+    try {
+      displayStore.config = await params.option.display.resolveConfig(params.resolve)
+    } catch (error) {
+      notifyError(error)
+    }
+  }
+
+  const requestParams = $derived.by(() => {
+    if (!active) return undefined
+
+    const course = courseStore.currentCourse
+    const option = getDisplayOption(displayStore.selectedDisplay)
+    if (!course || !option) return undefined
+
+    const users = userStore.selected
+    const selectedItems =
+      tabs
+        .find(({ value }) => value === selected)
+        ?.items()
+        .filter(({ checked }) => checked) ?? []
+
+    const resolve = {
+      courseId: course.id,
+      from: displayStore.from,
+      to: displayStore.to,
+      interval: displayStore.group,
+      userItems: users,
+      selectedInfo: selected,
+      selectedItems,
+      scale: displayStore.scale,
+    }
+
+    return { option, resolve }
   })
 
   $effect(() => {
-    if (!active || courseStore.currentCourse == null) return
-
-    const selectedDisplay = displayOptions.find(
-      ({ value }) => value === displayStore.selectedDisplay,
-    )
-
-    if (!selectedDisplay) return
-
-    const selectedItems = tabs
-      .find(({ value }) => value === selected)!
-      .items()
-      .filter(({ checked }) => checked)
-
-    const { display } = selectedDisplay
-
-    displayStore.showGroup = display.hasGroup()
-    displayStore.showScale = display.hasScale()
-
-    const selectedUsers = getSelectedUsers()
-
-    display
-      .resolveConfig({
-        courseId: courseStore.currentCourse.id,
-        from: displayStore.from,
-        to: displayStore.to,
-        interval: displayStore.group,
-        scale: displayStore.scale,
-        userItems: selectedUsers,
-        selectedInfo: selected,
-        selectedItems,
-      })
-      .then((option) => {
-        displayStore.config = option
-      })
+    const params = requestParams
+    if (!params) return
+    void refresh(params)
   })
 </script>
 
@@ -99,22 +88,22 @@
       value={tab.value}
     />
     <div class="tab-content">
-      <SelectButtons class="border-b border-base-200 p-1" items={tab.items()} />
-      {#if recordStore.isLoading}
-        {@render skeleton()}
-      {:else}
-        <Select component={RecordItem} items={tab.items()} ariaLabel={tab.label()} />
-      {/if}
+      <SelectButtons
+        class="border-b border-base-200 p-1"
+        items={tab.items()}
+        onToggleAll={setChecked}
+      />
+      <Select
+        item={recordItem}
+        items={tab.items()}
+        ariaLabel={tab.label()}
+        onToggle={(item, checked) => (item.checked = checked)}
+        onToggleAll={setChecked}
+      />
     </div>
   {/each}
 </div>
 
-{#snippet skeleton()}
-  <div class="flex animate-pulse flex-col overflow-hidden">
-    {#each { length: 5 }, i (i)}
-      <div class="m-1 h-6 w-48 shrink-0 skeleton"></div>
-      <div class="m-1 h-6 w-40 shrink-0 skeleton"></div>
-      <div class="m-1 h-6 w-56 shrink-0 skeleton"></div>
-    {/each}
-  </div>
+{#snippet recordItem(record: SelectableItem & { modName?: string })}
+  <RecordItem item={record} />
 {/snippet}

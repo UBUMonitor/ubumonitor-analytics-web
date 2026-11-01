@@ -4,6 +4,7 @@
   "application_error": "Application error",
   "backend_start_error": "The backend could not be started. Check the logs for details.",
   "close_application": "Close app",
+  "close": "Close",
 
   "update_available": "Update available",
   "update_in_progress": "Updating...",

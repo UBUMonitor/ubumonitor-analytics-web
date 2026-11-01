@@ -38,6 +38,9 @@ importers:
       luxon:
         specifier: ^3.7.2
         version: 3.7.2
+      svelte-sonner:
+        specifier: ^1.2.2
+        version: 1.2.2(svelte@5.57.2(@typescript-eslint/types@8.71.2))
     devDependencies:
       '@eslint/compat':
         specifier: ^2.1.1
@@ -2136,6 +2139,11 @@ packages:
     engines: {node: ^20.19.0 || >=22.12.0}
     hasBin: true
 
+  runed@0.28.0:
+    resolution: {integrity: sha512-k2xx7RuO9hWcdd9f+8JoBeqWtYrm5CALfgpkg2YDB80ds/QE4w0qqu34A7fqiAwiBBSBQOid7TLxwxVC27ymWQ==}
+    peerDependencies:
+      svelte: ^5.7.0
+
   sade@1.8.1:
     resolution: {integrity: sha512-xal3CZX1Xlo/k4ApwCFrHVACi9fBqJ7V+mwhBsuf/1IOKbBy098Fex+Wa/5QMubw09pSZ/u8EY8PWgevJsXp1A==}
     engines: {node: '>=6'}
@@ -2189,6 +2197,11 @@ packages:
     peerDependenciesMeta:
       svelte:
         optional: true
+
+  svelte-sonner@1.2.2:
+    resolution: {integrity: sha512-sHAvdhf9PNC7LMBmUSWRGPdxZn17HrW5ITsUKmF4SP9C3IZBE7B3rBw8BEztIiSDcTpEdZcKgmnN+BAhH4M8qQ==}
+    peerDependencies:
+      svelte: ^5.0.0
 
   svelte@5.57.2:
     resolution: {integrity: sha512-1YiPCAXT0Ct6g1vOMmSLa0Nsc3QRMvtDF32ihgglGVrugIuIK38RyDiFNXVDhtQ81TJjSO57NdMw6DyYLqSGDQ==}
@@ -4128,6 +4141,11 @@ snapshots:
       '@rolldown/binding-win32-arm64-msvc': 1.2.14
       '@rolldown/binding-win32-x64-msvc': 1.2.14
 
+  runed@0.28.0(svelte@5.57.2(@typescript-eslint/types@8.71.2)):
+    dependencies:
+      esm-env: 1.2.2
+      svelte: 5.57.2(@typescript-eslint/types@8.71.2)
+
   sade@1.8.1:
     dependencies:
       mri: 1.2.0
@@ -4173,6 +4191,11 @@ snapshots:
       postcss-selector-parser: 7.1.1
       semver: 7.8.1
     optionalDependencies:
+      svelte: 5.57.2(@typescript-eslint/types@8.71.2)
+
+  svelte-sonner@1.2.2(svelte@5.57.2(@typescript-eslint/types@8.71.2)):
+    dependencies:
+      runed: 0.28.0(svelte@5.57.2(@typescript-eslint/types@8.71.2))
       svelte: 5.57.2(@typescript-eslint/types@8.71.2)
 
   svelte@5.57.2(@typescript-eslint/types@8.71.2):

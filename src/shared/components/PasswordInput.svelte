@@ -1,37 +1,25 @@
 <script lang="ts">
   import { EyeIcon, EyeOffIcon } from "@lucide/svelte"
   import type { Snippet } from "svelte"
+  import type { HTMLInputAttributes } from "svelte/elements"
 
-  interface Props {
+  interface Props extends Omit<HTMLInputAttributes, "name" | "placeholder" | "required" | "type"> {
     name: string
     placeholder: string
     showLabel: string
     hideLabel: string
-    inputElement?: HTMLInputElement
-    children: Snippet
+    required?: boolean
+    icon: Snippet
   }
 
-  let {
-    name,
-    placeholder,
-    showLabel,
-    hideLabel,
-    inputElement = $bindable(),
-    children,
-  }: Props = $props()
+  let { name, placeholder, showLabel, hideLabel, required = true, icon, ...rest }: Props = $props()
 
   let showPassword = $state(false)
 </script>
 
 <label class="input w-full">
-  {@render children()}
-  <input
-    bind:this={inputElement}
-    type={showPassword ? "text" : "password"}
-    {name}
-    {placeholder}
-    required
-  />
+  {@render icon()}
+  <input {...rest} type={showPassword ? "text" : "password"} {name} {placeholder} {required} />
   <button
     type="button"
     tabindex="-1"

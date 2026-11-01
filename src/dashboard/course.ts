@@ -1,4 +1,3 @@
-import type { EnrollmentsResponseDto } from "@/backend/model"
 import { getCourseUsersContentInfo, syncCourseContent } from "@/backend/services/course-content"
 import {
   getCourseUsersEnrollmentsInfo,
@@ -8,56 +7,75 @@ import { getCourseGradesInfo, syncCourseGrades } from "@/backend/services/course
 import { getCourseLogsInfo, syncCourseLogs } from "@/backend/services/course-logs"
 import { courseStore } from "@/dashboard/course.svelte"
 import { updateChartDate } from "@/display/display"
-import { updateGrades } from "@/info/grade/grade"
-import { updateRecords } from "@/info/record/record"
-import { updateUsers } from "@/user/user.svelte"
+import { gradeStore } from "@/info/grade/grade.svelte"
+import { recordStore } from "@/info/record/record.svelte"
+import { loginStore } from "@/login/login.svelte"
+import { notifySyncStart } from "@/shared/lib/notify"
+import { userStore } from "@/user/user.svelte"
 import { DateTime } from "luxon"
-
-export async function updateCourses(enrollments: Promise<EnrollmentsResponseDto>) {
-  const { courses } = await enrollments
-
-  courseStore.courseItems = courses.map((course) => ({
-    id: course.id,
-    name: course.fullName,
-    startDate: course.startDate
-      ? (DateTime.fromSeconds(course.startDate) as DateTime<true>)
-      : undefined,
-    endDate: course.endDate ? (DateTime.fromSeconds(course.endDate) as DateTime<true>) : undefined,
-    lastSync: course.lastSync
-      ? (DateTime.fromSeconds(course.lastSync) as DateTime<true>)
-      : undefined,
-  }))
-}
 
 export async function changeCourse(courseId: number) {
   const course = courseStore.courseItems.find((course) => course.id === courseId)
 
   if (!course) return
 
+  const isDifferentCourse = courseStore.currentCourse?.id !== course.id
   courseStore.currentCourse = course
+
+  if (isDifferentCourse) {
+    userStore.reset()
+    recordStore.reset()
+    gradeStore.reset()
+  }
 
   updateChartDate(course.startDate, course.endDate)
 
   if (course.lastSync) {
-    updateAll(course.id)
+    await updateAll(course.id, course.name)
   } else {
-    await syncAll(course.id)
-    course.lastSync = DateTime.now()
+    const stopSyncToast = notifySyncStart()
+    try {
+      if (await syncAllForCourse(course.id)) course.lastSync = DateTime.now()
+    } finally {
+      stopSyncToast()
+    }
   }
 }
 
-async function updateAll(courseId: number) {
+async function updateAll(courseId: number, courseName: string) {
   return Promise.all([
-    updateUsers(getCourseUsersEnrollmentsInfo(courseId)),
-    updateRecords(getCourseUsersContentInfo(courseId), getCourseLogsInfo(courseId)),
-    updateGrades(getCourseGradesInfo(courseId)),
+    userStore.updateUsers(getCourseUsersEnrollmentsInfo(courseId)),
+    recordStore.updateRecords(getCourseUsersContentInfo(courseId), getCourseLogsInfo(courseId)),
+    gradeStore.updateGrades(getCourseGradesInfo(courseId), courseName),
   ])
 }
 
-export async function syncAll(courseId = courseStore.currentCourse!.id) {
-  return Promise.all([
-    updateUsers(syncCourseUsersEnrollments(courseId)),
-    updateRecords(syncCourseContent(courseId), syncCourseLogs(courseId)),
-    updateGrades(syncCourseGrades(courseId)),
+export async function syncAll(courseId: number) {
+  const stopSyncToast = notifySyncStart()
+  try {
+    if (await syncAllForCourse(courseId)) {
+      const course = courseStore.courseItems.find(({ id }) => id === courseId)
+      if (course) course.lastSync = DateTime.now()
+    }
+  } finally {
+    stopSyncToast()
+  }
+}
+
+async function syncAllForCourse(courseId: number) {
+  const [enrollments, [content, logs], grades] = await Promise.all([
+    syncCourseUsersEnrollments(courseId),
+    Promise.all([syncCourseContent(courseId), syncCourseLogs(courseId)]),
+    syncCourseGrades(courseId),
   ])
+  if (loginStore.token === null) return false
+
+  return Promise.all([
+    userStore.updateUsers(Promise.resolve(enrollments)),
+    recordStore.updateRecords(Promise.resolve(content), Promise.resolve(logs)),
+    gradeStore.updateGrades(
+      Promise.resolve(grades),
+      courseStore.courseItems.find(({ id }) => id === courseId)?.name ?? "",
+    ),
+  ]).then(() => true)
 }

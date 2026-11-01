@@ -1,28 +1,21 @@
 <script lang="ts">
   import { changeCourse, syncAll } from "@/dashboard/course"
   import { courseStore } from "@/dashboard/course.svelte"
+  import { AsyncAction } from "@/shared/lib/async.svelte"
   import { m } from "@/shared/paraglide/messages"
   import { RefreshCwIcon } from "@lucide/svelte"
   import type { ChangeEventHandler } from "svelte/elements"
 
-  let isSyncing = $state(false)
+  const action = new AsyncAction()
 
   const handleOnChange: ChangeEventHandler<HTMLSelectElement> = async (e) => {
-    isSyncing = true
-    try {
-      await changeCourse(Number(e.currentTarget.value))
-    } finally {
-      isSyncing = false
-    }
+    await action.run(() => changeCourse(Number(e.currentTarget.value)))
   }
 
   const handleSync = async () => {
-    isSyncing = true
-    try {
-      await syncAll()
-    } finally {
-      isSyncing = false
-    }
+    const courseId = courseStore.currentCourse?.id
+    if (courseId === undefined) return
+    await action.run(() => syncAll(courseId))
   }
 </script>
 
@@ -30,7 +23,7 @@
   <select
     class="select select-sm"
     name="course"
-    disabled={isSyncing || courseStore.courseItems.length === 0}
+    disabled={action.loading || courseStore.courseItems.length === 0}
     aria-label={m.select_course()}
     value={courseStore.currentCourse?.id}
     onchange={handleOnChange}
@@ -41,13 +34,16 @@
     {/each}
   </select>
   <button
-    class="group btn btn-square p-1 btn-primary btn-sm"
-    class:invisible={!courseStore.currentCourse?.id}
+    class={[
+      "group btn btn-square p-1 btn-primary btn-sm",
+      !courseStore.currentCourse?.id && "invisible",
+    ]}
+    type="button"
     onclick={handleSync}
-    disabled={isSyncing}
+    disabled={action.loading || !courseStore.currentCourse}
     aria-label={m.sync_course_data()}
     title={m.sync_course_data()}
   >
-    <RefreshCwIcon class="group-disabled:animate-spin" />
+    <RefreshCwIcon />
   </button>
 </div>

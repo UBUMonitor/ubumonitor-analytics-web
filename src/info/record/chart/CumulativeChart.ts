@@ -1,36 +1,23 @@
-import type { CourseLogsStatisticsRequestDtoFieldsItem } from "@/backend/model"
+import type {
+  CourseLogsStatisticsRequestDtoFieldsItem,
+  CourseLogsStatisticsResponseRowDto,
+} from "@/backend/model"
 import type { ECOption } from "@/display/impl/echarts"
 import { formatTooltip, round2 } from "@/display/impl/utils"
 import type { Resolve } from "@/info/record/RecordDisplay"
 import { RecordChart } from "@/info/record/chart/RecordChart"
 import { formatSlot, intervalSlots } from "@/shared/lib/datetime"
 import { m } from "@/shared/paraglide/messages"
-import type { CallbackDataParams } from "echarts/types/dist/shared"
 
 export class CumulativeChart extends RecordChart {
   getFields(): CourseLogsStatisticsRequestDtoFieldsItem[] {
     return ["USER_ID"]
   }
 
-  async resolveOptions({
-    courseId,
-    from,
-    to,
-    interval,
-    userItems,
-    selectedInfo,
-    selectedItems,
-  }: Resolve): Promise<ECOption> {
-    const rows = await this.requestLogsStatistics(
-      from,
-      to,
-      interval,
-      userItems,
-      selectedInfo,
-      selectedItems,
-      courseId,
-    )
-
+  buildOptions(
+    rows: CourseLogsStatisticsResponseRowDto[],
+    { from, to, interval, userItems }: Resolve,
+  ): ECOption {
     const range = intervalSlots(interval, from, to)
     const rangeLength = range.length
     const userCount = userItems.length
@@ -97,7 +84,7 @@ export class CumulativeChart extends RecordChart {
 
     return {
       tooltip: {
-        formatter: (param) => formatTooltip(interval, param as CallbackDataParams),
+        formatter: (param) => formatTooltip(interval, param),
       },
       legend: {
         type: "scroll",

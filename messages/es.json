@@ -4,6 +4,7 @@
   "application_error": "Error en la aplicación",
   "backend_start_error": "No se pudo iniciar el backend. Consulta los registros para obtener más información.",
   "close_application": "Cerrar aplicación",
+  "close": "Cerrar",
 
   "update_available": "Actualización disponible",
   "update_in_progress": "Actualizando...",

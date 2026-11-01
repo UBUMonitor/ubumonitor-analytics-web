@@ -7,21 +7,28 @@
   interface Props {
     class?: ClassValue
     items: SelectableItem[]
+    onToggleAll: (items: SelectableItem[], checked: boolean) => void
   }
 
-  let { items, class: className }: Props = $props()
-
-  const setAll = (checked: boolean) => {
-    for (const item of items) item.checked = checked
-  }
+  let { items, class: className, onToggleAll }: Props = $props()
 </script>
 
 <div class={["flex gap-1", className]}>
-  <button class="btn btn-square btn-sm" title={m.select_all()} onclick={() => setAll(true)}>
+  <button
+    type="button"
+    class="btn btn-square btn-sm"
+    title={m.select_all()}
+    onclick={() => onToggleAll(items, true)}
+  >
     <ListChecksIcon />
   </button>
 
-  <button class="btn btn-square btn-sm" title={m.deselect_all()} onclick={() => setAll(false)}>
+  <button
+    type="button"
+    class="btn btn-square btn-sm"
+    title={m.deselect_all()}
+    onclick={() => onToggleAll(items, false)}
+  >
     <ListIcon />
   </button>
 </div>

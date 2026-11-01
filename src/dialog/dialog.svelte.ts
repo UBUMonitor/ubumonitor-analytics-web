@@ -1,18 +1,37 @@
 import type { Component, ComponentProps } from "svelte"
 
-export const dialog = $state({
-  component: null as Component | null,
-  props: undefined as ComponentProps<Component> | undefined,
-  dialogRef: null as HTMLDialogElement | null,
-})
-
+// Svelte's component type requires an erased props type for dynamic rendering.
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-export function openDialog<C extends Component<any>>(component: C, props?: ComponentProps<C>) {
-  dialog.component = component
-  dialog.props = props
-  dialog.dialogRef?.showModal()
+type DynamicComponent = Component<any>
+
+class DialogState {
+  component = $state.raw<DynamicComponent | null>(null)
+  props = $state.raw<ComponentProps<DynamicComponent> | undefined>(undefined)
+  dialogRef = $state.raw<HTMLDialogElement | null>(null)
+
+  open<C extends DynamicComponent>(component: C, props?: ComponentProps<C>) {
+    this.component = component
+    this.props = props
+    this.dialogRef?.showModal()
+  }
+
+  close() {
+    this.dialogRef?.close()
+    this.reset()
+  }
+
+  reset() {
+    this.component = null
+    this.props = undefined
+  }
+}
+
+export const dialog = new DialogState()
+
+export function openDialog<C extends DynamicComponent>(component: C, props?: ComponentProps<C>) {
+  dialog.open(component, props)
 }
 
 export function closeDialog() {
-  dialog.dialogRef?.close()
+  dialog.close()
 }

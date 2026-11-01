@@ -3,11 +3,12 @@
   import DisplaySettings from "@/display/components/DisplaySettings.svelte"
   import TableComponent from "@/display/components/TableComponent.svelte"
   import { displayStore } from "@/display/display.svelte"
+  import { displayOptions } from "@/info/record/displayOptions"
 </script>
 
 <main class="flex size-full flex-col">
   <div class="tabs tabs-box">
-    {#each displayStore.display as option (option.value)}
+    {#each displayOptions as option (option.value)}
       <input
         type="radio"
         name="chart_select"

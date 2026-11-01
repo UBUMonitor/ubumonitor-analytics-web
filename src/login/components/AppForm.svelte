@@ -1,10 +1,14 @@
 <script lang="ts">
   import { appLogin, login } from "@/login"
   import PasswordInput from "@/shared/components/PasswordInput.svelte"
-  import { getErrorMessage } from "@/shared/error/errorMessage"
+  import { AsyncAction } from "@/shared/lib/async.svelte"
+  import { getFormString } from "@/shared/lib/form"
+  import { readStorageItem, writeStorageItem } from "@/shared/lib/storage"
   import { m } from "@/shared/paraglide/messages"
-  import { CircleXIcon, DatabaseIcon, KeyRoundIcon, UserIcon } from "@lucide/svelte"
-  import { onMount } from "svelte"
+  import { DatabaseIcon, KeyRoundIcon, UserIcon } from "@lucide/svelte"
+  import { warn } from "@tauri-apps/plugin-log"
+  import { untrack } from "svelte"
+  import type { Attachment } from "svelte/attachments"
   import type { EventHandler } from "svelte/elements"
 
   interface Props {
@@ -12,64 +16,47 @@
   }
 
   let { host }: Props = $props()
-  let loading = $state(false)
-  let errorLogin = $state<string | null>(null)
+  const usernameResult = untrack(() => readStorageItem(`username:${host}`))
+  if (!usernameResult.ok) warn("Failed to read the saved username from local storage")
+  const savedUsername = usernameResult.ok ? (usernameResult.value ?? "") : ""
+  const action = new AsyncAction()
 
-  let username = $derived(localStorage.getItem(`username:${host}`) ?? "")
-
-  let usernameInput: HTMLInputElement
-  let passwordInput = $state<HTMLInputElement>()
-
-  const handleSubmit: EventHandler<SubmitEvent, HTMLFormElement> = async (event) => {
-    try {
-      event.preventDefault()
-      loading = true
-      errorLogin = null
-
-      username = event.currentTarget.username.value as string
-      const password = event.currentTarget.password.value as string
-      const dbPassword = event.currentTarget.dbPassword.value as string
-
-      await login(appLogin(username, password, dbPassword, host))
-
-      localStorage.setItem(`username:${host}`, username)
-    } catch (e) {
-      errorLogin = getErrorMessage(e)
-    } finally {
-      loading = false
-    }
+  const focusInitialField: Attachment<HTMLFormElement> = (form) => {
+    const selector = savedUsername ? 'input[name="password"]' : 'input[name="username"]'
+    form.querySelector<HTMLInputElement>(selector)?.focus()
   }
 
-  onMount(() => {
-    if (username) {
-      passwordInput?.focus()
-    } else {
-      usernameInput?.focus()
-    }
-  })
+  const handleSubmit: EventHandler<SubmitEvent, HTMLFormElement> = async (event) => {
+    event.preventDefault()
+    const formData = new FormData(event.currentTarget)
+    const username = getFormString(formData, "username")
+    const password = getFormString(formData, "password")
+    const dbPassword = getFormString(formData, "dbPassword")
+
+    await action.run(async () => {
+      await login(appLogin(username, password, dbPassword, host))
+
+      const storageResult = writeStorageItem(`username:${host}`, username)
+      if (!storageResult.ok) warn("Failed to save the username to local storage")
+    })
+  }
 </script>
 
-<form class="fieldset" onsubmit={handleSubmit}>
+<form class="fieldset" onsubmit={handleSubmit} {@attach focusInitialField}>
   <label class="input w-full">
     <UserIcon />
-    <input
-      bind:this={usernameInput}
-      bind:value={username}
-      type="text"
-      name="username"
-      placeholder={m.username()}
-      required
-    />
+    <input type="text" name="username" placeholder={m.username()} value={savedUsername} required />
   </label>
 
   <PasswordInput
-    bind:inputElement={passwordInput}
     name="password"
     placeholder={m.password()}
     showLabel={m.show_password()}
     hideLabel={m.hide_password()}
   >
-    <KeyRoundIcon />
+    {#snippet icon()}
+      <KeyRoundIcon />
+    {/snippet}
   </PasswordInput>
 
   <PasswordInput
@@ -78,21 +65,16 @@
     showLabel={m.show_database_password()}
     hideLabel={m.hide_database_password()}
   >
-    <DatabaseIcon />
+    {#snippet icon()}
+      <DatabaseIcon />
+    {/snippet}
   </PasswordInput>
 
-  <button class="btn mt-2 btn-primary" disabled={loading}>
-    {#if loading}
+  <button class="btn mt-2 btn-primary" disabled={action.loading}>
+    {#if action.loading}
       <span class="loading loading-spinner"></span>
     {:else}
       {m.login()}
     {/if}
   </button>
-
-  {#if errorLogin}
-    <div role="alert" class="alert alert-error">
-      <CircleXIcon />
-      <span>{errorLogin}</span>
-    </div>
-  {/if}
 </form>
