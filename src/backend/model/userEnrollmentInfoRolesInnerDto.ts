@@ -9,6 +9,4 @@
 export interface UserEnrollmentInfoRolesInnerDto {
   /** The unique identifier of the role. */
   id: number
-  /** Role name */
-  name: string
 }

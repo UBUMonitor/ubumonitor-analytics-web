@@ -1,6 +1,7 @@
-import type { SelectableItem } from "@/shared/types/selectable-item"
+import type { Item, SelectableItem } from "@/shared/types/selectable-item"
 
 export interface ModuleItem extends SelectableItem {
+  sectionId: number
   modName?: string
 }
 
@@ -12,6 +13,7 @@ export const recordStore = $state({
   moduleItems: [] as ModuleItem[],
   componentItems: [] as SelectableItem[],
   eventItems: [] as SelectableItem[],
+  originItems: [] as Item[],
 })
 
 export function clearContent() {

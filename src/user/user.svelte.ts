@@ -1,6 +1,8 @@
+import type { CourseEnrollmentsResponseDto } from "@/backend/model"
 import { isBetweenDaysAgo, isMoreRecentThan, isOlderThan } from "@/shared/lib/datetime"
 import { includeIntl } from "@/shared/lib/utils"
 import { m } from "@/shared/paraglide/messages"
+import { getLocale } from "@/shared/paraglide/runtime"
 import type { SelectableItem } from "@/shared/types/selectable-item"
 import { DateTime } from "luxon"
 
@@ -114,4 +116,56 @@ export function clearUsers() {
   userStore.roleItems = []
   userStore.groupItems = []
   userStore.nameFilter = ""
+}
+
+export async function updateUsers(response: Promise<CourseEnrollmentsResponseDto>) {
+  userStore.isLoading = true
+  clearUsers()
+
+  try {
+    const comparator = Intl.Collator(getLocale()).compare
+
+    const { users, roles, groups } = await response
+
+    userStore.userItems = users
+      .toSorted((x, y) => comparator(x.fullName, y.fullName))
+      .map(({ id, imageUrl, fullName, lastAccess, lastCourseAccess, roles, groups }) => {
+        const now = DateTime.now()
+        const lastAccessDate = lastAccess ? DateTime.fromSeconds(lastAccess) : undefined
+        const lastCourseAccessDate = lastCourseAccess
+          ? DateTime.fromSeconds(lastCourseAccess)
+          : undefined
+
+        const lastAccessItems = userStore.lastAccessItems
+
+        return {
+          id,
+          checked: false,
+          name: fullName,
+          imageUrl,
+          lastAccess: lastAccessDate,
+          lastCourseAccess: lastCourseAccessDate,
+          roles: roles.map(({ id }) => id),
+          groups: groups.map(({ id }) => id),
+          lastAccessGroup: lastAccessItems.find((i) => i.is(now, lastAccessDate))!.id,
+          lastCourseAccessGroup: lastAccessItems.find((i) => i.is(now, lastCourseAccessDate))!.id,
+        }
+      })
+
+    userStore.roleItems =
+      roles?.map(({ id, name }) => ({
+        id,
+        name,
+        checked: false,
+      })) ?? []
+
+    userStore.groupItems =
+      groups?.map(({ id, name }) => ({
+        id,
+        name,
+        checked: false,
+      })) ?? []
+  } finally {
+    userStore.isLoading = false
+  }
 }

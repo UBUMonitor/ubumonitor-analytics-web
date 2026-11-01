@@ -32,7 +32,6 @@
         <label class="label justify-between gap-2">
           <span>{item.name}</span>
           <input
-            id={item.id.toString()}
             type="checkbox"
             class="checkbox checkbox-sm checkbox-primary"
             bind:checked={item.checked}

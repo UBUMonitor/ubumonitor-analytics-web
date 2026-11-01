@@ -33,7 +33,7 @@
 >
   {#each items as item (item.id)}
     <label class="cursor-pointer select-none has-checked:bg-accent">
-      <input class="hidden" type="checkbox" bind:checked={item.checked} id={item.id.toString()} />
+      <input class="hidden" type="checkbox" bind:checked={item.checked} />
       <ItemComponent {...item} />
     </label>
   {/each}

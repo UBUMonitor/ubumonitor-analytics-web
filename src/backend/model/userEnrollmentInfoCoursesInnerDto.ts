@@ -9,6 +9,4 @@
 export interface UserEnrollmentInfoCoursesInnerDto {
   /** The unique identifier of the course. */
   id: number
-  /** The full name of the course. */
-  fullName: string
 }

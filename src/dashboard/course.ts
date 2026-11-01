@@ -10,7 +10,7 @@ import { courseStore } from "@/dashboard/course.svelte"
 import { updateChartDate } from "@/display/display"
 import { updateGrades } from "@/info/grade/grade"
 import { updateRecords } from "@/info/record/record"
-import { updateUsers } from "@/user/user"
+import { updateUsers } from "@/user/user.svelte"
 import { DateTime } from "luxon"
 
 export async function updateCourses(enrollments: Promise<EnrollmentsResponseDto>) {

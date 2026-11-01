@@ -1329,10 +1329,15 @@ components:
           type: array
           items:
             $ref: "#/components/schemas/LogColumnComponentsEventsInnerDto"
+        origins:
+          type: array
+          items:
+            $ref: "#/components/schemas/OriginDto"
       required:
         - components
         - componentsEvents
         - events
+        - origins
     LogColumnComponentsEventsInnerDto:
       type: object
       properties:
@@ -1358,6 +1363,20 @@ components:
         - id
         - name
     LogEventDto:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        code:
+          type: string
+        name:
+          type: string
+      required:
+        - code
+        - id
+        - name
+    OriginDto:
       type: object
       properties:
         id:
@@ -1642,6 +1661,9 @@ components:
         originName:
           type: string
           description: Name of the origin associated with the log
+        originCode:
+          type: string
+          description: Code of the origin associated with the log
         originId:
           type: integer
           format: int64
@@ -1659,6 +1681,7 @@ components:
         - ip
         - moduleId
         - moduleName
+        - originCode
         - originId
         - originName
         - timeCreated
@@ -1849,6 +1872,7 @@ components:
               - COMPONENT_NAME
               - EVENT_NAME
               - ORIGIN_NAME
+              - ORIGIN_CODE
               - SECTION_ID
               - SECTION_NAME
         pagination:
@@ -1895,17 +1919,7 @@ components:
         - gradeMax
         - gradeMin
         - id
-    CourseEnrollmentsResponseDto:
-      type: object
-      properties:
-        users:
-          type: array
-          description: List of users and their course enrollment information
-          items:
-            $ref: "#/components/schemas/UserEnrollmentInfoDto"
-      required:
-        - users
-    UserEnrollmentInfoCoursesInnerDto:
+    CourseEnrollmentsResponseCoursesInnerDto:
       type: object
       properties:
         id:
@@ -1914,9 +1928,70 @@ components:
           description: The unique identifier of the course.
         fullName:
           type: string
-          description: The full name of the course.
+          description: The course's full display name.
       required:
         - fullName
+        - id
+    CourseEnrollmentsResponseDto:
+      type: object
+      properties:
+        users:
+          type: array
+          description: "Users enrolled in the requested course, with their enrollment\
+            \ details."
+          items:
+            $ref: "#/components/schemas/UserEnrollmentInfoDto"
+        roles:
+          type: array
+          description: Unique roles assigned to users enrolled in the requested course.
+          items:
+            $ref: "#/components/schemas/CourseEnrollmentsResponseRolesInnerDto"
+        groups:
+          type: array
+          description: Unique groups that users belong to in the requested course.
+          items:
+            $ref: "#/components/schemas/CourseEnrollmentsResponseGroupsInnerDto"
+        courses:
+          type: array
+          description: Unique courses included in the returned users' enrollments.
+          items:
+            $ref: "#/components/schemas/CourseEnrollmentsResponseCoursesInnerDto"
+      required:
+        - users
+    CourseEnrollmentsResponseGroupsInnerDto:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+          description: The unique identifier of the group.
+        name:
+          type: string
+          description: Display name of the group.
+      required:
+        - id
+        - name
+    CourseEnrollmentsResponseRolesInnerDto:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+          description: The unique identifier of the role.
+        name:
+          type: string
+          description: Display name of the role.
+      required:
+        - id
+        - name
+    UserEnrollmentInfoCoursesInnerDto:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+          description: The unique identifier of the course.
+      required:
         - id
     UserEnrollmentInfoDto:
       type: object
@@ -1944,25 +2019,25 @@ components:
         lastCourseAccess:
           type: integer
           format: int64
-          description: The Unix timestamp in seconds of the user's last access to
-            the course.
+          description: Unix timestamp in seconds of the user's most recent access
+            to the requested course.
         imageUrl:
           type: string
           format: uri
           description: The URL of the user's profile image.
         roles:
           type: array
-          description: List of roles the user has in the course.
+          description: IDs of the roles assigned to this user in the requested course.
           items:
             $ref: "#/components/schemas/UserEnrollmentInfoRolesInnerDto"
         groups:
           type: array
-          description: List of groups the user is enrolled in for the course.
+          description: IDs of the groups this user belongs to in the requested course.
           items:
             $ref: "#/components/schemas/UserEnrollmentInfoGroupsInnerDto"
         courses:
           type: array
-          description: List of courses the user is enrolled in.
+          description: IDs of the courses this user is enrolled in.
           items:
             $ref: "#/components/schemas/UserEnrollmentInfoCoursesInnerDto"
       required:
@@ -1980,12 +2055,8 @@ components:
           type: integer
           format: int64
           description: The unique identifier of the group.
-        name:
-          type: string
-          description: Group name
       required:
         - id
-        - name
     UserEnrollmentInfoRolesInnerDto:
       type: object
       properties:
@@ -1993,12 +2064,8 @@ components:
           type: integer
           format: int64
           description: The unique identifier of the role.
-        name:
-          type: string
-          description: Role name
       required:
         - id
-        - name
     CourseContentModuleDto:
       type: object
       properties:

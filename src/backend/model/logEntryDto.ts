@@ -35,6 +35,8 @@ export interface LogEntryDto {
   eventId: number
   /** Name of the origin associated with the log */
   originName: string
+  /** Code of the origin associated with the log */
+  originCode: string
   /** ID of the origin associated with the log */
   originId: number
   /** IP address associated with the log */

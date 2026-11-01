@@ -1,3 +1,4 @@
+import { recordStore } from "../record.svelte"
 import { getCourseLogsList } from "@/backend/services/course-logs"
 import type { DisplayConfig } from "@/display/display.svelte"
 import type { TableColumn } from "@/display/impl/table"
@@ -7,22 +8,16 @@ import { DateTime } from "luxon"
 
 const COLUMNS = [
   {
-    key: "timeCreated",
+    key: "dateTime",
     name: m.table_date_time(),
     type: "date",
     width: "12%",
   },
   {
-    key: "userFullName",
+    key: "user",
     name: m.table_name(),
     filter: true,
     width: "18%",
-  },
-  {
-    key: "moduleName",
-    name: m.table_module(),
-    filter: true,
-    width: "20%",
   },
   {
     key: "component",
@@ -31,13 +26,19 @@ const COLUMNS = [
     width: "10%",
   },
   {
-    key: "eventName",
+    key: "event",
     name: m.table_event(),
     filter: true,
     width: "20%",
   },
   {
-    key: "originName",
+    key: "module",
+    name: m.table_module(),
+    filter: true,
+    width: "20%",
+  },
+  {
+    key: "origin",
     name: m.table_origin(),
     filter: true,
     width: "5%",
@@ -62,6 +63,19 @@ export class RecordTable extends RecordDisplay {
     if (courseId == null || userItems.length === 0 || selectedItems.length === 0)
       return { type: "table", option: { columns: COLUMNS, data: [] } }
 
+    const userMap = new Map(userItems.map(({ id, name }) => [id, name]))
+    const componentMap = new Map(recordStore.componentItems.map(({ id, name }) => [id, name]))
+    const eventMap = new Map(recordStore.eventItems.map(({ id, name }) => [id, name]))
+    const sectionMap = new Map(recordStore.sectionItems.map(({ id, name }) => [id, name]))
+
+    const moduleMap = new Map(
+      recordStore.moduleItems.map(({ id, name, sectionId }) => [
+        id,
+        { name, sectionName: sectionMap.get(sectionId) },
+      ]),
+    )
+    const originMap = new Map(recordStore.originItems.map(({ id, name }) => [id, name]))
+
     const selectedItemsIds = selectedItems.map(({ id }) => id)
 
     const logs = await getCourseLogsList(courseId, {
@@ -75,16 +89,13 @@ export class RecordTable extends RecordDisplay {
       },
       fields: [
         "TIMESTAMP",
-        "USER_FULL_NAME",
-        "MODULE_NAME",
-        "COMPONENT_NAME",
-        "EVENT_NAME",
-        "ORIGIN_NAME",
+        "USER_ID",
+        "COMPONENT_ID",
+        "EVENT_ID",
+        "MODULE_ID",
+        "ORIGIN_ID",
         "IP_ADDRESS",
       ],
-      pagination: { page: 0, size: 10_000 },
-      sort: [{ field: "TIMESTAMP", direction: "ASC" }],
-      includeTotal: true,
     })
 
     return {
@@ -92,13 +103,14 @@ export class RecordTable extends RecordDisplay {
       option: {
         columns: COLUMNS,
         data: logs.content.map(
-          ({ timeCreated, userFullName, moduleName, component, eventName, originName, ip }) => ({
-            timeCreated: DateTime.fromSeconds(timeCreated),
-            userFullName,
-            moduleName,
-            component,
-            eventName,
-            originName,
+          ({ timeCreated, userId, componentId, eventId, moduleId, originId, ip }) => ({
+            dateTime: DateTime.fromSeconds(timeCreated),
+            user: userMap.get(userId),
+            component: componentMap.get(componentId),
+            event: eventMap.get(eventId),
+            sectionId: moduleMap.get(moduleId)?.sectionName,
+            module: moduleMap.get(moduleId)?.name,
+            origin: originMap.get(originId),
             ip,
           }),
         ),

@@ -13,12 +13,10 @@
   <div class="flex flex-col">
     <span class="truncate font-bold">{name}</span>
     <span class="truncate text-xs">
-      {m.last_access()}:
-      {lastAccessLabel}
+      {m.last_access()}: {lastAccessLabel}
     </span>
     <span class="truncate text-xs">
-      {m.last_course_access()}:
-      {lastCourseAccessLabel}
+      {m.last_course_access()}: {lastCourseAccessLabel}
     </span>
   </div>
 </div>

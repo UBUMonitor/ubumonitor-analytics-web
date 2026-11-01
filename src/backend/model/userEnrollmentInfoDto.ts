@@ -20,14 +20,14 @@ export interface UserEnrollmentInfoDto {
   firstAccess?: number
   /** The Unix timestamp in seconds of the user's last access to the site. */
   lastAccess?: number
-  /** The Unix timestamp in seconds of the user's last access to the course. */
+  /** Unix timestamp in seconds of the user's most recent access to the requested course. */
   lastCourseAccess?: number
   /** The URL of the user's profile image. */
   imageUrl: string
-  /** List of roles the user has in the course. */
+  /** IDs of the roles assigned to this user in the requested course. */
   roles: UserEnrollmentInfoRolesInnerDto[]
-  /** List of groups the user is enrolled in for the course. */
+  /** IDs of the groups this user belongs to in the requested course. */
   groups: UserEnrollmentInfoGroupsInnerDto[]
-  /** List of courses the user is enrolled in. */
+  /** IDs of the courses this user is enrolled in. */
   courses: UserEnrollmentInfoCoursesInnerDto[]
 }

@@ -9,6 +9,4 @@
 export interface UserEnrollmentInfoGroupsInnerDto {
   /** The unique identifier of the group. */
   id: number
-  /** Group name */
-  name: string
 }
