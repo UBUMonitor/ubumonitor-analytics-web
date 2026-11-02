@@ -133,6 +133,6 @@ jobs:
           tagName: v__VERSION__
           releaseName: "v__VERSION__ UBUMonitor Analytics"
           releaseBody: "See the assets to download this version and install."
-          releaseDraft: false
+          releaseDraft: true
           prerelease: false
           args: ${{ matrix.args }}
