@@ -1,5 +1,6 @@
 import type { CourseContentResponseDto, CourseLogsResponseDto } from "@/backend/model"
 import { mapAndSort, translateCode } from "@/shared/lib/i18n"
+import { checkedIds } from "@/shared/lib/selection"
 import type { Item, SelectableItem } from "@/shared/types/selectable-item"
 
 export interface ModuleItem extends SelectableItem {
@@ -14,7 +15,7 @@ class RecordStore {
   moduleItems = $state<ModuleItem[]>([])
   componentItems = $state<SelectableItem[]>([])
   eventItems = $state<SelectableItem[]>([])
-  originItems = $state<Item[]>([])
+  originItems = $state.raw<Item[]>([])
 
   reset() {
     this.sectionItems = []
@@ -29,8 +30,6 @@ class RecordStore {
     logs: Promise<CourseLogsResponseDto>,
   ) {
     const [{ sections }, { column }] = await Promise.all([content, logs])
-    const checkedIds = (items: readonly SelectableItem[]) =>
-      new Set(items.filter(({ checked }) => checked).map(({ id }) => id))
     const checkedSections = checkedIds(this.sectionItems)
     const checkedModules = checkedIds(this.moduleItems)
     const checkedComponents = checkedIds(this.componentItems)

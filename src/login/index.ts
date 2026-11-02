@@ -1,16 +1,13 @@
 import BackendErrorDialog from "@/app/BackendErrorDialog.svelte"
-import { authLogout, authSSO } from "@/backend/services/auth"
-import { authLogin } from "@/backend/services/auth"
+import { authLogin, authLogout, authSSO } from "@/backend/services/auth"
 import { syncUserEnrollments } from "@/backend/services/user-enrollments"
+import { resetCourseData } from "@/dashboard/course"
 import { courseStore } from "@/dashboard/course.svelte"
-import { dialog, openDialog } from "@/dialog/dialog.svelte"
+import { dialog } from "@/dialog/dialog.svelte"
 import { displayStore } from "@/display/display.svelte"
-import { gradeStore } from "@/info/grade/grade.svelte"
-import { recordStore } from "@/info/record/record.svelte"
 import { loginStore } from "@/login/login.svelte"
 import { healthCheck } from "@/shared/lib/orvalFetch"
 import { m } from "@/shared/paraglide/messages"
-import { userStore } from "@/user/user.svelte"
 import { invoke } from "@tauri-apps/api/core"
 import { once, type UnlistenFn } from "@tauri-apps/api/event"
 import { info } from "@tauri-apps/plugin-log"
@@ -41,7 +38,7 @@ export function ensureBackendUp() {
       info("Backend up")
     })
     .catch((error: unknown) => {
-      openDialog(BackendErrorDialog)
+      dialog.open(BackendErrorDialog)
       throw new Error("Backend failed", { cause: error })
     })
 
@@ -145,9 +142,7 @@ export async function logout() {
 export function resetAll() {
   loginStore.reset()
   courseStore.reset()
-  userStore.reset()
-  recordStore.reset()
-  gradeStore.reset()
+  resetCourseData()
   displayStore.reset()
   dialog.close()
 }

@@ -27,11 +27,3 @@ class DialogState {
 }
 
 export const dialog = new DialogState()
-
-export function openDialog<C extends DynamicComponent>(component: C, props?: ComponentProps<C>) {
-  dialog.open(component, props)
-}
-
-export function closeDialog() {
-  dialog.close()
-}

@@ -22,9 +22,7 @@ export async function changeCourse(courseId: number) {
   courseStore.currentCourse = course
 
   if (isDifferentCourse) {
-    userStore.reset()
-    recordStore.reset()
-    gradeStore.reset()
+    resetCourseData()
   }
 
   updateChartDate(course.startDate, course.endDate)
@@ -52,10 +50,14 @@ export async function changeCourse(courseId: number) {
 
 function clearCourseSelection() {
   courseStore.currentCourse = null
+  resetCourseData()
+  updateChartDate()
+}
+
+export function resetCourseData() {
   userStore.reset()
   recordStore.reset()
   gradeStore.reset()
-  updateChartDate()
 }
 
 async function updateAll(courseId: number, courseName: string) {

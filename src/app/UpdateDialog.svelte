@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { closeDialog } from "@/dialog/dialog.svelte"
+  import { dialog } from "@/dialog/dialog.svelte"
   import { m } from "@/shared/paraglide/messages"
   import { error, info } from "@tauri-apps/plugin-log"
   import { relaunch } from "@tauri-apps/plugin-process"
@@ -46,7 +46,7 @@
   }
 
   const handleCancel = () => {
-    closeDialog()
+    dialog.close()
     update.close()
   }
 </script>

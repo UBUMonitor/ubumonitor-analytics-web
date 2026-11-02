@@ -1,4 +1,5 @@
 import type { CourseGradeItemsResponseDto } from "@/backend/model"
+import { checkedIds } from "@/shared/lib/selection"
 import type { SelectableItem } from "@/shared/types/selectable-item"
 
 class GradeStore {
@@ -10,10 +11,10 @@ class GradeStore {
 
   async updateGrades(response: Promise<CourseGradeItemsResponseDto>, defaultName: string) {
     const { gradeItems } = await response
-    const checkedIds = new Set(this.items.filter(({ checked }) => checked).map(({ id }) => id))
+    const selectedIds = checkedIds(this.items)
     this.items = gradeItems.map(({ id, name }) => ({
       id,
-      checked: checkedIds.has(id),
+      checked: selectedIds.has(id),
       name: name ?? defaultName,
     }))
   }

@@ -3,10 +3,9 @@
   import PasswordInput from "@/shared/components/PasswordInput.svelte"
   import { AsyncAction } from "@/shared/lib/async.svelte"
   import { getFormString } from "@/shared/lib/form"
-  import { readStorageItem, writeStorageItem } from "@/shared/lib/storage"
+  import { loadSetting, saveSetting } from "@/shared/lib/settings"
   import { m } from "@/shared/paraglide/messages"
   import { DatabaseIcon, KeyRoundIcon, UserIcon } from "@lucide/svelte"
-  import { warn } from "@tauri-apps/plugin-log"
   import { untrack } from "svelte"
   import type { Attachment } from "svelte/attachments"
   import type { EventHandler } from "svelte/elements"
@@ -16,9 +15,7 @@
   }
 
   let { host }: Props = $props()
-  const usernameResult = untrack(() => readStorageItem(`username:${host}`))
-  if (!usernameResult.ok) void warn("Failed to read the saved username from local storage")
-  const savedUsername = usernameResult.ok ? (usernameResult.value ?? "") : ""
+  const savedUsername = untrack(() => loadSetting(`username:${host}`))
   const action = new AsyncAction()
 
   const focusInitialField: Attachment<HTMLFormElement> = (form) => {
@@ -36,8 +33,7 @@
     await action.run(async () => {
       await login(appLogin(username, password, dbPassword, host))
 
-      const storageResult = writeStorageItem(`username:${host}`, username)
-      if (!storageResult.ok) void warn("Failed to save the username to local storage")
+      saveSetting(`username:${host}`, username)
     })
   }
 </script>

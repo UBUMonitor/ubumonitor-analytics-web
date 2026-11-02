@@ -1,5 +1,6 @@
 import type { CourseEnrollmentsResponseDto } from "@/backend/model"
 import { isBetweenDaysAgo, isMoreRecentThan, isOlderThan } from "@/shared/lib/datetime"
+import { checkedIds, setChecked } from "@/shared/lib/selection"
 import { getLocaleCollator, includeIntl } from "@/shared/lib/utils"
 import { m } from "@/shared/paraglide/messages"
 import type { SelectableItem } from "@/shared/types/selectable-item"
@@ -55,15 +56,9 @@ class UserStore {
   ])
   nameFilter = $state("")
   filtered = $derived.by(() => {
-    const selectedRoles = new Set(
-      this.roleItems.filter(({ checked }) => checked).map(({ id }) => id),
-    )
-    const selectedGroups = new Set(
-      this.groupItems.filter(({ checked }) => checked).map(({ id }) => id),
-    )
-    const selectedAccess = new Set(
-      this.lastAccessItems.filter(({ checked }) => checked).map(({ id }) => id),
-    )
+    const selectedRoles = checkedIds(this.roleItems)
+    const selectedGroups = checkedIds(this.groupItems)
+    const selectedAccess = checkedIds(this.lastAccessItems)
 
     if (
       selectedRoles.size === 0 &&
@@ -91,15 +86,13 @@ class UserStore {
     this.userItems = []
     this.roleItems = []
     this.groupItems = []
-    this.lastAccessItems.forEach((item) => (item.checked = false))
+    setChecked(this.lastAccessItems, false)
     this.nameFilter = ""
   }
 
   async updateUsers(response: Promise<CourseEnrollmentsResponseDto>) {
     const comparator = getLocaleCollator().compare
     const { users, roles, groups } = await response
-    const checkedIds = (items: readonly SelectableItem[]) =>
-      new Set(items.filter(({ checked }) => checked).map(({ id }) => id))
     const checkedUsers = checkedIds(this.userItems)
     const checkedRoles = checkedIds(this.roleItems)
     const checkedGroups = checkedIds(this.groupItems)

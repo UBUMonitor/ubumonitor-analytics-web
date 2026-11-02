@@ -1,7 +1,7 @@
 <script lang="ts">
   import UpdateDialog from "@/app/UpdateDialog.svelte"
   import Dialog from "@/dialog/components/Dialog.svelte"
-  import { openDialog } from "@/dialog/dialog.svelte"
+  import { dialog } from "@/dialog/dialog.svelte"
   import Login from "@/login/components/Login.svelte"
   import { loginStore } from "@/login/login.svelte"
   import { notifyError } from "@/shared/lib/notify"
@@ -13,7 +13,7 @@
   const initialize = async () => {
     try {
       const update = await check()
-      if (update) openDialog(UpdateDialog, { update })
+      if (update) dialog.open(UpdateDialog, { update })
     } catch (error) {
       notifyError(error)
     }

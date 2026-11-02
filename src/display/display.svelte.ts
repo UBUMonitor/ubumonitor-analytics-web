@@ -7,22 +7,39 @@ import { DateTime } from "luxon"
 export type DisplayConfig =
   { type: "chart"; option: ECOption } | { type: "table"; option: TableOption }
 
-class DisplayStore {
-  config = $state.raw<DisplayConfig>({ type: "chart", option: {} })
-  selectedDisplay = $state(DEFAULT_DISPLAY)
-  from = $state(DateTime.now().startOf("year"))
-  to = $state(DateTime.now().plus({ day: 1 }).startOf("day"))
-  group = $state<StatsInterval>("MONTHLY")
-  scale = $state(60)
+export function defaultDisplayTo(now = DateTime.now()) {
+  return now.plus({ day: 1 }).startOf("day")
+}
 
-  reset() {
-    this.config = { type: "chart", option: {} }
-    this.selectedDisplay = DEFAULT_DISPLAY
-    this.from = DateTime.now().startOf("year")
-    this.to = DateTime.now().plus({ day: 1 }).startOf("day")
-    this.group = "MONTHLY"
-    this.scale = 60
+function defaults() {
+  return {
+    config: { type: "chart", option: {} } as DisplayConfig,
+    from: DateTime.now().startOf("year"),
+    to: defaultDisplayTo(),
+    group: "MONTHLY" as StatsInterval,
+    scale: 60,
   }
 }
+
+class DisplayStore {
+  config = $state.raw<DisplayConfig>(initialDefaults.config)
+  selectedDisplay = $state(DEFAULT_DISPLAY)
+  from = $state(initialDefaults.from)
+  to = $state(initialDefaults.to)
+  group = $state<StatsInterval>(initialDefaults.group)
+  scale = $state(initialDefaults.scale)
+
+  reset() {
+    const values = defaults()
+    this.config = values.config
+    this.selectedDisplay = DEFAULT_DISPLAY
+    this.from = values.from
+    this.to = values.to
+    this.group = values.group
+    this.scale = values.scale
+  }
+}
+
+const initialDefaults = defaults()
 
 export const displayStore = new DisplayStore()

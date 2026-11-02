@@ -4,10 +4,9 @@
   import LocaleSelector from "@/login/components/LocaleSelector.svelte"
   import WebForm from "@/login/components/WebForm.svelte"
   import { notifyError } from "@/shared/lib/notify"
-  import { readStorageItem, writeStorageItem } from "@/shared/lib/storage"
+  import { loadSetting, saveSetting } from "@/shared/lib/settings"
   import { m } from "@/shared/paraglide/messages.js"
   import { ArrowRightIcon, LinkIcon, SquarePenIcon } from "@lucide/svelte"
-  import { warn } from "@tauri-apps/plugin-log"
   import { untrack } from "svelte"
   import type { Attachment } from "svelte/attachments"
 
@@ -16,9 +15,7 @@
     | { status: "checking" }
     | { status: "ready"; typeOfLogin: TypeOfLogin; launchUrl?: string }
 
-  const hostResult = readStorageItem("host")
-  if (!hostResult.ok) void warn("Failed to read the saved host from local storage")
-  let host = $state(hostResult.ok ? (hostResult.value ?? "") : "")
+  let host = $state(loadSetting("host"))
   let hostState = $state<HostState>({ status: "idle" })
 
   const checkingHost = $derived(hostState.status === "checking")
@@ -51,8 +48,7 @@
         typeOfLogin: result.typeOfLogin,
         launchUrl: result.launchUrl,
       }
-      const storageResult = writeStorageItem("host", value)
-      if (!storageResult.ok) void warn("Failed to save the host to local storage")
+      saveSetting("host", value)
     } catch {
       notifyError(m.host_invalid_error())
       hostState = { status: "idle" }
