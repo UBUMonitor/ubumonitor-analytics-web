@@ -6,8 +6,6 @@ import { TotalChart } from "@/info/record/chart/TotalChart"
 import { RecordTable } from "@/info/record/table/RecordTable"
 import { m } from "@/shared/paraglide/messages"
 
-export const DEFAULT_DISPLAY = "total"
-
 export const displayOptions = [
   { value: "total", label: m.total, display: new TotalChart() },
   { value: "heatmap", label: m.heatmap, display: new HeatMapChart() },

@@ -17,7 +17,7 @@
     | { status: "ready"; typeOfLogin: TypeOfLogin; launchUrl?: string }
 
   const hostResult = readStorageItem("host")
-  if (!hostResult.ok) warn("Failed to read the saved host from local storage")
+  if (!hostResult.ok) void warn("Failed to read the saved host from local storage")
   let host = $state(hostResult.ok ? (hostResult.value ?? "") : "")
   let hostState = $state<HostState>({ status: "idle" })
 
@@ -35,13 +35,13 @@
       const result = await validateHost(value)
 
       if (!result.enableMobileWebService || !result.enableWebServices) {
-        notifyError(new Error(m.host_unsupported_error()))
+        notifyError(m.host_unsupported_error())
         hostState = { status: "idle" }
         return
       }
 
       if (result.maintenanceEnabled) {
-        notifyError(new Error(result.maintenanceMessage || m.host_maintenance_error()))
+        notifyError(result.maintenanceMessage || m.host_maintenance_error())
         hostState = { status: "idle" }
         return
       }
@@ -52,9 +52,9 @@
         launchUrl: result.launchUrl,
       }
       const storageResult = writeStorageItem("host", value)
-      if (!storageResult.ok) warn("Failed to save the host to local storage")
+      if (!storageResult.ok) void warn("Failed to save the host to local storage")
     } catch {
-      notifyError(new Error(m.host_invalid_error()))
+      notifyError(m.host_invalid_error())
       hostState = { status: "idle" }
     }
   }

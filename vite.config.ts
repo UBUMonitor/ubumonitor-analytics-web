@@ -52,11 +52,6 @@ export default defineConfig({
               test: /[\\/]node_modules[\\/]echarts[\\/]/,
               priority: 2,
             },
-            {
-              name: "tanstack",
-              test: /[\\/]node_modules[\\/]@tanstack[\\/]/,
-              priority: 1,
-            },
           ],
         },
       },

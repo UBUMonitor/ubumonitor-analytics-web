@@ -8,9 +8,10 @@
     ariaLabel: string
     onToggle: (item: T, checked: boolean) => void
     onToggleAll: (items: T[], checked: boolean) => void
+    loading?: Snippet
   }
 
-  let { item, items, ariaLabel, onToggle, onToggleAll }: Props = $props()
+  let { item, items, ariaLabel, onToggle, onToggleAll, loading }: Props = $props()
 
   function isEditableTarget(target: EventTarget | null): boolean {
     return (
@@ -37,19 +38,24 @@
   class="list h-full scrollbar-thin overflow-y-auto rounded-b-box"
   role="group"
   aria-label={ariaLabel}
+  aria-busy={loading !== undefined}
   onkeydown={handleKeydown}
 >
-  {#each items as selectable (selectable.id)}
-    <label
-      class="cursor-pointer select-none has-checked:bg-accent has-focus-visible:outline has-focus-visible:outline-2 has-focus-visible:outline-offset-2 has-focus-visible:outline-primary"
-    >
-      <input
-        class="sr-only peer"
-        type="checkbox"
-        checked={selectable.checked}
-        onchange={(event) => onToggle(selectable, event.currentTarget.checked)}
-      />
-      {@render item(selectable)}
-    </label>
-  {/each}
+  {#if loading}
+    {@render loading()}
+  {:else}
+    {#each items as selectable (selectable.id)}
+      <label
+        class="cursor-pointer select-none has-checked:bg-accent has-focus-visible:outline has-focus-visible:outline-2 has-focus-visible:outline-offset-2 has-focus-visible:outline-primary"
+      >
+        <input
+          class="sr-only peer"
+          type="checkbox"
+          checked={selectable.checked}
+          onchange={(event) => onToggle(selectable, event.currentTarget.checked)}
+        />
+        {@render item(selectable)}
+      </label>
+    {/each}
+  {/if}
 </div>

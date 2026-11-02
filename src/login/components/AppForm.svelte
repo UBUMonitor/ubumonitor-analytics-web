@@ -17,7 +17,7 @@
 
   let { host }: Props = $props()
   const usernameResult = untrack(() => readStorageItem(`username:${host}`))
-  if (!usernameResult.ok) warn("Failed to read the saved username from local storage")
+  if (!usernameResult.ok) void warn("Failed to read the saved username from local storage")
   const savedUsername = usernameResult.ok ? (usernameResult.value ?? "") : ""
   const action = new AsyncAction()
 
@@ -37,7 +37,7 @@
       await login(appLogin(username, password, dbPassword, host))
 
       const storageResult = writeStorageItem(`username:${host}`, username)
-      if (!storageResult.ok) warn("Failed to save the username to local storage")
+      if (!storageResult.ok) void warn("Failed to save the username to local storage")
     })
   }
 </script>

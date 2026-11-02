@@ -78,6 +78,7 @@
   "table_name": "Name",
   "table_module": "Module",
   "table_component": "Component",
+  "table_section": "Section",
   "table_event": "Event",
   "table_origin": "Origin",
   "table_ip": "IP",

@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { courseStore } from "@/dashboard/course.svelte"
   import MultiSelect from "@/shared/components/MultiSelect.svelte"
   import Select from "@/shared/components/Select.svelte"
   import SelectButtons from "@/shared/components/SelectButtons.svelte"
@@ -72,8 +73,24 @@
     ariaLabel={m.users()}
     onToggle={toggleItem}
     onToggleAll={setChecked}
+    loading={courseStore.isSyncing ? skeleton : undefined}
   />
 </div>
+
+{#snippet skeleton()}
+  <div class="flex animate-pulse flex-col overflow-hidden">
+    {#each { length: 10 }, i (i)}
+      <div class="flex h-14 gap-2">
+        <div class="m-1 aspect-square h-12 shrink-0 skeleton rounded-box"></div>
+        <div class="flex flex-col justify-center gap-1">
+          <div class="h-4 w-20 skeleton"></div>
+          <div class="h-3 w-36 skeleton"></div>
+          <div class="h-3 w-36 skeleton"></div>
+        </div>
+      </div>
+    {/each}
+  </div>
+{/snippet}
 
 {#snippet userItem(user: UserItemData)}
   <UserItem item={user} />

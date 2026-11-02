@@ -10,7 +10,6 @@ import { updateChartDate } from "@/display/display"
 import { gradeStore } from "@/info/grade/grade.svelte"
 import { recordStore } from "@/info/record/record.svelte"
 import { loginStore } from "@/login/login.svelte"
-import { notifySyncStart } from "@/shared/lib/notify"
 import { userStore } from "@/user/user.svelte"
 import { DateTime } from "luxon"
 
@@ -30,16 +29,33 @@ export async function changeCourse(courseId: number) {
 
   updateChartDate(course.startDate, course.endDate)
 
-  if (course.lastSync) {
-    await updateAll(course.id, course.name)
-  } else {
-    const stopSyncToast = notifySyncStart()
-    try {
-      if (await syncAllForCourse(course.id)) course.lastSync = DateTime.now()
-    } finally {
-      stopSyncToast()
+  courseStore.isSyncing = true
+  try {
+    if (course.lastSync) {
+      await updateAll(course.id, course.name)
+    } else {
+      try {
+        if (await syncAllForCourse(course.id)) {
+          course.lastSync = DateTime.now()
+        } else {
+          clearCourseSelection()
+        }
+      } catch (error) {
+        clearCourseSelection()
+        throw error
+      }
     }
+  } finally {
+    courseStore.isSyncing = false
   }
+}
+
+function clearCourseSelection() {
+  courseStore.currentCourse = null
+  userStore.reset()
+  recordStore.reset()
+  gradeStore.reset()
+  updateChartDate()
 }
 
 async function updateAll(courseId: number, courseName: string) {
@@ -51,14 +67,14 @@ async function updateAll(courseId: number, courseName: string) {
 }
 
 export async function syncAll(courseId: number) {
-  const stopSyncToast = notifySyncStart()
+  courseStore.isSyncing = true
   try {
     if (await syncAllForCourse(courseId)) {
       const course = courseStore.courseItems.find(({ id }) => id === courseId)
       if (course) course.lastSync = DateTime.now()
     }
   } finally {
-    stopSyncToast()
+    courseStore.isSyncing = false
   }
 }
 

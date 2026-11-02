@@ -15,6 +15,7 @@ export interface CourseItem {
 class CourseStore {
   currentCourse = $state<CourseItem | null>(null)
   courseItems = $state<CourseItem[]>([])
+  isSyncing = $state(false)
 
   reset() {
     this.currentCourse = null

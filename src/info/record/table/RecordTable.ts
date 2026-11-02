@@ -34,7 +34,7 @@ const COLUMNS = [
   },
   {
     key: "section",
-    name: "Section",
+    name: m.table_section(),
     filter: true,
     width: "14%",
   },
