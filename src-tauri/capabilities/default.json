@@ -9,6 +9,7 @@
     "core:default",
     "core:app:allow-exit",
     "log:default",
+    "store:default",
     "updater:default",
     "process:allow-restart"
   ]

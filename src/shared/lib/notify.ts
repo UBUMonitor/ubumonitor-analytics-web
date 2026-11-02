@@ -1,6 +1,7 @@
+import SyncToast from "@/features/sync/components/SyncToast.svelte"
 import ErrorToast from "@/shared/components/toast/ErrorToast.svelte"
-import SyncToast from "@/shared/components/toast/SyncToast.svelte"
 import { getErrorMessage } from "@/shared/error/errorMessage"
+import type { MutationCache } from "@tanstack/svelte-query"
 import { toast } from "svelte-sonner"
 
 function getSafeErrorMessage(error: unknown) {
@@ -22,9 +23,38 @@ export function notifyError(error: unknown): void {
   })
 }
 
-export function notifySyncStart(): () => void {
-  const id = toast.custom(SyncToast, { duration: Number.POSITIVE_INFINITY })
+export function trackSyncMutations(mutationCache: MutationCache): () => void {
+  let timer: ReturnType<typeof setTimeout> | undefined
+  let dismissToast: (() => void) | undefined
+
+  const isSyncing = () =>
+    mutationCache.getAll().some((mutation) => {
+      return mutation.options.meta?.sync === true && mutation.state.status === "pending"
+    })
+
+  const updateToast = () => {
+    if (isSyncing()) {
+      if (timer || dismissToast) return
+
+      timer = setTimeout(() => {
+        timer = undefined
+        if (!isSyncing()) return
+
+        const id = toast.custom(SyncToast, { duration: Number.POSITIVE_INFINITY })
+        dismissToast = () => toast.dismiss(id)
+      }, 300)
+      return
+    }
+
+    if (timer) clearTimeout(timer)
+    timer = undefined
+    dismissToast?.()
+    dismissToast = undefined
+  }
+
+  const unsubscribe = mutationCache.subscribe(updateToast)
   return () => {
-    toast.dismiss(id)
+    unsubscribe()
+    updateToast()
   }
 }

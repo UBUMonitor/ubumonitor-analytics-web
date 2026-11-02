@@ -11,24 +11,26 @@
 
   // Writable derived: follows `value` from the parent, but can be
   // overwritten locally by the input binding until `value` changes again.
-  let internalValue = $derived(value)
-
   let timeout: ReturnType<typeof setTimeout> | undefined
+  let pendingValue: string | undefined
 
-  function schedule() {
+  function schedule(nextValue: string) {
     clearTimeout(timeout)
-    timeout = setTimeout(() => onchange(internalValue), debounce)
+    pendingValue = nextValue
+    timeout = setTimeout(() => {
+      timeout = undefined
+      onchange(nextValue)
+    }, debounce)
   }
 
   function flush() {
     if (timeout === undefined) return
     clearTimeout(timeout)
     timeout = undefined
-    onchange(internalValue)
+    if (pendingValue !== undefined) onchange(pendingValue)
   }
 
-  // Cleanup on unmount
   $effect(() => () => clearTimeout(timeout))
 </script>
 
-<input {...rest} bind:value={internalValue} oninput={schedule} onblur={flush} />
+<input {...rest} {value} oninput={(event) => schedule(event.currentTarget.value)} onblur={flush} />

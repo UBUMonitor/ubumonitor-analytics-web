@@ -11,6 +11,9 @@ importers:
       '@lucide/svelte':
         specifier: ^1.58.0
         version: 1.58.0(svelte@5.57.2(@typescript-eslint/types@8.71.2))
+      '@tanstack/svelte-query':
+        specifier: ^6.3.7
+        version: 6.3.7(svelte@5.57.2(@typescript-eslint/types@8.71.2))
       '@tanstack/svelte-table':
         specifier: 9.3.1
         version: 9.3.1(svelte@5.57.2(@typescript-eslint/types@8.71.2))
@@ -26,15 +29,15 @@ importers:
       '@tauri-apps/plugin-process':
         specifier: ~2.4.0
         version: 2.4.0
+      '@tauri-apps/plugin-store':
+        specifier: ^2.5.0
+        version: 2.5.0
       '@tauri-apps/plugin-updater':
         specifier: ~2.14.0
         version: 2.14.0
       echarts:
         specifier: ^6.1.0
         version: 6.1.0
-      ky:
-        specifier: ^2.2.0
-        version: 2.2.0
       luxon:
         specifier: ^3.7.2
         version: 3.7.2
@@ -98,7 +101,7 @@ importers:
         version: 17.6.0
       orval:
         specifier: ^8.43.0
-        version: 8.43.0(prettier@3.9.10)(typedoc-plugin-markdown@4.11.0(typedoc@0.28.19(typescript@6.0.3)))(typedoc@0.28.19(typescript@6.0.3))(typescript@6.0.3)(zod@4.6.7)
+        version: 8.43.0(@tanstack/svelte-query@6.3.7(svelte@5.57.2(@typescript-eslint/types@8.71.2)))(prettier@3.9.10)(typedoc-plugin-markdown@4.11.0(typedoc@0.28.19(typescript@6.0.3)))(typedoc@0.28.19(typescript@6.0.3))(typescript@6.0.3)(zod@4.6.7)
       prettier:
         specifier: ^3.9.10
         version: 3.9.10
@@ -1052,8 +1055,16 @@ packages:
     peerDependencies:
       vite: ^5.2.0 || ^6 || ^7 || ^8
 
+  '@tanstack/query-core@5.105.1':
+    resolution: {integrity: sha512-B/rNlZoZ54w1dlddiUt9oEe1SLM+37c00SKLJEg9YH+7as3Y54P81o9Fh+2ujZ36tXPnQJ5oVe7AcyEWkyFhPg==}
+
   '@tanstack/store@0.11.2':
     resolution: {integrity: sha512-sJ4mjol8uQsHV0gOJzzjwXfh2Fwm+Sz0+8deqiTm4jGbMdjzNSW+xZCFm0kUa870uhd8yi+DpKnZb5Kc4apa0Q==}
+
+  '@tanstack/svelte-query@6.3.7':
+    resolution: {integrity: sha512-yqw1xxx+nPQIoBpT9cEegm+MkQSF00WCklYv20cqOpmzoIDEiLKfEIoSwJOXZvOkp2yPbG2UD02GnpEPXLMDsQ==}
+    peerDependencies:
+      svelte: ^5.25.0
 
   '@tanstack/svelte-store@0.12.3':
     resolution: {integrity: sha512-mF0Pe+OUmhMYjbX6jm0Ox6Zdhloi28piFekz6BWJn6oDhEY8SzJsjJKTfcT5/4JS0TSi74tDVWlF/NTM+jtfDw==}
@@ -1162,6 +1173,9 @@ packages:
 
   '@tauri-apps/plugin-process@2.4.0':
     resolution: {integrity: sha512-GddrmsSLAYrLa/yTXlXK/YRDzUgYeeOnUXTbiyvJWkmI424RmDPD3FVLeqcon7rv6O6ZfhBilcrHWnSo7o6hIQ==}
+
+  '@tauri-apps/plugin-store@2.5.0':
+    resolution: {integrity: sha512-+ykjiQwMJCSk/U2enHA8peKBWgDKgrP7JfZnGwQpqzwA0nVtKTc0LCyxWr2whOrcQoQqtUdr9NVdDZpfKpT1Xw==}
 
   '@tauri-apps/plugin-updater@2.14.0':
     resolution: {integrity: sha512-gdylJ9tger4hkyOn24QZd6MNOKVo2Eh53iw5th2Qj1vKTR/+u4PIwJWuiis5hohYvobn6iOvlnALfrqIPSzh7Q==}
@@ -1685,10 +1699,6 @@ packages:
 
   known-css-properties@0.37.0:
     resolution: {integrity: sha512-JCDrsP4Z1Sb9JwG0aJ8Eo2r7k4Ou5MwmThS/6lcIe1ICyb7UBJKGRIUUdqc2ASdE/42lgz6zFUnzAIhtXnBVrQ==}
-
-  ky@2.2.0:
-    resolution: {integrity: sha512-4+B63kyZt+Y8snQiUGydK1vgY9xYQJZEh9K/nIAIEts+gYJzy1EiAw3BbK8xpWRuWUpN70SNCMjqRGTm75xxIA==}
-    engines: {node: '>=22'}
 
   kysely@0.28.17:
     resolution: {integrity: sha512-nbD8lB9EB3wNdMhOCdx5Li8DxnLbvKByylRLcJ1h+4SkrowVeECAyZlyiKMThF7xFdRz0jSQ2MoJr+wXux2y0Q==}
@@ -2831,10 +2841,12 @@ snapshots:
       - '@faker-js/faker'
       - '@modelcontextprotocol/server'
 
-  '@orval/query@8.43.0':
+  '@orval/query@8.43.0(@tanstack/svelte-query@6.3.7(svelte@5.57.2(@typescript-eslint/types@8.71.2)))':
     dependencies:
       '@orval/core': 8.43.0
       '@orval/fetch': 8.43.0
+    optionalDependencies:
+      '@tanstack/svelte-query': 6.3.7(svelte@5.57.2(@typescript-eslint/types@8.71.2))
     transitivePeerDependencies:
       - '@faker-js/faker'
       - '@modelcontextprotocol/server'
@@ -3142,7 +3154,14 @@ snapshots:
       tailwindcss: 4.3.3
       vite: 8.3.4(@types/node@25.9.3)(esbuild@0.28.0)(jiti@2.7.0)(yaml@2.9.1)
 
+  '@tanstack/query-core@5.105.1': {}
+
   '@tanstack/store@0.11.2': {}
+
+  '@tanstack/svelte-query@6.3.7(svelte@5.57.2(@typescript-eslint/types@8.71.2))':
+    dependencies:
+      '@tanstack/query-core': 5.105.1
+      svelte: 5.57.2(@typescript-eslint/types@8.71.2)
 
   '@tanstack/svelte-store@0.12.3(svelte@5.57.2(@typescript-eslint/types@8.71.2))':
     dependencies:
@@ -3220,6 +3239,10 @@ snapshots:
       '@tauri-apps/api': 2.12.4
 
   '@tauri-apps/plugin-process@2.4.0':
+    dependencies:
+      '@tauri-apps/api': 2.12.4
+
+  '@tauri-apps/plugin-store@2.5.0':
     dependencies:
       '@tauri-apps/api': 2.12.4
 
@@ -3760,8 +3783,6 @@ snapshots:
 
   known-css-properties@0.37.0: {}
 
-  ky@2.2.0: {}
-
   kysely@0.28.17: {}
 
   levn@0.4.1:
@@ -3952,7 +3973,7 @@ snapshots:
       type-check: 0.4.0
       word-wrap: 1.2.5
 
-  orval@8.43.0(prettier@3.9.10)(typedoc-plugin-markdown@4.11.0(typedoc@0.28.19(typescript@6.0.3)))(typedoc@0.28.19(typescript@6.0.3))(typescript@6.0.3)(zod@4.6.7):
+  orval@8.43.0(@tanstack/svelte-query@6.3.7(svelte@5.57.2(@typescript-eslint/types@8.71.2)))(prettier@3.9.10)(typedoc-plugin-markdown@4.11.0(typedoc@0.28.19(typescript@6.0.3)))(typedoc@0.28.19(typescript@6.0.3))(typescript@6.0.3)(zod@4.6.7):
     dependencies:
       '@commander-js/extra-typings': 15.0.0(commander@15.0.0)
       '@orval/angular': 8.43.0
@@ -3964,7 +3985,7 @@ snapshots:
       '@orval/mcp': 8.43.0(zod@4.6.7)
       '@orval/mock': 8.43.0
       '@orval/pinia-colada': 8.43.0
-      '@orval/query': 8.43.0
+      '@orval/query': 8.43.0(@tanstack/svelte-query@6.3.7(svelte@5.57.2(@typescript-eslint/types@8.71.2)))
       '@orval/solid-start': 8.43.0
       '@orval/swr': 8.43.0
       '@orval/zod': 8.43.0(zod@4.6.7)

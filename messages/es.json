@@ -2,6 +2,7 @@
   "$schema": "https://inlang.com/schema/inlang-message-format",
 
   "application_error": "Error en la aplicación",
+  "backend_starting": "Iniciando el backend...",
   "backend_start_error": "No se pudo iniciar el backend. Consulta los registros para obtener más información.",
   "close_application": "Cerrar aplicación",
   "close": "Cerrar",

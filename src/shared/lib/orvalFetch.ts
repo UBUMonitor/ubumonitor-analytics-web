@@ -1,7 +1,6 @@
-import type { ErrorResponse } from "@/backend/model"
-import { getCheckHealthUrl } from "@/backend/services/health"
-import { loginStore } from "@/login/login.svelte"
-import ky from "ky"
+import { loginStore } from "@/features/auth/login.svelte"
+import { resolveApiUrl } from "@/shared/api/config"
+import type { ErrorResponse } from "@/shared/api/model"
 
 export class BackendError extends Error {
   constructor(code: string) {
@@ -12,7 +11,7 @@ export class BackendError extends Error {
 export async function orvalFetch<T>(url: string, options: RequestInit = {}) {
   const token = loginStore.token
 
-  const response = await fetch(url, {
+  const response = await fetch(resolveApiUrl(url), {
     ...options,
     headers: {
       ...options.headers,
@@ -26,13 +25,4 @@ export async function orvalFetch<T>(url: string, options: RequestInit = {}) {
   }
 
   return response.status === 204 ? (null as T) : ((await response.json()) as T)
-}
-
-export function healthCheck() {
-  return ky.get(getCheckHealthUrl(), {
-    retry: {
-      limit: 50,
-      delay: () => 200,
-    },
-  })
 }

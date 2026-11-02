@@ -5,10 +5,10 @@ export default defineConfig({
     output: {
       formatter: "prettier",
       mode: "tags",
-      target: "./src/backend/services",
-      schemas: "./src/backend/model",
-      client: "fetch",
-      baseUrl: "http://127.0.0.1:9090",
+      target: "./src/shared/api/services",
+      schemas: "./src/shared/api/model",
+      client: "svelte-query",
+      baseUrl: "",
       clean: true,
       override: {
         mutator: {

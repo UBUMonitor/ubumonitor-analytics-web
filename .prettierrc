@@ -13,7 +13,7 @@
       }
     }
   ],
-  "tailwindStylesheet": "./src/app/app.css",
+  "tailwindStylesheet": "./src/app.css",
   "semi": false,
   "printWidth": 100
 }
