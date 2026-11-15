@@ -5,7 +5,7 @@
  * API documentation for UBUMonitor Analytics
  * OpenAPI spec version: 1.0.0
  */
-import { orvalFetch } from "../../shared/lib/orvalFetch"
+import { orvalFetch } from "../../utils/orvalFetch"
 import type {
   AuthLoginRequestDto,
   AuthOfflineRequestDto,
@@ -13,7 +13,7 @@ import type {
   AuthSSORequestDto,
 } from "../model"
 
-export const getAuthSSOUrl = () => {
+export const getLoginWithSsoUrl = () => {
   return `http://127.0.0.1:9090/api/public/auth/sso`
 }
 
@@ -21,7 +21,7 @@ export const getAuthSSOUrl = () => {
  * Receives a Moodle site URL, an SSO launch credential, and the database encryption key. Returns an opaque Bearer session token for subsequent authenticated requests.
  * @summary Authenticate with an SSO launch credential
  */
-export const authSSO = async (
+export const loginWithSso = async (
   authSSORequestDto: AuthSSORequestDto,
   options?: Parameters<typeof orvalFetch>[1],
 ): Promise<AuthResponseDto> => {
@@ -44,7 +44,7 @@ export const authSSO = async (
     }
     return headers
   }
-  return orvalFetch<AuthResponseDto>(getAuthSSOUrl(), {
+  return orvalFetch<AuthResponseDto>(getLoginWithSsoUrl(), {
     ...options,
     method: "POST",
     headers: { "Content-Type": "application/json", ...getHeaders(options?.headers) },
@@ -52,7 +52,7 @@ export const authSSO = async (
   })
 }
 
-export const getAuthOfflineUrl = () => {
+export const getCreateOfflineSessionUrl = () => {
   return `http://127.0.0.1:9090/api/public/auth/offline`
 }
 
@@ -60,7 +60,7 @@ export const getAuthOfflineUrl = () => {
  * Receives the Moodle site URL, username, and database encryption key. Returns an opaque Bearer session token for an offline session.
  * @summary Create an offline application session
  */
-export const authOffline = async (
+export const createOfflineSession = async (
   authOfflineRequestDto: AuthOfflineRequestDto,
   options?: Parameters<typeof orvalFetch>[1],
 ): Promise<AuthResponseDto> => {
@@ -83,7 +83,7 @@ export const authOffline = async (
     }
     return headers
   }
-  return orvalFetch<AuthResponseDto>(getAuthOfflineUrl(), {
+  return orvalFetch<AuthResponseDto>(getCreateOfflineSessionUrl(), {
     ...options,
     method: "POST",
     headers: { "Content-Type": "application/json", ...getHeaders(options?.headers) },
@@ -91,7 +91,7 @@ export const authOffline = async (
   })
 }
 
-export const getAuthLoginUrl = () => {
+export const getLoginWithCredentialsUrl = () => {
   return `http://127.0.0.1:9090/api/public/auth/credentials`
 }
 
@@ -99,7 +99,7 @@ export const getAuthLoginUrl = () => {
  * Receives a Moodle site URL, username, password, and database encryption key. Returns an opaque Bearer session token for subsequent authenticated requests.
  * @summary Authenticate with Moodle credentials
  */
-export const authLogin = async (
+export const loginWithCredentials = async (
   authLoginRequestDto: AuthLoginRequestDto,
   options?: Parameters<typeof orvalFetch>[1],
 ): Promise<AuthResponseDto> => {
@@ -122,7 +122,7 @@ export const authLogin = async (
     }
     return headers
   }
-  return orvalFetch<AuthResponseDto>(getAuthLoginUrl(), {
+  return orvalFetch<AuthResponseDto>(getLoginWithCredentialsUrl(), {
     ...options,
     method: "POST",
     headers: { "Content-Type": "application/json", ...getHeaders(options?.headers) },
@@ -130,7 +130,7 @@ export const authLogin = async (
   })
 }
 
-export const getAuthLogoutUrl = () => {
+export const getLogoutSessionUrl = () => {
   return `http://127.0.0.1:9090/api/auth/logout`
 }
 
@@ -138,8 +138,8 @@ export const getAuthLogoutUrl = () => {
  * Logout session. The token must be included in the Authorization header as a Bearer token.
  * @summary Logout session
  */
-export const authLogout = async (options?: Parameters<typeof orvalFetch>[1]): Promise<void> => {
-  return orvalFetch<void>(getAuthLogoutUrl(), {
+export const logoutSession = async (options?: Parameters<typeof orvalFetch>[1]): Promise<void> => {
+  return orvalFetch<void>(getLogoutSessionUrl(), {
     ...options,
     method: "POST",
   })

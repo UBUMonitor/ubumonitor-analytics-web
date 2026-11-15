@@ -5,7 +5,7 @@
  * API documentation for UBUMonitor Analytics
  * OpenAPI spec version: 1.0.0
  */
-import { orvalFetch } from "../../shared/lib/orvalFetch"
+import { orvalFetch } from "../../utils/orvalFetch"
 import type {
   CourseLogsListRequestDto,
   CourseLogsListResponseDto,
@@ -32,7 +32,7 @@ export const syncCourseLogs = async (
   })
 }
 
-export const getGetCourseLogsStatisticsUrl = (courseId: number) => {
+export const getGetCourseLogStatisticsUrl = (courseId: number) => {
   return `http://127.0.0.1:9090/api/courses/${courseId}/logs/statistics`
 }
 
@@ -40,7 +40,7 @@ export const getGetCourseLogsStatisticsUrl = (courseId: number) => {
  * Get aggregated course log statistics
  * @summary Get course log statistics
  */
-export const getCourseLogsStatistics = async (
+export const getCourseLogStatistics = async (
   courseId: number,
   courseLogsStatisticsRequestDto: CourseLogsStatisticsRequestDto,
   options?: Parameters<typeof orvalFetch>[1],
@@ -64,7 +64,7 @@ export const getCourseLogsStatistics = async (
     }
     return headers
   }
-  return orvalFetch<CourseLogsStatisticsResponseDto>(getGetCourseLogsStatisticsUrl(courseId), {
+  return orvalFetch<CourseLogsStatisticsResponseDto>(getGetCourseLogStatisticsUrl(courseId), {
     ...options,
     method: "POST",
     headers: { "Content-Type": "application/json", ...getHeaders(options?.headers) },
@@ -72,7 +72,7 @@ export const getCourseLogsStatistics = async (
   })
 }
 
-export const getGetCourseLogsListUrl = (courseId: number) => {
+export const getSearchCourseLogsUrl = (courseId: number) => {
   return `http://127.0.0.1:9090/api/courses/${courseId}/logs/list`
 }
 
@@ -80,7 +80,7 @@ export const getGetCourseLogsListUrl = (courseId: number) => {
  * Retrieves logs for a specific course with optional filtering by date range and selectable log columns.
  * @summary Get course logs with filters
  */
-export const getCourseLogsList = async (
+export const searchCourseLogs = async (
   courseId: number,
   courseLogsListRequestDto: CourseLogsListRequestDto,
   options?: Parameters<typeof orvalFetch>[1],
@@ -104,7 +104,7 @@ export const getCourseLogsList = async (
     }
     return headers
   }
-  return orvalFetch<CourseLogsListResponseDto>(getGetCourseLogsListUrl(courseId), {
+  return orvalFetch<CourseLogsListResponseDto>(getSearchCourseLogsUrl(courseId), {
     ...options,
     method: "POST",
     headers: { "Content-Type": "application/json", ...getHeaders(options?.headers) },
@@ -112,7 +112,7 @@ export const getCourseLogsList = async (
   })
 }
 
-export const getGetCourseLogsInfoUrl = (courseId: number) => {
+export const getGetCourseLogFiltersUrl = (courseId: number) => {
   return `http://127.0.0.1:9090/api/courses/${courseId}/logs/info`
 }
 
@@ -120,11 +120,11 @@ export const getGetCourseLogsInfoUrl = (courseId: number) => {
  * Retrieves logs for a specific course with optional filtering by date range and selectable log columns.
  * @summary Get course logs with filters
  */
-export const getCourseLogsInfo = async (
+export const getCourseLogFilters = async (
   courseId: number,
   options?: Parameters<typeof orvalFetch>[1],
 ): Promise<CourseLogsResponseDto> => {
-  return orvalFetch<CourseLogsResponseDto>(getGetCourseLogsInfoUrl(courseId), {
+  return orvalFetch<CourseLogsResponseDto>(getGetCourseLogFiltersUrl(courseId), {
     ...options,
     method: "POST",
   })

@@ -5,16 +5,27 @@
  * API documentation for UBUMonitor Analytics
  * OpenAPI spec version: 1.0.0
  */
+import type { GradeItemDtoItemType } from "./gradeItemDtoItemType"
 
 export interface GradeItemDto {
   /** Unique identifier for the grade item */
   id: number
+  /** Type of the grade item in Moodle */
+  itemType: GradeItemDtoItemType
   /** Unique identifier for the parent grade item, if applicable */
   parentId?: number
+  /** Moodle category identifier containing this grade item, if applicable */
+  categoryId?: number
+  /** Moodle parent category identifier for this category grade item, if applicable */
+  parentCategoryId?: number
+  /** Moodle course module identifier for the grade item, if applicable */
+  moduleId?: number
+  /** 0-based position of the grade item in Moodle's gradeitems array */
+  position: number
   /** Name of the grade item */
   name?: string
   /** Minimum grade value for the grade item */
-  gradeMin: number
+  gradeMin?: number
   /** Maximum grade value for the grade item */
-  gradeMax: number
+  gradeMax?: number
 }

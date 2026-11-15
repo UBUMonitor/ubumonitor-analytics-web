@@ -5,13 +5,13 @@
  * API documentation for UBUMonitor Analytics
  * OpenAPI spec version: 1.0.0
  */
-import { orvalFetch } from "../../shared/lib/orvalFetch"
+import { orvalFetch } from "../../utils/orvalFetch"
 import type {
   CourseActivityCompletionResponse,
   GetCourseActivityCompletionValuesParams,
 } from "../model"
 
-export const getSyncCourseActivityCompletionUrl = (courseId: number) => {
+export const getSyncCourseActivityCompletionsUrl = (courseId: number) => {
   return `http://127.0.0.1:9090/api/courses/${courseId}/activitycompletion/sync`
 }
 
@@ -19,12 +19,12 @@ export const getSyncCourseActivityCompletionUrl = (courseId: number) => {
  * Retrieves the latest activity completion information for the specified course from Moodle and stores it in the local tenant database.
  * @summary Synchronize course activity completion information
  */
-export const syncCourseActivityCompletion = async (
+export const syncCourseActivityCompletions = async (
   courseId: number,
   options?: Parameters<typeof orvalFetch>[1],
 ): Promise<CourseActivityCompletionResponse> => {
   return orvalFetch<CourseActivityCompletionResponse>(
-    getSyncCourseActivityCompletionUrl(courseId),
+    getSyncCourseActivityCompletionsUrl(courseId),
     {
       ...options,
       method: "POST",
@@ -74,7 +74,7 @@ export const getCourseActivityCompletionValues = async (
   )
 }
 
-export const getGetCourseActivityCompletionInfoUrl = (courseId: number) => {
+export const getGetCourseActivityCompletionsUrl = (courseId: number) => {
   return `http://127.0.0.1:9090/api/courses/${courseId}/activitycompletion/info`
 }
 
@@ -82,12 +82,12 @@ export const getGetCourseActivityCompletionInfoUrl = (courseId: number) => {
  * Retrieves the activity completion information for a course.
  * @summary Get course activity completion information
  */
-export const getCourseActivityCompletionInfo = async (
+export const getCourseActivityCompletions = async (
   courseId: number,
   options?: Parameters<typeof orvalFetch>[1],
 ): Promise<CourseActivityCompletionResponse> => {
   return orvalFetch<CourseActivityCompletionResponse>(
-    getGetCourseActivityCompletionInfoUrl(courseId),
+    getGetCourseActivityCompletionsUrl(courseId),
     {
       ...options,
       method: "GET",

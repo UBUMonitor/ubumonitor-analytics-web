@@ -13,15 +13,6 @@
   --radius-box: 0.5rem;
 }
 
-@layer components {
-  .tab-content {
-    @apply border-0;
-  }
-  .tab:checked + .tab-content {
-    @apply flex! flex-col!;
-  }
-}
-
 @layer base {
   input::-ms-reveal,
   input::-ms-clear {

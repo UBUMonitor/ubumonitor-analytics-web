@@ -5,20 +5,23 @@
  * API documentation for UBUMonitor Analytics
  * OpenAPI spec version: 1.0.0
  */
+import type { CourseLogsStatisticsRequestCompositeFilterDto } from "./courseLogsStatisticsRequestCompositeFilterDto"
 
 export interface CourseLogsStatisticsRequestFiltersDto {
   /** @nullable */
-  userIds?: number[] | null
+  userIds?: (number | null)[] | null
   /** @nullable */
-  moduleIds?: number[] | null
+  moduleIds?: (number | null)[] | null
   /** @nullable */
-  componentIds?: number[] | null
+  componentIds?: (number | null)[] | null
   /** @nullable */
-  eventIds?: number[] | null
+  eventIds?: (number | null)[] | null
   /** @nullable */
-  originIds?: number[] | null
+  originIds?: (number | null)[] | null
   /** @nullable */
-  ipAddresses?: string[] | null
+  ipAddresses?: (string | null)[] | null
   /** @nullable */
-  sectionIds?: number[] | null
+  sectionIds?: (number | null)[] | null
+  /** OR alternatives of compound filters. Populated dimensions within each entry are combined with AND; each entry must populate at least two dimensions. The compound expression is ANDed with the ordinary filters above.  */
+  compositeFilters?: CourseLogsStatisticsRequestCompositeFilterDto[]
 }

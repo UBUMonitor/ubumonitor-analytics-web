@@ -27,4 +27,6 @@ export interface UserInfo {
   timeZone?: string
   /** Image url of the user. */
   userImageUrl: string
+  /** The language of the user. */
+  lang?: string
 }

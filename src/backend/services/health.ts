@@ -5,9 +5,9 @@
  * API documentation for UBUMonitor Analytics
  * OpenAPI spec version: 1.0.0
  */
-import { orvalFetch } from "../../shared/lib/orvalFetch"
+import { orvalFetch } from "../../utils/orvalFetch"
 
-export const getCheckHealthUrl = () => {
+export const getCheckServiceHealthUrl = () => {
   return `http://127.0.0.1:9090/api/public/system/health`
 }
 
@@ -15,8 +15,10 @@ export const getCheckHealthUrl = () => {
  * Checks the health status of the service.
  * @summary Check service health
  */
-export const checkHealth = async (options?: Parameters<typeof orvalFetch>[1]): Promise<void> => {
-  return orvalFetch<void>(getCheckHealthUrl(), {
+export const checkServiceHealth = async (
+  options?: Parameters<typeof orvalFetch>[1],
+): Promise<void> => {
+  return orvalFetch<void>(getCheckServiceHealthUrl(), {
     ...options,
     method: "GET",
   })

@@ -6,9 +6,10 @@
  * OpenAPI spec version: 1.0.0
  */
 
+/**
+ * IDs of the roles assigned to this user in the requested course.
+ */
 export interface UserEnrollmentInfoRolesInnerDto {
   /** The unique identifier of the role. */
   id: number
-  /** Role name */
-  name: string
 }

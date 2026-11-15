@@ -6,6 +6,9 @@
  * OpenAPI spec version: 1.0.0
  */
 
+/**
+ * Columns to include in response
+ */
 export type CourseLogsListRequestDtoFieldsItem =
   (typeof CourseLogsListRequestDtoFieldsItem)[keyof typeof CourseLogsListRequestDtoFieldsItem]
 
@@ -24,6 +27,7 @@ export const CourseLogsListRequestDtoFieldsItem = {
   COMPONENT_NAME: "COMPONENT_NAME",
   EVENT_NAME: "EVENT_NAME",
   ORIGIN_NAME: "ORIGIN_NAME",
+  ORIGIN_CODE: "ORIGIN_CODE",
   SECTION_ID: "SECTION_ID",
   SECTION_NAME: "SECTION_NAME",
 } as const

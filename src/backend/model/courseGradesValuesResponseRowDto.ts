@@ -13,6 +13,10 @@ export interface CourseGradesValuesResponseRowDto {
   userId?: number
   /** The grade value for the user in the specified grade item */
   grade?: number
-  /** The percentage grade for the user in the specified grade item */
+  /**
+   * The percentage grade for the user in the specified grade item
+   * @minimum 0
+   * @maximum 100
+   */
   percentage?: number
 }

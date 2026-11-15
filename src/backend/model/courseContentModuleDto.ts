@@ -6,6 +6,9 @@
  * OpenAPI spec version: 1.0.0
  */
 
+/**
+ * List of modules in the section
+ */
 export interface CourseContentModuleDto {
   /** Module ID */
   id: number
@@ -19,4 +22,6 @@ export interface CourseContentModuleDto {
   description: string
   /** Is module visible */
   visible: boolean
+  /** Moodle activity instance ID */
+  instance?: number
 }

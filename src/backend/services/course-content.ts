@@ -5,7 +5,7 @@
  * API documentation for UBUMonitor Analytics
  * OpenAPI spec version: 1.0.0
  */
-import { orvalFetch } from "../../shared/lib/orvalFetch"
+import { orvalFetch } from "../../utils/orvalFetch"
 import type { CourseContentResponseDto } from "../model"
 
 export const getSyncCourseContentUrl = (courseId: number) => {
@@ -26,7 +26,7 @@ export const syncCourseContent = async (
   })
 }
 
-export const getGetCourseUsersContentInfoUrl = (courseId: number) => {
+export const getGetCourseContentUrl = (courseId: number) => {
   return `http://127.0.0.1:9090/api/courses/${courseId}/content/info`
 }
 
@@ -34,11 +34,11 @@ export const getGetCourseUsersContentInfoUrl = (courseId: number) => {
  * Retrieves the sections and modules stored for a course.
  * @summary Get course content
  */
-export const getCourseUsersContentInfo = async (
+export const getCourseContent = async (
   courseId: number,
   options?: Parameters<typeof orvalFetch>[1],
 ): Promise<CourseContentResponseDto> => {
-  return orvalFetch<CourseContentResponseDto>(getGetCourseUsersContentInfoUrl(courseId), {
+  return orvalFetch<CourseContentResponseDto>(getGetCourseContentUrl(courseId), {
     ...options,
     method: "GET",
   })

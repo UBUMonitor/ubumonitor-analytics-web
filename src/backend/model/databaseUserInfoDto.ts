@@ -6,6 +6,9 @@
  * OpenAPI spec version: 1.0.0
  */
 
+/**
+ * Databases available for users on this Moodle site.
+ */
 export interface DatabaseUserInfoDto {
   /** Unique identifier of the database. */
   id: string

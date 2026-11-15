@@ -1,13 +1,13 @@
 {
   "name": "ubumonitor-analytics-app",
   "private": true,
-  "version": "0.2.0",
+  "version": "0.2.4",
   "type": "module",
   "scripts": {
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
-    "check": "svelte-check --tsconfig ./tsconfig.app.json && tsc -p tsconfig.node.json",
+    "check": "svelte-check --tsconfig ./tsconfig.json",
     "generate": "orval",
     "lint": "eslint --fix .",
     "lint:check": "eslint .",
@@ -19,15 +19,15 @@
     "@eslint/compat": "^2.1.1",
     "@eslint/js": "^10.0.1",
     "@inlang/cli": "^3.4.4",
-    "@inlang/paraglide-js": "^2.29.0",
+    "@inlang/paraglide-js": "^3.2.2",
     "@sveltejs/vite-plugin-svelte": "^7.3.1",
     "@tailwindcss/vite": "^4.3.3",
     "@tauri-apps/cli": "^2.12.3",
     "@trivago/prettier-plugin-sort-imports": "^6.0.2",
     "@tsconfig/svelte": "^5.0.8",
     "@types/luxon": "^3.7.6",
-    "@types/node": "^25.9.3",
-    "daisyui": "^5.7.50",
+    "@types/node": "^26.6.6",
+    "daisyui": "^5.8.0",
     "eslint": "^10.12.0",
     "eslint-config-prettier": "^10.1.8",
     "eslint-plugin-svelte": "^3.23.1",
@@ -55,7 +55,8 @@
     "@tauri-apps/plugin-updater": "~2.14.0",
     "echarts": "^6.1.0",
     "ky": "^2.2.0",
-    "luxon": "^3.7.2"
+    "luxon": "^3.7.2",
+    "svelte-sonner": "^1.2.3"
   },
   "lint-staged": {
     "*.{js,ts,svelte}": [

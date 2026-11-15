@@ -6,9 +6,10 @@
  * OpenAPI spec version: 1.0.0
  */
 
+/**
+ * IDs of the courses this user is enrolled in.
+ */
 export interface UserEnrollmentInfoCoursesInnerDto {
   /** The unique identifier of the course. */
   id: number
-  /** The full name of the course. */
-  fullName: string
 }

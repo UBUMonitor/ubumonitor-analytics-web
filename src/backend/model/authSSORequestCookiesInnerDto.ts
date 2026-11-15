@@ -6,6 +6,9 @@
  * OpenAPI spec version: 1.0.0
  */
 
+/**
+ * Cookies from SSO request, if any.
+ */
 export interface AuthSSORequestCookiesInnerDto {
   /** Cookie name. */
   name: string

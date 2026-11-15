@@ -6,6 +6,9 @@
  * OpenAPI spec version: 1.0.0
  */
 
+/**
+ * List of courses the user is enrolled in, with updated enrollment information.
+ */
 export interface CourseInformationDto {
   /** The unique identifier of the course. */
   id: number

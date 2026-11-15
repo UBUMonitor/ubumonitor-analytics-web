@@ -5,7 +5,7 @@
  * API documentation for UBUMonitor Analytics
  * OpenAPI spec version: 1.0.0
  */
-import { orvalFetch } from "../../shared/lib/orvalFetch"
+import { orvalFetch } from "../../utils/orvalFetch"
 import type {
   GetPublicSiteInfoParams,
   PublicSiteInfoResponseDto,

@@ -1,17 +1,15 @@
 <script lang="ts">
-  import UpdateDialog from "@/app/UpdateDialog.svelte"
-  import Dialog from "@/dialog/components/Dialog.svelte"
-  import { openDialog } from "@/dialog/dialog.svelte"
-  import Login from "@/login/components/Login.svelte"
-  import { loginStore } from "@/login/login.svelte"
+  import Dialog from "@/components/dialogs/Dialog.svelte"
+  import UpdateDialog from "@/components/dialogs/UpdateDialog.svelte"
+  import Login from "@/components/login/Login.svelte"
+  import { dialogStore } from "@/stores/dialog.svelte"
+  import { loginStore } from "@/stores/login.svelte"
   import { check } from "@tauri-apps/plugin-updater"
-  import { onMount } from "svelte"
+  import { Toaster } from "svelte-sonner"
 
-  const dashboard = import("@/dashboard/components/Dashboard.svelte")
+  const dashboard = import("@/components/Dashboard.svelte")
 
-  onMount(() => {
-    check().then((update) => update && openDialog(UpdateDialog, { update }))
-  })
+  check().then((update) => update && dialogStore.openDialog(UpdateDialog, { update }))
 </script>
 
 {#if !loginStore.token}
@@ -22,3 +20,4 @@
   {/await}
 {/if}
 <Dialog />
+<Toaster richColors position="top-center" />

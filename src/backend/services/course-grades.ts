@@ -5,11 +5,11 @@
  * API documentation for UBUMonitor Analytics
  * OpenAPI spec version: 1.0.0
  */
-import { orvalFetch } from "../../shared/lib/orvalFetch"
+import { orvalFetch } from "../../utils/orvalFetch"
 import type {
   CourseGradeItemsResponseDto,
   CourseGradesValuesResponseDto,
-  GetCourseGradesValuesParams,
+  GetCourseGradeValuesParams,
 } from "../model"
 
 export const getSyncCourseGradesUrl = (courseId: number) => {
@@ -30,9 +30,9 @@ export const syncCourseGrades = async (
   })
 }
 
-export const getGetCourseGradesValuesUrl = (
+export const getGetCourseGradeValuesUrl = (
   courseId: number,
-  params: GetCourseGradesValuesParams,
+  params: GetCourseGradeValuesParams,
 ) => {
   const normalizedParams = new URLSearchParams()
 
@@ -58,18 +58,18 @@ export const getGetCourseGradesValuesUrl = (
  * Get course grade values
  * @summary Get course grade values
  */
-export const getCourseGradesValues = async (
+export const getCourseGradeValues = async (
   courseId: number,
-  params: GetCourseGradesValuesParams,
+  params: GetCourseGradeValuesParams,
   options?: Parameters<typeof orvalFetch>[1],
 ): Promise<CourseGradesValuesResponseDto> => {
-  return orvalFetch<CourseGradesValuesResponseDto>(getGetCourseGradesValuesUrl(courseId, params), {
+  return orvalFetch<CourseGradesValuesResponseDto>(getGetCourseGradeValuesUrl(courseId, params), {
     ...options,
     method: "GET",
   })
 }
 
-export const getGetCourseGradesInfoUrl = (courseId: number) => {
+export const getGetCourseGradesUrl = (courseId: number) => {
   return `http://127.0.0.1:9090/api/courses/${courseId}/grades/info`
 }
 
@@ -77,11 +77,11 @@ export const getGetCourseGradesInfoUrl = (courseId: number) => {
  * Retrieves the grade information for users enrolled in a specific course. This endpoint provides details about the users enrolled in the course, including their roles and grade status. It allows clients to access up-to-date grade information for a particular course on the Moodle site.
  * @summary Get course grades
  */
-export const getCourseGradesInfo = async (
+export const getCourseGrades = async (
   courseId: number,
   options?: Parameters<typeof orvalFetch>[1],
 ): Promise<CourseGradeItemsResponseDto> => {
-  return orvalFetch<CourseGradeItemsResponseDto>(getGetCourseGradesInfoUrl(courseId), {
+  return orvalFetch<CourseGradeItemsResponseDto>(getGetCourseGradesUrl(courseId), {
     ...options,
     method: "GET",
   })

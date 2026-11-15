@@ -8,6 +8,7 @@
 import type { LogColumnComponentsEventsInnerDto } from "./logColumnComponentsEventsInnerDto"
 import type { LogComponentDto } from "./logComponentDto"
 import type { LogEventDto } from "./logEventDto"
+import type { OriginDto } from "./originDto"
 
 /**
  * Unique value columns
@@ -16,4 +17,5 @@ export interface LogColumn {
   components: LogComponentDto[]
   events: LogEventDto[]
   componentsEvents: LogColumnComponentsEventsInnerDto[]
+  origins: OriginDto[]
 }

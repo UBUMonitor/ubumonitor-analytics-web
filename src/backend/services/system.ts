@@ -5,9 +5,9 @@
  * API documentation for UBUMonitor Analytics
  * OpenAPI spec version: 1.0.0
  */
-import { orvalFetch } from "../../shared/lib/orvalFetch"
+import { orvalFetch } from "../../utils/orvalFetch"
 
-export const getShutdownUrl = () => {
+export const getShutdownServerUrl = () => {
   return `http://127.0.0.1:9090/api/public/system/shutdown`
 }
 
@@ -15,8 +15,8 @@ export const getShutdownUrl = () => {
  * Shuts down the server gracefully.
  * @summary Shutdown the server
  */
-export const shutdown = async (options?: Parameters<typeof orvalFetch>[1]): Promise<void> => {
-  return orvalFetch<void>(getShutdownUrl(), {
+export const shutdownServer = async (options?: Parameters<typeof orvalFetch>[1]): Promise<void> => {
+  return orvalFetch<void>(getShutdownServerUrl(), {
     ...options,
     method: "POST",
   })

@@ -7,6 +7,9 @@
  */
 import type { DatabaseUserInfoDto } from "./databaseUserInfoDto"
 
+/**
+ * Available Moodle hosts and their databases.
+ */
 export interface DatabaseHostInfoDto {
   /** URL of the Moodle site. */
   moodleUrl: string

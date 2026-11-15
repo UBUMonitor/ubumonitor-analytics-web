@@ -5,10 +5,10 @@
  * API documentation for UBUMonitor Analytics
  * OpenAPI spec version: 1.0.0
  */
-import { orvalFetch } from "../../shared/lib/orvalFetch"
+import { orvalFetch } from "../../utils/orvalFetch"
 import type { CourseEnrollmentsResponseDto } from "../model"
 
-export const getSyncCourseUsersEnrollmentsUrl = (courseId: number) => {
+export const getSyncCourseEnrollmentsUrl = (courseId: number) => {
   return `http://127.0.0.1:9090/api/courses/${courseId}/enrollments/sync`
 }
 
@@ -16,17 +16,17 @@ export const getSyncCourseUsersEnrollmentsUrl = (courseId: number) => {
  * Retrieves the latest enrollment data for users in the specified course and updates the local tenant database.
  * @summary Synchronize course enrollments
  */
-export const syncCourseUsersEnrollments = async (
+export const syncCourseEnrollments = async (
   courseId: number,
   options?: Parameters<typeof orvalFetch>[1],
 ): Promise<CourseEnrollmentsResponseDto> => {
-  return orvalFetch<CourseEnrollmentsResponseDto>(getSyncCourseUsersEnrollmentsUrl(courseId), {
+  return orvalFetch<CourseEnrollmentsResponseDto>(getSyncCourseEnrollmentsUrl(courseId), {
     ...options,
     method: "POST",
   })
 }
 
-export const getGetCourseUsersEnrollmentsInfoUrl = (courseId: number) => {
+export const getGetCourseEnrollmentsUrl = (courseId: number) => {
   return `http://127.0.0.1:9090/api/courses/${courseId}/enrollments/info`
 }
 
@@ -34,11 +34,11 @@ export const getGetCourseUsersEnrollmentsInfoUrl = (courseId: number) => {
  * Retrieves the enrollment information for users enrolled in a specific course. This endpoint provides details about the users enrolled in the course, including their roles and enrollment status. It allows clients to access up-to-date enrollment information for a particular course on the Moodle site.
  * @summary Get course enrollments
  */
-export const getCourseUsersEnrollmentsInfo = async (
+export const getCourseEnrollments = async (
   courseId: number,
   options?: Parameters<typeof orvalFetch>[1],
 ): Promise<CourseEnrollmentsResponseDto> => {
-  return orvalFetch<CourseEnrollmentsResponseDto>(getGetCourseUsersEnrollmentsInfoUrl(courseId), {
+  return orvalFetch<CourseEnrollmentsResponseDto>(getGetCourseEnrollmentsUrl(courseId), {
     ...options,
     method: "GET",
   })

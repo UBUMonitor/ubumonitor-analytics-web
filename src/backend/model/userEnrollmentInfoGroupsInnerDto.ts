@@ -6,9 +6,10 @@
  * OpenAPI spec version: 1.0.0
  */
 
+/**
+ * IDs of the groups this user belongs to in the requested course.
+ */
 export interface UserEnrollmentInfoGroupsInnerDto {
   /** The unique identifier of the group. */
   id: number
-  /** Group name */
-  name: string
 }

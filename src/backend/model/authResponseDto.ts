@@ -5,10 +5,12 @@
  * API documentation for UBUMonitor Analytics
  * OpenAPI spec version: 1.0.0
  */
+import type { UserInfo } from "./userInfo"
 
 export interface AuthResponseDto {
   /** Access token for authentication */
   accessToken: string
   /** Type of the token, usually "Bearer" */
   tokenType: string
+  user: UserInfo
 }

@@ -1,12 +1,10 @@
 use reqwest::Client;
 use serde::{Deserialize, Serialize};
 use serde_json::{json, Value};
-use std::sync::{
-    atomic::{AtomicBool, Ordering},
-    Arc, LazyLock,
-};
+use std::sync::LazyLock;
 use std::time::Duration;
-use tauri::{AppHandle, Emitter, Manager, Url, WebviewUrl, WebviewWindowBuilder, WindowEvent};
+use tauri::async_runtime::channel;
+use tauri::{AppHandle, Manager, Url, WebviewUrl, WebviewWindowBuilder, WindowEvent};
 
 #[derive(Deserialize)]
 struct AjaxResponse {
@@ -135,24 +133,27 @@ pub async fn get_public_moodle_config(host: String) -> Result<SiteInfo, String> 
         .ok_or_else(|| "response without data".to_string())
 }
 
-#[derive(Serialize, Clone)]
+#[derive(Serialize)]
+#[serde(rename_all = "camelCase")]
 struct CookieInfo {
     name: String,
     value: String,
-    domain: Option<String>,
-    path: Option<String>,
-    secure: Option<bool>,
-    http_only: Option<bool>,
 }
 
-#[derive(Serialize, Clone)]
-struct MoodleLoginPayload {
+#[derive(Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct MoodleLoginPayload {
     url: String,
     cookies: Vec<CookieInfo>,
 }
 
+type LoginResult = Result<MoodleLoginPayload, String>;
+
 #[tauri::command]
-pub async fn open_moodle_login(app: AppHandle, login_url: String) -> Result<(), String> {
+pub async fn open_moodle_login(
+    app: AppHandle,
+    login_url: String,
+) -> Result<MoodleLoginPayload, String> {
     let parsed: Url = login_url
         .parse()
         .map_err(|e| format!("invalid login url: {e}"))?;
@@ -161,18 +162,15 @@ pub async fn open_moodle_login(app: AppHandle, login_url: String) -> Result<(), 
         return Err(format!("unsupported url scheme: {}", parsed.scheme()));
     }
 
-    // Reuse the existing window instead of failing on a duplicate label.
     if let Some(existing) = app.get_webview_window("moodle-login") {
         let _ = existing.set_focus();
-        return Ok(());
+        return Err("login already in progress".to_string());
     }
 
-    let token_received = Arc::new(AtomicBool::new(false));
-    let token_received_nav = token_received.clone();
-    let token_received_close = token_received.clone();
-
-    let app_handle_nav = app.clone();
-    let app_handle_close = app.clone();
+    // Only the first message is read; any later ones are dropped.
+    let (tx, mut rx) = channel::<LoginResult>(4);
+    let tx_nav = tx.clone();
+    let app_nav = app.clone();
     let cookie_url = parsed.clone();
 
     let window = WebviewWindowBuilder::new(&app, "moodle-login", WebviewUrl::External(parsed))
@@ -181,18 +179,19 @@ pub async fn open_moodle_login(app: AppHandle, login_url: String) -> Result<(), 
             let _ = window.set_title(&title);
         })
         .on_navigation(move |url| {
-            if url.scheme() == "moodlemobile" {
-                // Only handle the first redirect; ignore duplicates.
-                if token_received_nav.swap(true, Ordering::SeqCst) {
-                    return false;
-                }
+            if url.scheme() != "moodlemobile" {
+                return true;
+            }
 
-                let full_url = url.as_str().to_string();
-                let app_handle = app_handle_nav.clone();
-                let cookie_url = cookie_url.clone();
+            let full_url = url.to_string();
+            let app = app_nav.clone();
+            let cookie_url = cookie_url.clone();
+            let tx = tx_nav.clone();
 
-                tauri::async_runtime::spawn(async move {
-                    if let Some(win) = app_handle.get_webview_window("moodle-login") {
+            // Cookies are read from an async task to avoid blocking the webview thread.
+            tauri::async_runtime::spawn(async move {
+                let result = match app.get_webview_window("moodle-login") {
+                    Some(win) => {
                         let cookies = win
                             .cookies_for_url(cookie_url)
                             .unwrap_or_default()
@@ -200,37 +199,32 @@ pub async fn open_moodle_login(app: AppHandle, login_url: String) -> Result<(), 
                             .map(|c| CookieInfo {
                                 name: c.name().to_string(),
                                 value: c.value().to_string(),
-                                domain: c.domain().map(|d| d.to_string()),
-                                path: c.path().map(|p| p.to_string()),
-                                secure: c.secure(),
-                                http_only: c.http_only(),
                             })
-                            .collect::<Vec<_>>();
-
-                        let payload = MoodleLoginPayload {
+                            .collect();
+                        let _ = win.close();
+                        Ok(MoodleLoginPayload {
                             url: full_url,
                             cookies,
-                        };
-
-                        let _ = app_handle.emit("moodle-token-received", payload);
-                        let _ = win.close();
+                        })
                     }
-                });
+                    None => Err("login window not found".to_string()),
+                };
+                let _ = tx.try_send(result);
+            });
 
-                return false;
-            }
-            true
+            false
         })
         .build()
         .map_err(|e| format!("failed to open login window: {e}"))?;
 
     window.on_window_event(move |event| {
         if let WindowEvent::Destroyed = event {
-            if !token_received_close.load(Ordering::SeqCst) {
-                let _ = app_handle_close.emit("moodle-login-cancelled", ());
-            }
+            // Ignored if the token was already sent (it is read first).
+            let _ = tx.try_send(Err("login cancelled".to_string()));
         }
     });
 
-    Ok(())
+    rx.recv()
+        .await
+        .unwrap_or_else(|| Err("login channel closed".to_string()))
 }

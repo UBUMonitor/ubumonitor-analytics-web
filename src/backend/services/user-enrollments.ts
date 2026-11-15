@@ -5,10 +5,10 @@
  * API documentation for UBUMonitor Analytics
  * OpenAPI spec version: 1.0.0
  */
-import { orvalFetch } from "../../shared/lib/orvalFetch"
+import { orvalFetch } from "../../utils/orvalFetch"
 import type { EnrollmentsResponseDto } from "../model"
 
-export const getSyncUserEnrollmentsUrl = () => {
+export const getSyncCurrentUserEnrollmentsUrl = () => {
   return `http://127.0.0.1:9090/api/enrollments/sync`
 }
 
@@ -16,16 +16,16 @@ export const getSyncUserEnrollmentsUrl = () => {
  * Retrieves the current user's latest course enrollments from Moodle and updates the local tenant database.
  * @summary Synchronize the current user's enrollments
  */
-export const syncUserEnrollments = async (
+export const syncCurrentUserEnrollments = async (
   options?: Parameters<typeof orvalFetch>[1],
 ): Promise<EnrollmentsResponseDto> => {
-  return orvalFetch<EnrollmentsResponseDto>(getSyncUserEnrollmentsUrl(), {
+  return orvalFetch<EnrollmentsResponseDto>(getSyncCurrentUserEnrollmentsUrl(), {
     ...options,
     method: "POST",
   })
 }
 
-export const getGetActualUserEnrollmentsUrl = () => {
+export const getGetCurrentUserEnrollmentsUrl = () => {
   return `http://127.0.0.1:9090/api/enrollments/info`
 }
 
@@ -33,10 +33,10 @@ export const getGetActualUserEnrollmentsUrl = () => {
  * Retrieves the current user's course enrollments from the local tenant database.
  * @summary Get the current user's enrollments
  */
-export const getActualUserEnrollments = async (
+export const getCurrentUserEnrollments = async (
   options?: Parameters<typeof orvalFetch>[1],
 ): Promise<EnrollmentsResponseDto> => {
-  return orvalFetch<EnrollmentsResponseDto>(getGetActualUserEnrollmentsUrl(), {
+  return orvalFetch<EnrollmentsResponseDto>(getGetCurrentUserEnrollmentsUrl(), {
     ...options,
     method: "GET",
   })

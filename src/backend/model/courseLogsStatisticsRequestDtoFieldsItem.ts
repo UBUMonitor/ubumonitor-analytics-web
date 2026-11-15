@@ -6,6 +6,9 @@
  * OpenAPI spec version: 1.0.0
  */
 
+/**
+ * Columns to include in the response and use as grouping dimensions.
+ */
 export type CourseLogsStatisticsRequestDtoFieldsItem =
   (typeof CourseLogsStatisticsRequestDtoFieldsItem)[keyof typeof CourseLogsStatisticsRequestDtoFieldsItem]
 

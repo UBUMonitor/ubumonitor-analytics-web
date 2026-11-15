@@ -5,11 +5,11 @@
  * API documentation for UBUMonitor Analytics
  * OpenAPI spec version: 1.0.0
  */
-import { orvalFetch } from "../../shared/lib/orvalFetch"
+import { orvalFetch } from "../../utils/orvalFetch"
 import type {
   CurrentUserInfoResponseDto,
-  GetUserImagesProfileParams,
-  GetUsersEnrollmentImagesDocumentParams,
+  GenerateUserEnrollmentImagesDocumentParams,
+  GetUserProfileImageParams,
 } from "../model"
 
 export const getGetCurrentUserInfoUrl = () => {
@@ -29,8 +29,8 @@ export const getCurrentUserInfo = async (
   })
 }
 
-export const getGetUsersEnrollmentImagesDocumentUrl = (
-  params: GetUsersEnrollmentImagesDocumentParams,
+export const getGenerateUserEnrollmentImagesDocumentUrl = (
+  params: GenerateUserEnrollmentImagesDocumentParams,
 ) => {
   const normalizedParams = new URLSearchParams()
 
@@ -60,17 +60,17 @@ export const getGetUsersEnrollmentImagesDocumentUrl = (
  * Retrieves the enrollment images for users
  * @summary Get users Word document with enrollment images
  */
-export const getUsersEnrollmentImagesDocument = async (
-  params: GetUsersEnrollmentImagesDocumentParams,
+export const generateUserEnrollmentImagesDocument = async (
+  params: GenerateUserEnrollmentImagesDocumentParams,
   options?: Parameters<typeof orvalFetch>[1],
 ): Promise<Blob> => {
-  return orvalFetch<Blob>(getGetUsersEnrollmentImagesDocumentUrl(params), {
+  return orvalFetch<Blob>(getGenerateUserEnrollmentImagesDocumentUrl(params), {
     ...options,
     method: "GET",
   })
 }
 
-export const getGetUserImagesProfileUrl = (userId: number, params: GetUserImagesProfileParams) => {
+export const getGetUserProfileImageUrl = (userId: number, params: GetUserProfileImageParams) => {
   const normalizedParams = new URLSearchParams()
 
   Object.entries(params || {}).forEach(([key, value]) => {
@@ -90,12 +90,12 @@ export const getGetUserImagesProfileUrl = (userId: number, params: GetUserImages
  * Retrieves a user's Moodle profile image and supports conditional requests with an ETag.
  * @summary Get user profile image
  */
-export const getUserImagesProfile = async (
+export const getUserProfileImage = async (
   userId: number,
-  params: GetUserImagesProfileParams,
+  params: GetUserProfileImageParams,
   options?: Parameters<typeof orvalFetch>[1],
 ): Promise<Blob> => {
-  return orvalFetch<Blob>(getGetUserImagesProfileUrl(userId, params), {
+  return orvalFetch<Blob>(getGetUserProfileImageUrl(userId, params), {
     ...options,
     method: "GET",
   })

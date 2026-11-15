@@ -6,6 +6,9 @@
  * OpenAPI spec version: 1.0.0
  */
 
+/**
+ * List of log rows (dynamic fields based on columns)
+ */
 export interface LogEntryDto {
   /** Log entry ID */
   id: number
@@ -22,7 +25,7 @@ export interface LogEntryDto {
   /** Name of the module associated with the log */
   moduleName: string
   /** ID of the section associated with the log */
-  sectionId?: number
+  sectionId: number
   /** Name of the section associated with the log */
   sectionName?: string
   /** Component associated with the log */
@@ -35,6 +38,8 @@ export interface LogEntryDto {
   eventId: number
   /** Name of the origin associated with the log */
   originName: string
+  /** Code of the origin associated with the log */
+  originCode: string
   /** ID of the origin associated with the log */
   originId: number
   /** IP address associated with the log */
