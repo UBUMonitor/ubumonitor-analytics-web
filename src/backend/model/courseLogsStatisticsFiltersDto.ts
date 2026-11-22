@@ -7,7 +7,7 @@
  */
 import type { CourseLogsStatisticsRequestCompositeFilterDto } from "./courseLogsStatisticsRequestCompositeFilterDto"
 
-export interface CourseLogsStatisticsRequestFiltersDto {
+export interface CourseLogsStatisticsFiltersDto {
   /** @nullable */
   userIds?: (number | null)[] | null
   /** @nullable */

@@ -25,7 +25,7 @@ export interface LogEntryDto {
   /** Name of the module associated with the log */
   moduleName: string
   /** ID of the section associated with the log */
-  sectionId: number
+  sectionId?: number
   /** Name of the section associated with the log */
   sectionName?: string
   /** Component associated with the log */

@@ -5,10 +5,10 @@
  * API documentation for UBUMonitor Analytics
  * OpenAPI spec version: 1.0.0
  */
-import type { CourseLogsResponseStatsDto } from "./courseLogsResponseStatsDto"
+import type { CourseLogsImportStatsDto } from "./courseLogsImportStatsDto"
 import type { LogColumn } from "./logColumn"
 
 export interface CourseLogsResponseDto {
-  stats?: CourseLogsResponseStatsDto
+  stats?: CourseLogsImportStatsDto
   column: LogColumn
 }

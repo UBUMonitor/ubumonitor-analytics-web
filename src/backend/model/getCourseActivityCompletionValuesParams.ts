@@ -14,7 +14,7 @@ export type GetCourseActivityCompletionValuesParams = {
    */
   moduleIds: number[]
   /**
-   * Course user ids.
+   * Moodle user IDs to include in the results.
    * @minItems 0
    * @maxItems 2147483647
    */

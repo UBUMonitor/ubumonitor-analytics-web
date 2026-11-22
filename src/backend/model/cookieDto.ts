@@ -9,7 +9,7 @@
 /**
  * Cookies from SSO request, if any.
  */
-export interface AuthSSORequestCookiesInnerDto {
+export interface CookieDto {
   /** Cookie name. */
   name: string
   /** Cookie value. */

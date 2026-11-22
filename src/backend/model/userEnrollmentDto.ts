@@ -5,14 +5,14 @@
  * API documentation for UBUMonitor Analytics
  * OpenAPI spec version: 1.0.0
  */
-import type { UserEnrollmentInfoCoursesInnerDto } from "./userEnrollmentInfoCoursesInnerDto"
-import type { UserEnrollmentInfoGroupsInnerDto } from "./userEnrollmentInfoGroupsInnerDto"
-import type { UserEnrollmentInfoRolesInnerDto } from "./userEnrollmentInfoRolesInnerDto"
+import type { CourseRefDto } from "./courseRefDto"
+import type { GroupRefDto } from "./groupRefDto"
+import type { RoleRefDto } from "./roleRefDto"
 
 /**
  * Users enrolled in the requested course, with their enrollment details.
  */
-export interface UserEnrollmentInfoDto {
+export interface UserEnrollmentDto {
   /** The unique identifier of the user. */
   id: number
   /** The full name of the user. */
@@ -28,9 +28,9 @@ export interface UserEnrollmentInfoDto {
   /** The URL of the user's profile image. */
   imageUrl: string
   /** IDs of the roles assigned to this user in the requested course. */
-  roles: UserEnrollmentInfoRolesInnerDto[]
+  roles: RoleRefDto[]
   /** IDs of the groups this user belongs to in the requested course. */
-  groups: UserEnrollmentInfoGroupsInnerDto[]
+  groups: GroupRefDto[]
   /** IDs of the courses this user is enrolled in. */
-  courses: UserEnrollmentInfoCoursesInnerDto[]
+  courses: CourseRefDto[]
 }

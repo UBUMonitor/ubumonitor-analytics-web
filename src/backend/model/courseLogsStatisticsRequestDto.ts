@@ -5,18 +5,18 @@
  * API documentation for UBUMonitor Analytics
  * OpenAPI spec version: 1.0.0
  */
+import type { CourseLogsStatisticsFiltersDto } from "./courseLogsStatisticsFiltersDto"
 import type { CourseLogsStatisticsRequestDtoFieldsItem } from "./courseLogsStatisticsRequestDtoFieldsItem"
 import type { CourseLogsStatisticsRequestDtoInterval } from "./courseLogsStatisticsRequestDtoInterval"
-import type { CourseLogsStatisticsRequestFiltersDto } from "./courseLogsStatisticsRequestFiltersDto"
-import type { CourseLogsStatisticsRequestTimeRangeDto } from "./courseLogsStatisticsRequestTimeRangeDto"
+import type { CourseLogsStatisticsTimeRangeDto } from "./courseLogsStatisticsTimeRangeDto"
 
 export interface CourseLogsStatisticsRequestDto {
   /** Columns to include in the response and use as grouping dimensions. */
   fields?: CourseLogsStatisticsRequestDtoFieldsItem[]
-  timeRange?: CourseLogsStatisticsRequestTimeRangeDto
+  timeRange?: CourseLogsStatisticsTimeRangeDto
   /** Optional time aggregation interval for grouping logs by time buckets. If not provided, no time-based grouping is applied.  */
   interval?: CourseLogsStatisticsRequestDtoInterval
   /** IANA time zone used to compute time buckets when `interval` is set (e.g. Europe/Madrid). Ignored if `interval` is not provided.  */
   timeZone?: string
-  filters?: CourseLogsStatisticsRequestFiltersDto
+  filters?: CourseLogsStatisticsFiltersDto
 }

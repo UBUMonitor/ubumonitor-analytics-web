@@ -1,4 +1,5 @@
 <script lang="ts">
+  import SafeImage from "../shared/SafeImage.svelte"
   import SelectorPanel from "@/components/records/SelectorPanel.svelte"
   import { m } from "@/paraglide/messages"
   import { isRecordChartKey, RECORD_CHARTS } from "@/services/records/charts"
@@ -72,9 +73,13 @@
   >
     {#snippet row(component)}
       {#if component.code.startsWith("mod_")}
-        <img class="size-7" src="/icons/{component.code.slice(4)}.svg" alt={component.name} />
+        <SafeImage
+          class="size-7 shrink-0"
+          src="/icons/{component.code.slice(4)}.svg"
+          alt={component.name}
+        />
       {:else}
-        <ComponentIcon class="size-7 p-0.5" />
+        <ComponentIcon class="size-7 shrink-0 p-0.5" />
       {/if}
       <span class="truncate">{component.name}</span>
     {/snippet}
@@ -91,7 +96,7 @@
     {#snippet row(event)}
       {const component = event.component}
       {#if component.code.startsWith("mod_")}
-        <img
+        <SafeImage
           class="size-7 shrink-0"
           src="/icons/{component.code.slice(4)}.svg"
           alt={component.name}
@@ -130,7 +135,7 @@
     dimmed={({ visible }) => !visible}
   >
     {#snippet row(module)}
-      <img class="size-7" src="/icons/{module.modName}.svg" alt={module.name} />
+      <SafeImage class="size-7 shrink-0" src="/icons/{module.modName}.svg" alt={module.name} />
       <span class="truncate">{module.name}</span>
     {/snippet}
   </SelectorPanel>

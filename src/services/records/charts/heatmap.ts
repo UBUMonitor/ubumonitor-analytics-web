@@ -1,4 +1,4 @@
-import { formatTooltip } from "@/services/display/utils"
+import { basicTooltip } from "@/services/display/utils"
 import { requestLogsStatistics, type ChartParams } from "@/services/records/shared"
 import type { DisplayConfig } from "@/stores/display.svelte"
 import { formatSlot, intervalSlots } from "@/utils/datetime"
@@ -9,7 +9,7 @@ const HEATMAP_SCALE_STEP = 5
 type HeatMapDatum = {
   value: [x: number, y: number, count: number]
   fullName: string
-  img?: string
+  img: string
 }
 
 export async function recordsHeatmapChart(params: ChartParams): Promise<DisplayConfig> {
@@ -45,7 +45,14 @@ export async function recordsHeatmapChart(params: ChartParams): Promise<DisplayC
       tooltip: {
         formatter: (tooltipParams) => {
           const p = tooltipParams as CallbackDataParams
-          return formatTooltip(interval, p, (p.data as HeatMapDatum).value[2])
+          const { fullName, img, value } = p.data as HeatMapDatum
+          return basicTooltip({
+            userName: fullName,
+            img,
+            name: formatSlot(interval, p.name),
+            value: value[2],
+            marker: p.marker,
+          })
         },
       },
       xAxis: {

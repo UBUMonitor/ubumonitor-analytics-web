@@ -9,10 +9,10 @@
 /**
  * The type of login method used by the Moodle site.
  */
-export type PublicSiteInfoResponseSiteConfigTypeOfLogin =
-  (typeof PublicSiteInfoResponseSiteConfigTypeOfLogin)[keyof typeof PublicSiteInfoResponseSiteConfigTypeOfLogin]
+export type MoodleSiteConfigurationTypeOfLogin =
+  (typeof MoodleSiteConfigurationTypeOfLogin)[keyof typeof MoodleSiteConfigurationTypeOfLogin]
 
-export const PublicSiteInfoResponseSiteConfigTypeOfLogin = {
+export const MoodleSiteConfigurationTypeOfLogin = {
   APP: "APP",
   BROWSER: "BROWSER",
   EMBEDDED: "EMBEDDED",

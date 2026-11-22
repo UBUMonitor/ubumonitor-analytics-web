@@ -9,7 +9,7 @@
 /**
  * IDs of the groups this user belongs to in the requested course.
  */
-export interface UserEnrollmentInfoGroupsInnerDto {
+export interface GroupRefDto {
   /** The unique identifier of the group. */
   id: number
 }

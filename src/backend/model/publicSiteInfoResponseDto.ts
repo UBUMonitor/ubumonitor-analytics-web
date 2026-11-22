@@ -5,8 +5,8 @@
  * API documentation for UBUMonitor Analytics
  * OpenAPI spec version: 1.0.0
  */
-import type { PublicSiteInfoResponseSiteConfig } from "./publicSiteInfoResponseSiteConfig"
+import type { MoodleSiteConfiguration } from "./moodleSiteConfiguration"
 
 export interface PublicSiteInfoResponseDto {
-  siteConfig?: PublicSiteInfoResponseSiteConfig
+  siteConfig?: MoodleSiteConfiguration
 }

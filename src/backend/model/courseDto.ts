@@ -7,9 +7,11 @@
  */
 
 /**
- * IDs of the courses this user is enrolled in.
+ * Unique courses included in the returned users' enrollments.
  */
-export interface UserEnrollmentInfoCoursesInnerDto {
+export interface CourseDto {
   /** The unique identifier of the course. */
   id: number
+  /** The course's full display name. */
+  fullName: string
 }

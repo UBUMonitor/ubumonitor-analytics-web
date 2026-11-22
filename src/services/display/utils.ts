@@ -1,18 +1,47 @@
-import echarts from "@/services/display/echarts"
-import { formatSlot, type StatsInterval } from "@/utils/datetime"
-import type { CallbackDataParams } from "echarts/types/dist/shared"
-import type { Dictionary, OptionDataItem, OptionDataValue } from "echarts/types/src/util/types.js"
+import { format } from "echarts"
+import type { TooltipMarker } from "echarts/types/src/util/format.js"
 
 export const round2 = (value: number): number => Math.round(value * 100) / 100
 
-export function formatTooltip(
-  interval: StatsInterval,
-  params: CallbackDataParams,
-  value?: OptionDataItem,
-) {
-  const data = params.data as Dictionary<OptionDataValue>
-  value = value ?? params.value
-  const fullName = echarts.format.encodeHTML(data.fullName as string)
+const { encodeHTML } = format
 
-  return `<div style="line-height:1"><img src="${data.img}" width="100" height="100" style="border-radius:4px"><div style="margin-top:10px">${fullName}</div><div style="margin-top:10px">${params.marker}<span style="margin-left:2px">${formatSlot(interval, params.name)}</span><span style="float:right;margin-left:20px;font-weight:900">${value}</span></div></div>`
+type BasicTooltipParams = {
+  userName: string
+  name: string
+  img: string
+  marker?: TooltipMarker
+  value: number
+}
+
+const STYLES = {
+  root: "line-height:1",
+  img: "width:100px;height:100px;border-radius:4px;object-fit:cover;display:block",
+  userName: "margin-top:10px",
+  row: "margin-top:10px;display:flex;align-items:center;justify-content:space-between;gap:20px",
+  label: "display:flex;align-items:center;gap:2px",
+  value: "font-weight:900",
+} as const
+
+export function basicTooltip({
+  userName,
+  name,
+  img,
+  marker = "",
+  value,
+}: BasicTooltipParams): string {
+  const safeUserName = encodeHTML(userName)
+  const safeName = encodeHTML(name)
+  const safeImg = encodeHTML(img)
+  const safeValue = encodeHTML(String(value ?? "-"))
+
+  return `
+    <div style="${STYLES.root}">
+      <img src="${safeImg}" alt="${safeUserName}" style="${STYLES.img}">
+      <div style="${STYLES.userName}">${safeUserName}</div>
+      <div style="${STYLES.row}">
+        <span style="${STYLES.label}">${marker}<span>${safeName}</span></span>
+        <span style="${STYLES.value}">${safeValue}</span>
+      </div>
+    </div>
+  `.trim()
 }

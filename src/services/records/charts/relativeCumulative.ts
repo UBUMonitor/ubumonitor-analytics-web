@@ -24,7 +24,7 @@ export async function recordsRelativeCumulativeChart(params: ChartParams): Promi
         min: isEmpty ? -EMPTY_CHART_MAX_Y : undefined,
         max: isEmpty ? EMPTY_CHART_MAX_Y : undefined,
       },
-      series: buildUserSeries(userItems, data, (value, t) => round2(value - data.columnAverage[t])),
+      series: buildUserSeries(userItems, data, (value, t) => round2(value - data.columnMean[t])),
     },
   }
 }

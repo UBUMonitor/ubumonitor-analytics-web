@@ -6,7 +6,7 @@
  * OpenAPI spec version: 1.0.0
  */
 
-export interface CourseLogsResponseStatsDto {
+export interface CourseLogsImportStatsDto {
   /** Number of logs imported */
   saved: number
   /** Number of logs ignored (e.g. duplicates or don't have a mapper for component, event or origin) */

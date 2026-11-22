@@ -6,7 +6,7 @@
  * OpenAPI spec version: 1.0.0
  */
 
-export interface CourseLogsStatisticsRequestTimeRangeDto {
+export interface CourseLogsStatisticsTimeRangeDto {
   /** Inclusive start time as a Unix timestamp in seconds. */
   from?: number
   /** Inclusive end time as a Unix timestamp in seconds. */

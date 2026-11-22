@@ -5,18 +5,18 @@
  * API documentation for UBUMonitor Analytics
  * OpenAPI spec version: 1.0.0
  */
-import type { CourseEnrollmentsResponseCoursesInnerDto } from "./courseEnrollmentsResponseCoursesInnerDto"
-import type { CourseEnrollmentsResponseGroupsInnerDto } from "./courseEnrollmentsResponseGroupsInnerDto"
-import type { CourseEnrollmentsResponseRolesInnerDto } from "./courseEnrollmentsResponseRolesInnerDto"
-import type { UserEnrollmentInfoDto } from "./userEnrollmentInfoDto"
+import type { CourseDto } from "./courseDto"
+import type { GroupDto } from "./groupDto"
+import type { RoleDto } from "./roleDto"
+import type { UserEnrollmentDto } from "./userEnrollmentDto"
 
 export interface CourseEnrollmentsResponseDto {
   /** Users enrolled in the requested course, with their enrollment details. */
-  users: UserEnrollmentInfoDto[]
+  users: UserEnrollmentDto[]
   /** Unique roles assigned to users enrolled in the requested course. */
-  roles?: CourseEnrollmentsResponseRolesInnerDto[]
+  roles?: RoleDto[]
   /** Unique groups that users belong to in the requested course. */
-  groups?: CourseEnrollmentsResponseGroupsInnerDto[]
+  groups?: GroupDto[]
   /** Unique courses included in the returned users' enrollments. */
-  courses?: CourseEnrollmentsResponseCoursesInnerDto[]
+  courses?: CourseDto[]
 }

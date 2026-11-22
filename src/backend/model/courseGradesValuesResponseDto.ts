@@ -8,5 +8,5 @@
 import type { CourseGradesValuesResponseRowDto } from "./courseGradesValuesResponseRowDto"
 
 export interface CourseGradesValuesResponseDto {
-  grades?: CourseGradesValuesResponseRowDto[]
+  grades: CourseGradesValuesResponseRowDto[]
 }

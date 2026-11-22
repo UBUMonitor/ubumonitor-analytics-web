@@ -1,6 +1,6 @@
 <script lang="ts">
   import echarts, { type ECOption } from "@/services/display/echarts"
-  import { onMount } from "svelte"
+  import type { Attachment } from "svelte/attachments"
 
   interface Props {
     option: ECOption
@@ -15,24 +15,21 @@
     outerBoundsMode: "same",
   } as const
 
-  let container: HTMLDivElement
-  let instance: echarts.ECharts
+  const chart: Attachment<HTMLDivElement> = (container) => {
+    const instance = echarts.init(container, "app")
 
-  onMount(() => {
-    instance = echarts.init(container)
-
-    const observer = new ResizeObserver(() => instance?.resize())
+    const observer = new ResizeObserver(() => instance.resize())
     observer.observe(container)
+
+    $effect(() => {
+      instance.setOption({ ...option, grid: CHART_GRID }, { notMerge: true })
+    })
 
     return () => {
       observer.disconnect()
-      instance?.dispose()
+      instance.dispose()
     }
-  })
-
-  $effect(() => {
-    instance?.setOption({ ...option, grid: CHART_GRID }, { notMerge: true })
-  })
+  }
 </script>
 
-<div class="size-full" bind:this={container}></div>
+<div class="size-full" {@attach chart}></div>

@@ -129,6 +129,7 @@ fn start_backend(app: &AppHandle) -> Result<(), String> {
 fn main() {
     tauri::Builder::default()
         .plugin(tauri_plugin_single_instance::init(|_app, _args, _cwd| {}))
+        .plugin(tauri_plugin_process::init())
         .plugin(
             tauri_plugin_log::Builder::new()
                 .timezone_strategy(TimezoneStrategy::UseLocal)

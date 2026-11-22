@@ -33,6 +33,8 @@ tags:
     description: "Forums, discussions and posts of a course."
   - name: Calendars
     description: Calendar events.
+  - name: CourseAssignments
+    description: Assignments of a course.
   - name: CourseActivityCompletion
     description: Activity completion information of a course.
   - name: Sites
@@ -527,6 +529,43 @@ paths:
                 $ref: "#/components/schemas/ErrorResponse"
       security:
         - bearerAuth: []
+  /api/courses/{courseId}/assignments/submissions/sync:
+    post:
+      tags:
+        - CourseAssignments
+      summary: Synchronize course assignments and submissions
+      description: Synchronizes assignment tasks and submissions for the specified
+        course. The response includes tasks only.
+      operationId: syncCourseAssignmentSubmissions
+      parameters:
+        - name: courseId
+          in: path
+          description: Course identifier
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        "200":
+          description: Synchronized assignment tasks.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CourseAssignmentsResponseDto"
+        "401":
+          description: Unauthorized - token missing or invalid
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "403":
+          description: Forbidden - an online Moodle session is required
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+      security:
+        - bearerAuth: []
   /api/courses/{courseId}/activitycompletion/sync:
     post:
       tags:
@@ -657,12 +696,11 @@ paths:
       parameters:
         - name: userIds
           in: query
-          description: "List of user IDs to filter the results. If provided, only the\
-            \ specified users will have their grades included in the response."
+          description: Moodle user IDs to include in the results.
           required: true
           schema:
             maxItems: 2147483647
-            minItems: 1
+            minItems: 0
             type: array
             items:
               type: integer
@@ -932,8 +970,7 @@ paths:
               format: int64
         - name: userIds
           in: query
-          description: "List of user IDs to filter the results. If provided, only the\
-            \ specified users will have their grades included in the response."
+          description: Moodle user IDs to include in the results.
           required: true
           schema:
             maxItems: 2147483647
@@ -1088,6 +1125,88 @@ paths:
                 $ref: "#/components/schemas/ErrorResponse"
       security:
         - bearerAuth: []
+  /api/courses/{courseId}/assignments/submissions/values:
+    get:
+      tags:
+        - CourseAssignments
+      summary: Get filtered course assignment submissions
+      description: "Retrieves persisted assignment submissions for the specified course,\
+        \ filtered by assignment and user IDs."
+      operationId: getCourseAssignmentSubmissionValues
+      parameters:
+        - name: courseId
+          in: path
+          description: Course identifier
+          required: true
+          schema:
+            type: integer
+            format: int64
+        - name: assignmentIds
+          in: query
+          description: Assignment IDs to include. An empty list returns no submissions.
+          required: true
+          schema:
+            type: array
+            items:
+              type: integer
+              format: int64
+        - name: userIds
+          in: query
+          description: Moodle user IDs to include in the results.
+          required: true
+          schema:
+            maxItems: 2147483647
+            minItems: 0
+            type: array
+            items:
+              type: integer
+              format: int64
+      responses:
+        "200":
+          description: Filtered assignment submissions for the course.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CourseAssignmentSubmissionsResponseDto"
+        "401":
+          description: Unauthorized - token missing or invalid
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+      security:
+        - bearerAuth: []
+  /api/courses/{courseId}/assignments/submissions/info:
+    get:
+      tags:
+        - CourseAssignments
+      summary: Get course assignments
+      description: Retrieves persisted assignment tasks for the specified course.
+        Submissions are not included.
+      operationId: getCourseAssignmentSubmissions
+      parameters:
+        - name: courseId
+          in: path
+          description: Course identifier
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        "200":
+          description: Assignment tasks for the course.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CourseAssignmentsResponseDto"
+        "401":
+          description: Unauthorized - token missing or invalid
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+      security:
+        - bearerAuth: []
   /api/courses/{courseId}/activitycompletion/values:
     get:
       tags:
@@ -1116,7 +1235,7 @@ paths:
               format: int64
         - name: userIds
           in: query
-          description: Course user ids.
+          description: Moodle user IDs to include in the results.
           required: true
           schema:
             maxItems: 2147483647
@@ -1341,38 +1460,6 @@ components:
           type: string
           description: The language of the user.
       description: Information about the authenticated user.
-    AuthSSORequestCookiesInnerDto:
-      required:
-        - name
-        - value
-      type: object
-      properties:
-        name:
-          type: string
-          description: Cookie name.
-        value:
-          type: string
-          description: Cookie value.
-        domain:
-          type: string
-          description: Cookie domain.
-        path:
-          type: string
-          description: Cookie path.
-        secure:
-          type: boolean
-          description: Whether the cookie is only sent over HTTPS.
-        httpOnly:
-          type: boolean
-          description: Whether the cookie is inaccessible to client-side scripts.
-      description: "Cookies from SSO request, if any."
-      example:
-        - name: MoodleSession
-          value: abc123...
-          domain: moodle.midominio.com
-          path: /
-          secure: true
-          httpOnly: true
     AuthSSORequestDto:
       required:
         - cookies
@@ -1407,7 +1494,39 @@ components:
               secure: true
               httpOnly: true
           items:
-            $ref: "#/components/schemas/AuthSSORequestCookiesInnerDto"
+            $ref: "#/components/schemas/CookieDto"
+    CookieDto:
+      required:
+        - name
+        - value
+      type: object
+      properties:
+        name:
+          type: string
+          description: Cookie name.
+        value:
+          type: string
+          description: Cookie value.
+        domain:
+          type: string
+          description: Cookie domain.
+        path:
+          type: string
+          description: Cookie path.
+        secure:
+          type: boolean
+          description: Whether the cookie is only sent over HTTPS.
+        httpOnly:
+          type: boolean
+          description: Whether the cookie is inaccessible to client-side scripts.
+      description: "Cookies from SSO request, if any."
+      example:
+        - name: MoodleSession
+          value: abc123...
+          domain: moodle.midominio.com
+          path: /
+          secure: true
+          httpOnly: true
     AuthOfflineRequestDto:
       required:
         - dbPassword
@@ -1515,16 +1634,7 @@ components:
             \ information."
           items:
             $ref: "#/components/schemas/CourseInformationDto"
-    CourseLogsResponseDto:
-      required:
-        - column
-      type: object
-      properties:
-        stats:
-          $ref: "#/components/schemas/CourseLogsResponseStatsDto"
-        column:
-          $ref: "#/components/schemas/LogColumn"
-    CourseLogsResponseStatsDto:
+    CourseLogsImportStatsDto:
       required:
         - failed
         - ignored
@@ -1544,6 +1654,15 @@ components:
           type: integer
           description: Number of logs that failed to import due to errors
           format: int32
+    CourseLogsResponseDto:
+      required:
+        - column
+      type: object
+      properties:
+        stats:
+          $ref: "#/components/schemas/CourseLogsImportStatsDto"
+        column:
+          $ref: "#/components/schemas/LogColumn"
     LogColumn:
       required:
         - components
@@ -1719,83 +1838,7 @@ components:
         fullName:
           type: string
           example: María González
-    CourseLogsStatisticsRequestCompositeFilterDto:
-      type: object
-      properties:
-        userId:
-          type: integer
-          format: int64
-          nullable: true
-        moduleId:
-          type: integer
-          format: int64
-          nullable: true
-        componentId:
-          type: integer
-          format: int32
-          nullable: true
-        eventId:
-          type: integer
-          format: int32
-          nullable: true
-        originId:
-          type: integer
-          format: int32
-          nullable: true
-        sectionId:
-          type: integer
-          format: int64
-          nullable: true
-        ipAddress:
-          type: string
-          nullable: true
-      description: "OR alternatives of compound filters. Populated dimensions within
-        each entry are combined with AND; each entry must populate at least two dimensions.
-        The compound expression is ANDed with the ordinary filters above. "
-    CourseLogsStatisticsRequestDto:
-      type: object
-      properties:
-        fields:
-          type: array
-          description: Columns to include in the response and use as grouping dimensions.
-          items:
-            type: string
-            description: Columns to include in the response and use as grouping dimensions.
-            enum:
-              - USER_ID
-              - MODULE_ID
-              - COMPONENT_ID
-              - EVENT_ID
-              - ORIGIN_ID
-              - IP_ADDRESS
-              - USER_FULL_NAME
-              - MODULE_NAME
-              - COMPONENT_NAME
-              - EVENT_NAME
-              - ORIGIN_NAME
-              - SECTION_ID
-              - SECTION_NAME
-        timeRange:
-          $ref: "#/components/schemas/CourseLogsStatisticsRequestTimeRangeDto"
-        interval:
-          type: string
-          description: "Optional time aggregation interval for grouping logs by time\
-            \ buckets. If not provided, no time-based grouping is applied. "
-          example: DAILY
-          enum:
-            - HOURLY
-            - DAILY
-            - WEEKLY
-            - MONTHLY
-            - DAY_OF_WEEK
-        timeZone:
-          type: string
-          description: "IANA time zone used to compute time buckets when `interval`
-            is set (e.g. Europe/Madrid). Ignored if `interval` is not provided. "
-          example: Europe/Madrid
-        filters:
-          $ref: "#/components/schemas/CourseLogsStatisticsRequestFiltersDto"
-    CourseLogsStatisticsRequestFiltersDto:
+    CourseLogsStatisticsFiltersDto:
       type: object
       properties:
         userIds:
@@ -1854,7 +1897,83 @@ components:
             above. "
           items:
             $ref: "#/components/schemas/CourseLogsStatisticsRequestCompositeFilterDto"
-    CourseLogsStatisticsRequestTimeRangeDto:
+    CourseLogsStatisticsRequestCompositeFilterDto:
+      type: object
+      properties:
+        userId:
+          type: integer
+          format: int64
+          nullable: true
+        moduleId:
+          type: integer
+          format: int64
+          nullable: true
+        componentId:
+          type: integer
+          format: int64
+          nullable: true
+        eventId:
+          type: integer
+          format: int64
+          nullable: true
+        originId:
+          type: integer
+          format: int64
+          nullable: true
+        sectionId:
+          type: integer
+          format: int64
+          nullable: true
+        ipAddress:
+          type: string
+          nullable: true
+      description: "OR alternatives of compound filters. Populated dimensions within
+        each entry are combined with AND; each entry must populate at least two dimensions.
+        The compound expression is ANDed with the ordinary filters above. "
+    CourseLogsStatisticsRequestDto:
+      type: object
+      properties:
+        fields:
+          type: array
+          description: Columns to include in the response and use as grouping dimensions.
+          items:
+            type: string
+            description: Columns to include in the response and use as grouping dimensions.
+            enum:
+              - USER_ID
+              - MODULE_ID
+              - COMPONENT_ID
+              - EVENT_ID
+              - ORIGIN_ID
+              - IP_ADDRESS
+              - USER_FULL_NAME
+              - MODULE_NAME
+              - COMPONENT_NAME
+              - EVENT_NAME
+              - ORIGIN_NAME
+              - SECTION_ID
+              - SECTION_NAME
+        timeRange:
+          $ref: "#/components/schemas/CourseLogsStatisticsTimeRangeDto"
+        interval:
+          type: string
+          description: "Optional time aggregation interval for grouping logs by time\
+            \ buckets. If not provided, no time-based grouping is applied. "
+          example: DAILY
+          enum:
+            - HOURLY
+            - DAILY
+            - WEEKLY
+            - MONTHLY
+            - DAY_OF_WEEK
+        timeZone:
+          type: string
+          description: "IANA time zone used to compute time buckets when `interval`
+            is set (e.g. Europe/Madrid). Ignored if `interval` is not provided. "
+          example: Europe/Madrid
+        filters:
+          $ref: "#/components/schemas/CourseLogsStatisticsFiltersDto"
+    CourseLogsStatisticsTimeRangeDto:
       type: object
       properties:
         from:
@@ -2516,7 +2635,7 @@ components:
           description: Last modification time as a Unix timestamp
           format: int64
       description: Posts of the discussion
-    CourseEnrollmentsResponseCoursesInnerDto:
+    CourseDto:
       required:
         - fullName
         - id
@@ -2540,23 +2659,33 @@ components:
           description: "Users enrolled in the requested course, with their enrollment\
             \ details."
           items:
-            $ref: "#/components/schemas/UserEnrollmentInfoDto"
+            $ref: "#/components/schemas/UserEnrollmentDto"
         roles:
           type: array
           description: Unique roles assigned to users enrolled in the requested course.
           items:
-            $ref: "#/components/schemas/CourseEnrollmentsResponseRolesInnerDto"
+            $ref: "#/components/schemas/RoleDto"
         groups:
           type: array
           description: Unique groups that users belong to in the requested course.
           items:
-            $ref: "#/components/schemas/CourseEnrollmentsResponseGroupsInnerDto"
+            $ref: "#/components/schemas/GroupDto"
         courses:
           type: array
           description: Unique courses included in the returned users' enrollments.
           items:
-            $ref: "#/components/schemas/CourseEnrollmentsResponseCoursesInnerDto"
-    CourseEnrollmentsResponseGroupsInnerDto:
+            $ref: "#/components/schemas/CourseDto"
+    CourseRefDto:
+      required:
+        - id
+      type: object
+      properties:
+        id:
+          type: integer
+          description: The unique identifier of the course.
+          format: int64
+      description: IDs of the courses this user is enrolled in.
+    GroupDto:
       required:
         - id
         - name
@@ -2570,7 +2699,17 @@ components:
           type: string
           description: Display name of the group.
       description: Unique groups that users belong to in the requested course.
-    CourseEnrollmentsResponseRolesInnerDto:
+    GroupRefDto:
+      required:
+        - id
+      type: object
+      properties:
+        id:
+          type: integer
+          description: The unique identifier of the group.
+          format: int64
+      description: IDs of the groups this user belongs to in the requested course.
+    RoleDto:
       required:
         - id
         - name
@@ -2584,17 +2723,17 @@ components:
           type: string
           description: Display name of the role.
       description: Unique roles assigned to users enrolled in the requested course.
-    UserEnrollmentInfoCoursesInnerDto:
+    RoleRefDto:
       required:
         - id
       type: object
       properties:
         id:
           type: integer
-          description: The unique identifier of the course.
+          description: The unique identifier of the role.
           format: int64
-      description: IDs of the courses this user is enrolled in.
-    UserEnrollmentInfoDto:
+      description: IDs of the roles assigned to this user in the requested course.
+    UserEnrollmentDto:
       required:
         - courses
         - email
@@ -2638,39 +2777,19 @@ components:
           type: array
           description: IDs of the roles assigned to this user in the requested course.
           items:
-            $ref: "#/components/schemas/UserEnrollmentInfoRolesInnerDto"
+            $ref: "#/components/schemas/RoleRefDto"
         groups:
           type: array
           description: IDs of the groups this user belongs to in the requested course.
           items:
-            $ref: "#/components/schemas/UserEnrollmentInfoGroupsInnerDto"
+            $ref: "#/components/schemas/GroupRefDto"
         courses:
           type: array
           description: IDs of the courses this user is enrolled in.
           items:
-            $ref: "#/components/schemas/UserEnrollmentInfoCoursesInnerDto"
+            $ref: "#/components/schemas/CourseRefDto"
       description: "Users enrolled in the requested course, with their enrollment\
         \ details."
-    UserEnrollmentInfoGroupsInnerDto:
-      required:
-        - id
-      type: object
-      properties:
-        id:
-          type: integer
-          description: The unique identifier of the group.
-          format: int64
-      description: IDs of the groups this user belongs to in the requested course.
-    UserEnrollmentInfoRolesInnerDto:
-      required:
-        - id
-      type: object
-      properties:
-        id:
-          type: integer
-          description: The unique identifier of the role.
-          format: int64
-      description: IDs of the roles assigned to this user in the requested course.
     CourseContentModuleDto:
       required:
         - description
@@ -2747,6 +2866,63 @@ components:
           description: List of modules in the section
           items:
             $ref: "#/components/schemas/CourseContentModuleDto"
+    CourseAssignmentDto:
+      required:
+        - courseId
+        - id
+        - moduleId
+        - name
+      type: object
+      properties:
+        id:
+          type: integer
+          description: Moodle assignment ID.
+          format: int64
+        courseId:
+          type: integer
+          description: Course ID.
+          format: int64
+        moduleId:
+          type: integer
+          description: Course module ID.
+          format: int64
+        name:
+          type: string
+          description: Assignment name.
+        intro:
+          type: string
+          description: Assignment description.
+        timeModified:
+          type: integer
+          description: Last modification time as a Unix timestamp.
+          format: int64
+        dueDate:
+          type: integer
+          description: Submission due date as a Unix timestamp.
+          format: int64
+        submissionsFromDate:
+          type: integer
+          description: Earliest submission time as a Unix timestamp.
+          format: int64
+        cutoffDate:
+          type: integer
+          description: Submission cutoff time as a Unix timestamp.
+          format: int64
+        gradingDueDate:
+          type: integer
+          description: Grading due date as a Unix timestamp.
+          format: int64
+      description: Assignment activities in the requested course.
+    CourseAssignmentsResponseDto:
+      required:
+        - assignments
+      type: object
+      properties:
+        assignments:
+          type: array
+          description: Assignment activities in the requested course.
+          items:
+            $ref: "#/components/schemas/CourseAssignmentDto"
     ActivityCompletion:
       required:
         - moduleId
@@ -2988,12 +3164,7 @@ components:
           description: Available Moodle hosts and their databases.
           items:
             $ref: "#/components/schemas/DatabaseHostInfoDto"
-    PublicSiteInfoResponseDto:
-      type: object
-      properties:
-        siteConfig:
-          $ref: "#/components/schemas/PublicSiteInfoResponse_siteConfig"
-    PublicSiteInfoResponse_siteConfig:
+    MoodleSiteConfiguration:
       type: object
       properties:
         typeOfLogin:
@@ -3021,6 +3192,11 @@ components:
           type: string
           description: "The maintenance message for the Moodle site, if applicable."
       description: The configuration settings of the Moodle site.
+    PublicSiteInfoResponseDto:
+      type: object
+      properties:
+        siteConfig:
+          $ref: "#/components/schemas/MoodleSiteConfiguration"
     CourseGradesValuesResponseDto:
       type: object
       properties:
@@ -3029,6 +3205,9 @@ components:
           items:
             $ref: "#/components/schemas/CourseGradesValuesResponseRowDto"
     CourseGradesValuesResponseRowDto:
+      required:
+        - id
+        - userId
       type: object
       properties:
         id:
@@ -3051,6 +3230,68 @@ components:
           type: number
           description: The percentage grade for the user in the specified grade item
           format: double
+    CourseAssignmentSubmissionDto:
+      required:
+        - assignmentId
+        - attemptNumber
+        - courseId
+        - status
+        - submissionId
+        - userId
+      type: object
+      properties:
+        submissionId:
+          type: integer
+          description: Moodle submission ID.
+          format: int64
+        assignmentId:
+          type: integer
+          description: Moodle assignment ID.
+          format: int64
+        courseId:
+          type: integer
+          description: Course ID.
+          format: int64
+        userId:
+          type: integer
+          description: User associated with this submission.
+          format: int64
+        attemptNumber:
+          type: integer
+          description: Submission attempt number.
+          format: int32
+        timeCreated:
+          type: integer
+          description: Submission creation time as a Unix timestamp.
+          format: int64
+        timeModified:
+          type: integer
+          description: Submission modification time as a Unix timestamp.
+          format: int64
+        timeStarted:
+          type: integer
+          description: Submission start time as a Unix timestamp.
+          format: int64
+        status:
+          type: string
+          description: Submission status.
+        latest:
+          type: boolean
+          description: Whether this is the latest attempt.
+        gradingStatus:
+          type: string
+          description: Grading status.
+      description: "Assignment submissions, associated with each submitting user."
+    CourseAssignmentSubmissionsResponseDto:
+      required:
+        - submissions
+      type: object
+      properties:
+        submissions:
+          type: array
+          description: "Assignment submissions, associated with each submitting user."
+          items:
+            $ref: "#/components/schemas/CourseAssignmentSubmissionDto"
   securitySchemes:
     bearerAuth:
       type: http

@@ -8,9 +8,9 @@
 
 export interface CourseGradesValuesResponseRowDto {
   /** Unique identifier for the grade item */
-  id?: number
+  id: number
   /** Unique identifier for the user */
-  userId?: number
+  userId: number
   /** The grade value for the user in the specified grade item */
   grade?: number
   /**

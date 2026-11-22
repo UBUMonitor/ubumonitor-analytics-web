@@ -8,8 +8,8 @@
 
 export type GenerateUserEnrollmentImagesDocumentParams = {
   /**
-   * List of user IDs to filter the results. If provided, only the specified users will have their grades included in the response.
-   * @minItems 1
+   * Moodle user IDs to include in the results.
+   * @minItems 0
    * @maxItems 2147483647
    */
   userIds: number[]

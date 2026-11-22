@@ -1,5 +1,6 @@
-import { formatTooltip, round2 } from "@/services/display/utils"
-import type { Row, ChartParams } from "@/services/records/shared"
+import type { ECOption } from "@/services/display/echarts"
+import { basicTooltip, round2 } from "@/services/display/utils"
+import type { ChartParams, Row } from "@/services/records/shared"
 import type { User } from "@/stores/users.svelte"
 import { formatSlot, intervalSlots, type StatsInterval } from "@/utils/datetime"
 import type { CallbackDataParams } from "echarts/types/src/util/types.js"
@@ -10,7 +11,13 @@ export type CumulativeData = {
   range: Slots
   rangeLength: number
   matrix: Float64Array
-  columnAverage: number[]
+  columnMean: number[]
+}
+
+type UserDatum = {
+  value: number
+  fullName: string
+  img: string
 }
 
 export function buildCumulativeData(rows: Row[], params: ChartParams): CumulativeData {
@@ -35,7 +42,7 @@ export function buildCumulativeData(rows: Row[], params: ChartParams): Cumulativ
     matrix[userIdx * rangeLength + dateIdx] = row.value
   }
 
-  const columnAverage = new Array<number>(rangeLength)
+  const columnMean = new Array<number>(rangeLength)
   const runningTotals = new Float64Array(userCount)
 
   for (let t = 0; t < rangeLength; t++) {
@@ -48,10 +55,10 @@ export function buildCumulativeData(rows: Row[], params: ChartParams): Cumulativ
       columnSum += runningTotals[u]
     }
 
-    columnAverage[t] = userCount > 0 ? round2(columnSum / userCount) : 0
+    columnMean[t] = userCount > 0 ? round2(columnSum / userCount) : 0
   }
 
-  return { range, rangeLength, matrix, columnAverage }
+  return { range, rangeLength, matrix, columnMean }
 }
 
 export function buildUserSeries(
@@ -62,18 +69,32 @@ export function buildUserSeries(
   return userItems.map((user, u) => ({
     name: user.name,
     type: "line" as const,
-    data: Array.from(matrix.subarray(u * rangeLength, (u + 1) * rangeLength), (value, t) => ({
-      value: transform(value, t),
-      fullName: user.name,
-      img: user.imageUrl,
-    })),
+    data: Array.from(
+      matrix.subarray(u * rangeLength, (u + 1) * rangeLength),
+      (value, t) =>
+        ({
+          value: transform(value, t),
+          fullName: user.name,
+          img: user.imageUrl,
+        }) satisfies UserDatum,
+    ),
   }))
 }
 
-export function lineChartBase(interval: StatsInterval, range: Slots) {
+export function lineChartBase(interval: StatsInterval, range: Slots): ECOption {
   return {
     tooltip: {
-      formatter: (params: unknown) => formatTooltip(interval, params as CallbackDataParams),
+      formatter: (tooltipParams) => {
+        const p = tooltipParams as CallbackDataParams
+        const { fullName, img, value } = p.data as UserDatum
+        return basicTooltip({
+          userName: fullName,
+          img,
+          value,
+          name: formatSlot(interval, p.name),
+          marker: p.marker,
+        })
+      },
     },
     legend: { type: "scroll" as const, top: "top" as const, left: "center" as const },
     xAxis: {

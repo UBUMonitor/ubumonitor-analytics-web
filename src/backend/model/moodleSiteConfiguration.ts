@@ -5,14 +5,14 @@
  * API documentation for UBUMonitor Analytics
  * OpenAPI spec version: 1.0.0
  */
-import type { PublicSiteInfoResponseSiteConfigTypeOfLogin } from "./publicSiteInfoResponseSiteConfigTypeOfLogin"
+import type { MoodleSiteConfigurationTypeOfLogin } from "./moodleSiteConfigurationTypeOfLogin"
 
 /**
  * The configuration settings of the Moodle site.
  */
-export interface PublicSiteInfoResponseSiteConfig {
+export interface MoodleSiteConfiguration {
   /** The type of login method used by the Moodle site. */
-  typeOfLogin?: PublicSiteInfoResponseSiteConfigTypeOfLogin
+  typeOfLogin?: MoodleSiteConfigurationTypeOfLogin
   /** The SSO login launch URL for the Moodle site, if applicable. */
   launchUrl?: string
   /** Indicates if the mobile web service is enabled for the Moodle site. */

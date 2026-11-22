@@ -16,15 +16,16 @@ export async function recordsCumulativeChart(params: ChartParams): Promise<Displ
   const data = buildCumulativeData(rows, params)
   const userSeries = buildUserSeries(userItems, data)
 
-  const averageSeries = {
-    name: m.average(),
+  const meanSeries = {
+    name: m.mean(),
     type: "line" as const,
-    data: data.columnAverage,
-    lineStyle: { type: "dashed" as const, width: 2 },
+    data: data.columnMean,
+    lineStyle: { type: "dashed" as const },
     symbol: "none" as const,
     z: 10,
     itemStyle: { color: "#000000" },
     tooltip: { show: false },
+    silent: true,
   }
 
   return {
@@ -36,7 +37,7 @@ export async function recordsCumulativeChart(params: ChartParams): Promise<Displ
         min: 0,
         max: isEmpty ? EMPTY_CHART_MAX_Y : undefined,
       },
-      series: userItems.length > 1 ? [...userSeries, averageSeries] : userSeries,
+      series: userItems.length > 1 ? [...userSeries, meanSeries] : userSeries,
     },
   }
 }

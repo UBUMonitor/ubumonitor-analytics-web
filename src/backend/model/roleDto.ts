@@ -9,7 +9,7 @@
 /**
  * Unique roles assigned to users enrolled in the requested course.
  */
-export interface CourseEnrollmentsResponseRolesInnerDto {
+export interface RoleDto {
   /** The unique identifier of the role. */
   id: number
   /** Display name of the role. */

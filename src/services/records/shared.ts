@@ -1,7 +1,7 @@
 import type {
+  CourseLogsStatisticsFiltersDto,
   CourseLogsStatisticsRequestDto,
   CourseLogsStatisticsRequestDtoFieldsItem,
-  CourseLogsStatisticsRequestFiltersDto,
   CourseLogsStatisticsResponseRowDto,
 } from "@/backend/model"
 import { getCourseLogStatistics } from "@/backend/services/course-logs"
@@ -12,7 +12,7 @@ import type { DateTime } from "luxon"
 
 export type Row = CourseLogsStatisticsResponseRowDto
 export type Field = CourseLogsStatisticsRequestDtoFieldsItem
-export type Filters = CourseLogsStatisticsRequestFiltersDto
+export type Filters = CourseLogsStatisticsFiltersDto
 type AnyItem = ItemByType[RecordType]
 
 export const EMPTY_CHART_MAX_Y = 10

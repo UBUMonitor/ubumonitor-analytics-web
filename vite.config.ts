@@ -35,7 +35,7 @@ export default defineConfig({
   clearScreen: false,
   envPrefix: ["VITE_", "TAURI_ENV_*"],
   build: {
-    target: process.env.TAURI_ENV_PLATFORM == "windows" ? "chrome111" : "safari16.4",
+    target: process.env.TAURI_ENV_PLATFORM == "windows" ? "chrome125" : "safari17.5",
     minify: !process.env.TAURI_ENV_DEBUG,
     sourcemap: !!process.env.TAURI_ENV_DEBUG,
   },
