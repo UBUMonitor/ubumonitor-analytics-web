@@ -7,8 +7,7 @@ on:
   workflow_dispatch:
 
 env:
-  # Formato que exige actions/setup-java (sufijo .0.LTS)
-  SETUP_JAVA_VERSION: "25.0.3+9.0.LTS"
+  SETUP_JAVA_VERSION: "25"
   JAR_URL: "https://github.com/UBUMonitor/ubumonitor-analytics-api/releases/latest/download/ubumonitoranalytics.jar"
 
 jobs:
@@ -58,10 +57,11 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       - name: Setup Temurin JDK 25 (para jdeps y jlink)
-        uses: actions/setup-java@v4
+        uses: actions/setup-java@v6
         with:
           distribution: temurin
           java-version: ${{ env.SETUP_JAVA_VERSION }}
+          check-latest: true
 
       - name: Download JAR
         shell: bash
