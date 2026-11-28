@@ -14,10 +14,16 @@ import {
   tableFeatures,
 } from "@tanstack/svelte-table"
 import { DateTime } from "luxon"
+import type { Component } from "svelte"
 
 export type DynamicRow = Record<string, unknown>
 
 export type DataType = "string" | "number" | "boolean" | "date"
+
+export interface CellProps {
+  value: unknown
+  row: DynamicRow
+}
 
 export interface TableColumn {
   key: string
@@ -25,6 +31,7 @@ export interface TableColumn {
   type?: DataType
   filter?: boolean
   width?: string
+  component?: Component<CellProps>
 }
 
 export interface TableOption {
@@ -35,6 +42,7 @@ export interface TableOption {
 interface ColumnMeta {
   dataType?: DataType
   width?: string
+  custom?: boolean
 }
 
 export const features = tableFeatures({

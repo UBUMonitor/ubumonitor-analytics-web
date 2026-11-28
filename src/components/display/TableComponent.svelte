@@ -7,7 +7,7 @@
     type DynamicRow,
     type TableOption,
   } from "@/services/display/table"
-  import { createTable, FlexRender, type ColumnDef } from "@tanstack/svelte-table"
+  import { createTable, FlexRender, renderComponent, type ColumnDef } from "@tanstack/svelte-table"
   import { createVirtualizer } from "@tanstack/svelte-virtual"
   import { get } from "svelte/store"
 
@@ -24,13 +24,17 @@
 
     return option.columns.map((column): ColumnDef<typeof features, DynamicRow> => {
       const dataType = column.type
+      const Custom = column.component
 
       return {
         accessorKey: column.key,
         header: column.name,
         enableColumnFilter: column.filter ?? false,
-        meta: { dataType, width: column.width },
-        cell: (info) => renderValue(info.getValue(), dataType),
+        meta: { dataType, width: column.width, custom: !!Custom },
+        cell: (info) =>
+          Custom
+            ? renderComponent(Custom, { value: info.getValue(), row: info.row.original })
+            : renderValue(info.getValue(), dataType),
       }
     })
   })
@@ -130,7 +134,9 @@
               <td
                 class="truncate"
                 style:width={cell.column.columnDef.meta?.width ?? "auto"}
-                title={renderValue(cell.getValue(), cell.column.columnDef.meta?.dataType)}
+                title={cell.column.columnDef.meta?.custom
+                  ? undefined
+                  : renderValue(cell.getValue(), cell.column.columnDef.meta?.dataType)}
               >
                 <FlexRender {cell} />
               </td>
